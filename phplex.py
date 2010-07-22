@@ -16,7 +16,6 @@ import ply.lex as lex
 # todo: BAD_CHARACTER
 # todo: CURLY_OPEN, DOLLAR_OPEN_CURLY_BRACES, STRING_VARNAME
 # todo: <script> syntax (does anyone use this?)
-# todo: HALT_COMPILER (??)
 
 states = (
     ('php', 'exclusive'),
@@ -36,7 +35,7 @@ reserved = (
 )
 
 tokens = reserved + (
-    'WHITESPACE', 'INLINE_HTML',
+    'WHITESPACE',
 
     # Operators
     'PLUS', 'MINUS', 'MUL', 'DIV', 'MOD', 'AND', 'OR', 'NOT', 'XOR', 'SL',
@@ -67,11 +66,12 @@ tokens = reserved + (
     'COMMENT', 'DOC_COMMENT',
 
     # Escaping from HTML
-    'OPEN_TAG', 'OPEN_TAG_WITH_ECHO', 'CLOSE_TAG',
+    'OPEN_TAG', 'OPEN_TAG_WITH_ECHO', 'CLOSE_TAG',  'INLINE_HTML',
 
     # Identifiers and reserved words
     'DIR', 'FILE', 'LINE', 'FUNC_C', 'CLASS_C', 'METHOD_C', 'NS_C',
     'LOGICAL_AND', 'LOGICAL_OR', 'LOGICAL_XOR',
+    'HALT_COMPILER',
     'STRING', 'VARIABLE',
     'LNUMBER', 'DNUMBER',
     'CONSTANT_ENCAPSED_STRING',
@@ -188,19 +188,20 @@ def t_INLINE_HTML(t):
 # Identifiers and reserved words
 
 reserved_map = {
-    '__DIR__':       'DIR',
-    '__FILE__':      'FILE',
-    '__LINE__':      'LINE',
-    '__FUNCTION__':  'FUNC_C',
-    '__CLASS__':     'CLASS_C',
-    '__METHOD__':    'METHOD_C',
-    '__NAMESPACE__': 'NS_C',
+    '__DIR__':         'DIR',
+    '__FILE__':        'FILE',
+    '__LINE__':        'LINE',
+    '__FUNCTION__':    'FUNC_C',
+    '__CLASS__':       'CLASS_C',
+    '__METHOD__':      'METHOD_C',
+    '__NAMESPACE__':   'NS_C',
 
-    'AND':           'LOGICAL_AND',
-    'OR':            'LOGICAL_OR',
-    'XOR':           'LOGICAL_XOR',
+    'AND':             'LOGICAL_AND',
+    'OR':              'LOGICAL_OR',
+    'XOR':             'LOGICAL_XOR',
 
-    'DIE':           'EXIT',
+    'DIE':             'EXIT',
+    '__HALT_COMPILER': 'HALT_COMPILER',
 }
 
 for r in reserved:
