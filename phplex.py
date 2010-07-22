@@ -12,7 +12,6 @@ import ply.lex as lex
 # todo: backticks
 # todo: namespaces
 # todo: casts
-# todo: "die" as alias for "exit"
 # todo: BAD_CHARACTER
 # todo: CURLY_OPEN, DOLLAR_OPEN_CURLY_BRACES, STRING_VARNAME
 # todo: <script> syntax (does anyone use this?)
@@ -186,6 +185,8 @@ reserved_map = {
     'AND':           'LOGICAL_AND',
     'OR':            'LOGICAL_OR',
     'XOR':           'LOGICAL_XOR',
+
+    'DIE':           'EXIT',
 }
 
 for r in reserved:
