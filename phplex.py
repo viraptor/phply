@@ -8,7 +8,6 @@ import ply.lex as lex
 
 # todo: end-of-line comments containing ?>
 # todo: double-quoted strings
-# todo: number literals (LNUMBER, DNUMBER)
 # todo: heredocs
 # todo: backticks
 # todo: namespaces
@@ -135,7 +134,7 @@ t_php_RBRACKET             = r'\]'
 t_php_LBRACE               = r'\{'
 t_php_RBRACE               = r'\}'
 t_php_COMMA                = r','
-t_php_CONCAT               = r'\.'
+t_php_CONCAT               = r'\.(?!\d)'
 t_php_QUESTION             = r'\?'
 t_php_COLON                = r':'
 t_php_SEMI                 = r';'
@@ -203,14 +202,14 @@ def t_php_VARIABLE(t):
     r'\$[A-Za-z_][\w_]*'
     return t
 
-# Integer literal (todo)
-def t_php_LNUMBER(t):
-    r'\d+([uU]|[lL]|[uU][lL]|[lL][uU])?'
+# Floating literal
+def t_php_DNUMBER(t):
+    r'(\d*\.\d+([Ee][+-]?\d+)?)|(\d+(\.|[Ee][+-]?\d+))'
     return t
 
-# Floating literal (todo)
-def t_php_DNUMBER(t):
-    r'((\d+)(\.\d+)(e(\+|-)?(\d+))? | (\d+)e(\+|-)?(\d+))([lL]|[fF])?'
+# Integer literal
+def t_php_LNUMBER(t):
+    r'(0x[0-9A-Fa-f]+)|\d+'
     return t
 
 # String literal
