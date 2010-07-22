@@ -11,7 +11,6 @@ import ply.lex as lex
 # todo: heredocs
 # todo: backticks
 # todo: namespaces
-# todo: casts
 # todo: BAD_CHARACTER
 # todo: CURLY_OPEN, DOLLAR_OPEN_CURLY_BRACES, STRING_VARNAME
 # todo: <script> syntax (does anyone use this?)
@@ -57,6 +56,10 @@ tokens = reserved + (
     # Delimiters
     'LPAREN', 'RPAREN', 'LBRACKET', 'RBRACKET', 'LBRACE', 'RBRACE', 'COMMA',
     'CONCAT', 'QUESTION', 'COLON', 'SEMI', 'AT',
+
+    # Casts
+    'ARRAY_CAST', 'BOOL_CAST', 'DOUBLE_CAST', 'INT_CAST', 'OBJECT_CAST',
+    'STRING_CAST', 'UNSET_CAST',
 
     # Comments
     'COMMENT', 'DOC_COMMENT',
@@ -138,6 +141,15 @@ t_php_QUESTION             = r'\?'
 t_php_COLON                = r':'
 t_php_SEMI                 = r';'
 t_php_AT                   = r'@'
+
+# Casts
+t_php_ARRAY_CAST           = r'\([ \t]*[Aa][Rr][Rr][Aa][Yy][ \t]*\)'
+t_php_BOOL_CAST            = r'\([ \t]*[Bb][Oo][Oo][Ll]([Ee][Aa][Nn])?[ \t]*\)'
+t_php_DOUBLE_CAST          = r'\([ \t]*([Rr][Ee][Aa][Ll]|[Dd][Oo][Uu][Bb][Ll][Ee]|[Ff][Ll][Oo][Aa][Tt])[ \t]*\)'
+t_php_INT_CAST             = r'\([ \t]*[Ii][Nn][Tt]([Ee][Gg][Ee][Rr])?[ \t]*\)'
+t_php_OBJECT_CAST          = r'\([ \t]*[Oo][Bb][Jj][Ee][Cc][Tt][ \t]*\)'
+t_php_STRING_CAST          = r'\([ \t]*[Ss][Tt][Rr][Ii][Nn][Gg][ \t]*\)'
+t_php_UNSET_CAST           = r'\([ \t]*[Uu][Nn][Ss][Ee][Tt][ \t]*\)'
 
 # Comments
 
