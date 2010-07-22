@@ -6,7 +6,6 @@
 
 import ply.lex as lex
 
-# todo: end-of-line comments containing ?>
 # todo: double-quoted strings
 # todo: heredocs, nowdocs
 # todo: backticks
@@ -66,7 +65,7 @@ tokens = reserved + (
     'COMMENT', 'DOC_COMMENT',
 
     # Escaping from HTML
-    'OPEN_TAG', 'OPEN_TAG_WITH_ECHO', 'CLOSE_TAG',  'INLINE_HTML',
+    'OPEN_TAG', 'OPEN_TAG_WITH_ECHO', 'CLOSE_TAG', 'INLINE_HTML',
 
     # Identifiers and reserved words
     'DIR', 'FILE', 'LINE', 'FUNC_C', 'CLASS_C', 'METHOD_C', 'NS_C',
@@ -161,7 +160,7 @@ def t_php_DOC_COMMENT(t):
     return t
 
 def t_php_COMMENT(t):
-    r'(/\*(.|\n)*?\*/)|(//.*?\n)|(\#.*?\n)'
+    r'/\*(.|\n)*?\*/ | //([^?%\n]|[?%](?!>))*\n? | \#([^?%\n]|[?%](?!>))*\n?'
     t.lexer.lineno += t.value.count("\n")
     return t
 
@@ -181,7 +180,7 @@ def t_php_CLOSE_TAG(t):
     return t
 
 def t_INLINE_HTML(t):
-    r'(([^<])|(<(?![?%])))+'
+    r'([^<]|<(?![?%]))+'
     t.lexer.lineno += t.value.count("\n")
     return t
 
