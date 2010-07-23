@@ -237,5 +237,6 @@ def t_ANY_error(t):
     t.lexer.skip(1)
 
 lexer = lex.lex(optimize=0)
+
 if __name__ == "__main__":
     lex.runmain(lexer)
