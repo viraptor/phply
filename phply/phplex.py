@@ -10,7 +10,6 @@ import ply.lex as lex
 # todo: backticks
 # todo: namespaces
 # todo: binary string literals and casts
-# todo: value coercion for number literals
 # todo: BAD_CHARACTER
 # todo: CURLY_OPEN, DOLLAR_OPEN_CURLY_BRACES, STRING_VARNAME
 # todo: <script> syntax (does anyone use this?)
