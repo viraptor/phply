@@ -6,7 +6,6 @@
 
 import ply.lex as lex
 
-# todo: double-quoted strings
 # todo: heredocs, nowdocs
 # todo: backticks
 # todo: namespaces
@@ -18,6 +17,8 @@ import ply.lex as lex
 
 states = (
     ('php', 'exclusive'),
+    ('quoted', 'exclusive'),
+    ('property', 'exclusive'),
 )
 
 # Reserved words
@@ -73,7 +74,7 @@ tokens = reserved + (
     'HALT_COMPILER',
     'STRING', 'VARIABLE',
     'LNUMBER', 'DNUMBER',
-    'CONSTANT_ENCAPSED_STRING',
+    'CONSTANT_ENCAPSED_STRING', 'ENCAPSED_AND_WHITESPACE', 'QUOTE',
 )
 
 # Newlines
@@ -170,13 +171,13 @@ def t_OPEN_TAG(t):
     r'<[?%]((php)|=)?[ \t\r\n]?'
     if t.value.endswith('='): t.type = 'OPEN_TAG_WITH_ECHO'
     t.lexer.lineno += t.value.count("\n")
-    t.lexer.begin('php')
+    t.lexer.push_state('php')
     return t
 
 def t_php_CLOSE_TAG(t):
     r'[?%]>[ \t\r\n]?'
     t.lexer.lineno += t.value.count("\n")
-    t.lexer.begin('INITIAL')
+    t.lexer.pop_state()
     return t
 
 def t_INLINE_HTML(t):
@@ -229,7 +230,37 @@ def t_php_LNUMBER(t):
 
 # String literal
 def t_php_CONSTANT_ENCAPSED_STRING(t):
-    r'(\"([^\\\n]|(\\.))*?\")|(\'([^\\\n]|(\\.))*?\')'
+    r"'([^\\']|\\(.|\n))*'"
+    t.lexer.lineno += t.value.count("\n")
+    return t
+
+def t_php_QUOTE(t):
+    r'"'
+    t.lexer.push_state('quoted')
+    return t
+
+def t_quoted_QUOTE(t):
+    r'"'
+    t.lexer.pop_state()
+    return t
+
+def t_quoted_ENCAPSED_AND_WHITESPACE(t):
+    r'([^\\"$-] | \\(.|\n) | -(?!>[A-Za-z_]))+'
+    t.lexer.lineno += t.value.count("\n")
+    return t
+
+def t_quoted_VARIABLE(t):
+    r'\$[A-Za-z_][\w_]*'
+    return t
+
+def t_quoted_OBJECT_OPERATOR(t):
+    r'->'
+    t.lexer.push_state('property')
+    return t
+
+def t_property_STRING(t):
+    r'[A-Za-z_][\w_]*'
+    t.lexer.pop_state()
     return t
 
 def t_ANY_error(t):
