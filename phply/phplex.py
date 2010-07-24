@@ -244,7 +244,7 @@ def t_quoted_QUOTE(t):
     return t
 
 def t_quoted_ENCAPSED_AND_WHITESPACE(t):
-    r'([^\\"$-] | \\(.|\n) | -(?!>[A-Za-z_]))+'
+    r'([^\\"$-] | \\(.|\n) | \$(?![A-Za-z_]) | -(?!>[A-Za-z_]))+'
     t.lexer.lineno += t.value.count("\n")
     return t
 
