@@ -12,6 +12,37 @@ import ply.yacc as yacc
 # Get the token map
 tokens = phplex.tokens
 
+precedence = (
+    ('left', 'INCLUDE', 'INCLUDE_ONCE', 'EVAL', 'REQUIRE', 'REQUIRE_ONCE'),
+    ('left', 'COMMA'),
+    ('left', 'LOGICAL_OR'),
+    ('left', 'LOGICAL_XOR'),
+    ('left', 'LOGICAL_AND'),
+    ('right', 'PRINT'),
+    ('left', 'EQUALS', 'PLUS_EQUAL', 'MINUS_EQUAL', 'MUL_EQUAL', 'DIV_EQUAL', 'CONCAT_EQUAL', 'MOD_EQUAL', 'AND_EQUAL', 'OR_EQUAL', 'XOR_EQUAL', 'SL_EQUAL', 'SR_EQUAL'),
+    ('left', 'QUESTION', 'COLON'),
+    ('left', 'BOOLEAN_OR'),
+    ('left', 'BOOLEAN_AND'),
+    ('left', 'OR'),
+    ('left', 'XOR'),
+    ('left', 'AND'),
+    ('nonassoc', 'IS_EQUAL', 'IS_NOT_EQUAL', 'IS_IDENTICAL', 'IS_NOT_IDENTICAL'),
+    ('nonassoc', 'IS_SMALLER', 'IS_SMALLER_OR_EQUAL', 'IS_GREATER', 'IS_GREATER_OR_EQUAL'),
+    ('left', 'SL', 'SR'),
+    ('left', 'PLUS', 'MINUS', 'CONCAT'),
+    ('left', 'MUL', 'DIV', 'MOD'),
+    ('right', 'BOOLEAN_NOT'),
+    ('nonassoc', 'INSTANCEOF'),
+    ('right', 'NOT', 'INC', 'DEC', 'INT_CAST', 'DOUBLE_CAST', 'STRING_CAST', 'ARRAY_CAST', 'OBJECT_CAST', 'BOOL_CAST', 'UNSET_CAST', 'AT'),
+    ('right', 'LBRACKET'),
+    ('nonassoc', 'NEW', 'CLONE'),
+    ('token', 'EXIT'),
+    ('token', 'IF'),
+    ('left', 'ELSEIF'),
+    ('left', 'ELSE'),
+    ('left', 'ENDIF'),
+)
+
 def p_start(p):
     'start : top_statement_list'
     p[0] = p[1]
@@ -193,11 +224,38 @@ def p_expr_scalar(p):
     p[0] = p[1]
 
 def p_expr_binary_op(p):
-    '''expr : expr PLUS expr
+    '''expr : expr BOOLEAN_AND expr
+            | expr BOOLEAN_OR expr
+            | expr LOGICAL_AND expr
+            | expr LOGICAL_OR expr
+            | expr LOGICAL_XOR expr
+            | expr AND expr
+            | expr OR expr
+            | expr XOR expr
+            | expr CONCAT expr
+            | expr PLUS expr
             | expr MINUS expr
             | expr MUL expr
-            | expr DIV expr'''
+            | expr DIV expr
+            | expr SL expr
+            | expr SR expr
+            | expr MOD expr
+            | expr IS_IDENTICAL expr
+            | expr IS_NOT_IDENTICAL expr
+            | expr IS_EQUAL expr
+            | expr IS_NOT_EQUAL expr
+            | expr IS_SMALLER expr
+            | expr IS_SMALLER_OR_EQUAL expr
+            | expr IS_GREATER expr
+            | expr IS_GREATER_OR_EQUAL expr'''
     p[0] = ast.BinaryOp([p[2], p[1], p[3]])
+
+def p_expr_unary_op(p):
+    '''expr : PLUS expr
+            | MINUS expr
+            | NOT expr
+            | BOOLEAN_NOT expr'''
+    p[0] = ast.UnaryOp([p[1], p[2]])
 
 def p_expr_group(p):
     'expr : LPAREN expr RPAREN'
