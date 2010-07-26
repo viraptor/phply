@@ -39,7 +39,7 @@ def node(name, fields):
 EmptyNode = node('EmptyNode', [])
 InlineHTML = node('InlineHTML', ['data'])
 Block = node('Block', ['nodes'])
-Assignment = node('Assignment', ['node', 'expr'])
+Assignment = node('Assignment', ['node', 'expr', 'is_ref'])
 ListAssignment = node('ListAssignment', ['nodes', 'expr'])
 Break = node('Break', ['node'])
 Continue = node('Continue', ['node'])

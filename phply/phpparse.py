@@ -153,9 +153,12 @@ def p_expr_variable(p):
     p[0] = p[1]
 
 def p_expr_assign(p):
-    'expr : variable EQUALS expr'
-    # todo: ref
-    p[0] = ast.Assignment([p[1], p[3]])
+    '''expr : variable EQUALS expr
+            | variable EQUALS AND expr'''
+    if len(p) == 5:
+        p[0] = ast.Assignment([p[1], p[4], True])
+    else:
+        p[0] = ast.Assignment([p[1], p[3], False])
 
 def p_expr_list_assign(p):
     'expr : LIST LPAREN assignment_list RPAREN EQUALS expr'
