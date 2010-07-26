@@ -56,6 +56,8 @@ def p_top_statement_list(p):
 
 def p_top_statement(p):
     '''top_statement : statement
+                     | function_declaration_statement
+                     | class_declaration_statement
                      | HALT_COMPILER LPAREN RPAREN SEMI'''
     if len(p) == 2:
         p[0] = p[1]
@@ -73,6 +75,8 @@ def p_inner_statement_list(p):
 
 def p_inner_statement(p):
     '''inner_statement : statement
+                       | function_declaration_statement
+                       | class_declaration_statement
                        | HALT_COMPILER LPAREN RPAREN SEMI'''
     assert len(p) == 2, "__HALT_COMPILER() can only be used from the outermost scope"
     p[0] = p[1]
@@ -177,6 +181,45 @@ def p_unset_variables(p):
 def p_unset_variable(p):
     'unset_variable : variable'
     p[0] = p[1]
+
+def p_function_declaration_statement(p):
+    'function_declaration_statement : FUNCTION is_reference STRING LPAREN parameter_list RPAREN LBRACE inner_statement_list RBRACE'
+    p[0] = ast.Function([p[5], p[8], p[2]])
+
+def p_class_declaration_statement(p):
+    'class_declaration_statement : CLASS'
+    # todo
+
+def p_is_reference(p):
+    '''is_reference : AND
+                    | empty'''
+    p[0] = p[1] is not None
+
+def p_parameter_list(p):
+    '''parameter_list : parameter_list COMMA parameter
+                      | parameter'''
+    if len(p) == 4:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
+
+def p_parameter_list_empty(p):
+    'parameter_list : empty'
+    p[0] = []
+
+def p_parameter(p):
+    '''parameter : VARIABLE
+                 | AND VARIABLE
+                 | VARIABLE EQUALS static_scalar
+                 | AND VARIABLE EQUALS static_scalar'''
+    if len(p) == 2:
+        p[0] = ast.Parameter([p[1], None, False])
+    elif len(p) == 3:
+        p[0] = ast.Parameter([p[2], None, True])
+    elif len(p) == 4:
+        p[0] = ast.Parameter([p[1], p[3], False])
+    else:
+        p[0] = ast.Parameter([p[2], p[4], True])
 
 def p_expr_variable(p):
     'expr : variable'
@@ -285,11 +328,17 @@ def p_common_scalar_string(p):
     'common_scalar : CONSTANT_ENCAPSED_STRING'
     p[0] = p[1][1:-1]
 
+def p_static_scalar(p):
+    'static_scalar : common_scalar'
+    # todo: double-quoted strings with no variables
+    p[0] = p[1]
+
 def p_encaps_list(p):
     '''encaps_list : encaps_list encaps_var
                    | encaps_list ENCAPSED_AND_WHITESPACE
                    | encaps_var
-                   | ENCAPSED_AND_WHITESPACE encaps_var'''
+                   | ENCAPSED_AND_WHITESPACE encaps_var
+                   | ENCAPSED_AND_WHITESPACE'''
     if len(p) == 3:
         p[0] = ast.BinaryOp(['.', p[1], p[2]])
     else:
