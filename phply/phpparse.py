@@ -36,11 +36,10 @@ precedence = (
     ('right', 'NOT', 'INC', 'DEC', 'INT_CAST', 'DOUBLE_CAST', 'STRING_CAST', 'ARRAY_CAST', 'OBJECT_CAST', 'BOOL_CAST', 'UNSET_CAST', 'AT'),
     ('right', 'LBRACKET'),
     ('nonassoc', 'NEW', 'CLONE'),
-    ('token', 'EXIT'),
-    ('token', 'IF'),
     ('left', 'ELSEIF'),
     ('left', 'ELSE'),
     ('left', 'ENDIF'),
+    ('right', 'STATIC', 'ABSTRACT', 'FINAL', 'PRIVATE', 'PROTECTED', 'PUBLIC'),
 )
 
 def p_start(p):
