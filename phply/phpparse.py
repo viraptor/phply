@@ -347,6 +347,7 @@ def p_expr_group(p):
 
 def p_scalar(p):
     '''scalar : common_scalar
+              | namespace_name
               | QUOTE encaps_list QUOTE'''
     if len(p) == 4:
         p[0] = p[2]
@@ -372,11 +373,16 @@ def p_common_scalar_string(p):
 
 def p_static_scalar(p):
     '''static_scalar : common_scalar
+                     | namespace_name
                      | QUOTE ENCAPSED_AND_WHITESPACE QUOTE'''
     if len(p) == 4:
         p[0] = p[2]
     else:
         p[0] = p[1]
+
+def p_namespace_name(p):
+    'namespace_name : STRING'
+    p[0] = ast.Constant([p[1]])
 
 def p_encaps_list(p):
     '''encaps_list : encaps_list encaps_var
@@ -403,7 +409,7 @@ def p_empty(t):
 
 # Error rule for syntax errors
 def p_error(t):
-    if t and t.type in ('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG'):
+    if t and t.type in ('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG', 'COMMENT', 'DOC_COMMENT'):
         yacc.errok()
     else:
         print 'Parse error at', t

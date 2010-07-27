@@ -30,7 +30,7 @@ class Node(object):
                         item = item.generic()
                     value.append(item)
             values[field] = value
-        return [self.__class__.__name__, values]
+        return (self.__class__.__name__, values)
 
 def node(name, fields):
     attrs = {'fields': fields}
@@ -51,6 +51,7 @@ Unset = node('Unset', ['nodes'])
 Function = node('Function', ['params', 'nodes', 'is_ref'])
 BinaryOp = node('BinaryOp', ['op', 'left', 'right'])
 UnaryOp = node('UnaryOp', ['op', 'expr'])
+Constant = node('Constant', ['name'])
 Variable = node('Variable', ['name'])
 StaticVariable = node('StaticVariable', ['name', 'initial'])
 FormalParameter = node('FormalParameter', ['name', 'default', 'is_ref'])
