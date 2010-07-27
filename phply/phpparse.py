@@ -231,13 +231,13 @@ def p_parameter(p):
                  | VARIABLE EQUALS static_scalar
                  | AND VARIABLE EQUALS static_scalar'''
     if len(p) == 2:
-        p[0] = ast.Parameter([p[1], None, False])
+        p[0] = ast.FormalParameter([p[1], None, False])
     elif len(p) == 3:
-        p[0] = ast.Parameter([p[2], None, True])
+        p[0] = ast.FormalParameter([p[2], None, True])
     elif len(p) == 4:
-        p[0] = ast.Parameter([p[1], p[3], False])
+        p[0] = ast.FormalParameter([p[1], p[3], False])
     else:
-        p[0] = ast.Parameter([p[2], p[4], True])
+        p[0] = ast.FormalParameter([p[2], p[4], True])
 
 def p_expr_variable(p):
     'expr : variable'
@@ -282,6 +282,30 @@ def p_variable(p):
 def p_expr_scalar(p):
     'expr : scalar'
     p[0] = p[1]
+
+def p_expr_function_call(p):
+    'expr : STRING LPAREN function_call_parameter_list RPAREN'
+    p[0] = ast.FunctionCall([p[1], p[3]])
+
+def p_function_call_parameter_list(p):
+    '''function_call_parameter_list : function_call_parameter_list COMMA function_call_parameter
+                                    | function_call_parameter'''
+    if len(p) == 4:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
+
+def p_function_call_parameter_list_empty(p):
+    'function_call_parameter_list : empty'
+    p[0] = []
+
+def p_function_call_parameter(p):
+    '''function_call_parameter : expr
+                               | AND variable'''
+    if len(p) == 2:
+        p[0] = ast.Parameter([p[1], False])
+    else:
+        p[0] = ast.Parameter([p[2], True])
 
 def p_expr_binary_op(p):
     '''expr : expr BOOLEAN_AND expr
