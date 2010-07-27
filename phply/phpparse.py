@@ -329,9 +329,12 @@ def p_common_scalar_string(p):
     p[0] = p[1][1:-1]
 
 def p_static_scalar(p):
-    'static_scalar : common_scalar'
-    # todo: double-quoted strings with no variables
-    p[0] = p[1]
+    '''static_scalar : common_scalar
+                     | QUOTE ENCAPSED_AND_WHITESPACE QUOTE'''
+    if len(p) == 4:
+        p[0] = p[2]
+    else:
+        p[0] = p[1]
 
 def p_encaps_list(p):
     '''encaps_list : encaps_list encaps_var
