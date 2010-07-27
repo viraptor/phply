@@ -119,7 +119,9 @@ def p_statement_global(p):
     'statement : GLOBAL global_var_list SEMI'
     p[0] = ast.Global([p[2]])
 
-# todo: static
+def p_statement_static(p):
+    'statement : STATIC static_var_list SEMI'
+    p[0] = ast.Static([p[2]])
 
 def p_statement_open_tag_with_echo(p):
     'statement : OPEN_TAG_WITH_ECHO expr CLOSE_TAG'
@@ -161,6 +163,22 @@ def p_global_var_list(p):
 def p_global_var(p):
     'global_var : VARIABLE'
     p[0] = ast.Variable([p[1]])
+
+def p_static_var_list(p):
+    '''static_var_list : static_var_list COMMA static_var
+                       | static_var'''
+    if len(p) == 4:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
+
+def p_static_var(p):
+    '''static_var : VARIABLE EQUALS static_scalar
+                  | VARIABLE'''
+    if len(p) == 4:
+        p[0] = ast.StaticVariable([p[1], p[3]])
+    else:
+        p[0] = ast.StaticVariable([p[1], None])
 
 def p_echo_expr_list(p):
     '''echo_expr_list : echo_expr_list COMMA expr
