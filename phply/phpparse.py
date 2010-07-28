@@ -147,7 +147,7 @@ def p_statement_unset(p):
 
 def p_statement_empty(p):
     'statement : SEMI'
-    p[0] = ast.EmptyNode([])
+    pass
 
 # todo: try/catch
 # todo: throw
@@ -265,15 +265,12 @@ def p_assignment_list(p):
 
 def p_assignment_list_element(p):
     '''assignment_list_element : variable
+                               | empty
                                | LIST LPAREN assignment_list RPAREN'''
     if len(p) == 2:
         p[0] = p[1]
     else:
         p[0] = p[3]
-
-def p_assignment_list_element_empty(p):
-    'assignment_list_element : empty'
-    p[0] = ast.EmptyNode([])
 
 def p_variable(p):
     'variable : VARIABLE'

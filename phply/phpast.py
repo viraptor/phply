@@ -36,7 +36,6 @@ def node(name, fields):
     attrs = {'fields': fields}
     return type(name, (Node,), attrs)
 
-EmptyNode = node('EmptyNode', [])
 InlineHTML = node('InlineHTML', ['data'])
 Block = node('Block', ['nodes'])
 Assignment = node('Assignment', ['node', 'expr', 'is_ref'])
