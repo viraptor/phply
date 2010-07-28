@@ -36,8 +36,8 @@ precedence = (
     ('right', 'NOT', 'INC', 'DEC', 'INT_CAST', 'DOUBLE_CAST', 'STRING_CAST', 'ARRAY_CAST', 'OBJECT_CAST', 'BOOL_CAST', 'UNSET_CAST', 'AT'),
     ('right', 'LBRACKET'),
     ('nonassoc', 'NEW', 'CLONE'),
-    ('left', 'ELSEIF'),
-    ('left', 'ELSE'),
+    # ('left', 'ELSEIF'),
+    # ('left', 'ELSE'),
     ('left', 'ENDIF'),
     ('right', 'STATIC', 'ABSTRACT', 'FINAL', 'PRIVATE', 'PROTECTED', 'PUBLIC'),
 )
@@ -85,7 +85,24 @@ def p_statement_block(p):
     'statement : LBRACE inner_statement_list RBRACE'
     p[0] = ast.Block(p[2])
 
-# todo: if/elseif/else
+def p_statement_if(p):
+    'statement : IF LPAREN expr RPAREN statement elseif_list else_single'
+    p[0] = ast.If(p[3], p[5], p[6], p[7])
+
+def p_elseif_list(p):
+    '''elseif_list : empty
+                   | elseif_list ELSEIF LPAREN expr RPAREN statement'''
+    if len(p) == 2:
+        p[0] = []
+    else:
+        p[0] = p[1] + [ast.ElseIf(p[4], p[6])]
+
+def p_else_single(p):
+    '''else_single : empty
+                   | ELSE statement'''
+    if len(p) == 3:
+        p[0] = ast.Else(p[2])
+
 # todo: while
 # todo: do/while
 # todo: for
