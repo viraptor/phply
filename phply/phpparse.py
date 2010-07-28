@@ -86,8 +86,12 @@ def p_statement_block(p):
     p[0] = ast.Block(p[2])
 
 def p_statement_if(p):
-    'statement : IF LPAREN expr RPAREN statement elseif_list else_single'
-    p[0] = ast.If(p[3], p[5], p[6], p[7])
+    '''statement : IF LPAREN expr RPAREN statement elseif_list else_single
+                 | IF LPAREN expr RPAREN COLON inner_statement_list new_elseif_list new_else_single ENDIF SEMI'''
+    if len(p) == 8:
+        p[0] = ast.If(p[3], p[5], p[6], p[7])
+    else:
+        p[0] = ast.If(p[3], ast.Block(p[6]), p[7], p[8])
 
 def p_elseif_list(p):
     '''elseif_list : empty
@@ -102,6 +106,20 @@ def p_else_single(p):
                    | ELSE statement'''
     if len(p) == 3:
         p[0] = ast.Else(p[2])
+
+def p_new_elseif_list(p):
+    '''new_elseif_list : empty
+                       | new_elseif_list ELSEIF LPAREN expr RPAREN COLON inner_statement_list'''
+    if len(p) == 2:
+        p[0] = []
+    else:
+        p[0] = p[1] + [ast.ElseIf(p[4], ast.Block(p[7]))]
+
+def p_new_else_single(p):
+    '''new_else_single : empty
+                       | ELSE COLON inner_statement_list'''
+    if len(p) == 4:
+        p[0] = ast.Else(ast.Block(p[3]))
 
 # todo: while
 # todo: do/while
