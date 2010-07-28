@@ -7,10 +7,14 @@
 class Node(object):
     fields = []
 
-    def __init__(self, values, lineno=None):
-        assert len(self.fields) == len(values)
+    def __init__(self, *args, **kwargs):
+        assert len(self.fields) == len(args)
+        try:
+            self.lineno = kwargs['lineno']
+        except KeyError:
+            self.lineno = None
         for i, field in enumerate(self.fields):
-            setattr(self, field, values[i])
+            setattr(self, field, args[i])
 
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__,

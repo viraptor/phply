@@ -83,7 +83,7 @@ def p_inner_statement(p):
 
 def p_statement_block(p):
     'statement : LBRACE inner_statement_list RBRACE'
-    p[0] = ast.Block([p[2]])
+    p[0] = ast.Block(p[2])
 
 # todo: if/elseif/else
 # todo: while
@@ -95,45 +95,45 @@ def p_statement_break(p):
     '''statement : BREAK SEMI
                  | BREAK expr SEMI'''
     if len(p) == 3:
-        p[0] = ast.Break([None])
+        p[0] = ast.Break(None)
     else:
-        p[0] = ast.Break([p[2]])
+        p[0] = ast.Break(p[2])
 
 def p_statement_continue(p):
     '''statement : CONTINUE SEMI
                  | CONTINUE expr SEMI'''
     if len(p) == 3:
-        p[0] = ast.Continue([None])
+        p[0] = ast.Continue(None)
     else:
-        p[0] = ast.Continue([p[2]])
+        p[0] = ast.Continue(p[2])
 
 def p_statement_return(p):
     '''statement : RETURN SEMI
                  | RETURN expr SEMI'''
     if len(p) == 3:
-        p[0] = ast.Return([None])
+        p[0] = ast.Return(None)
     else:
-        p[0] = ast.Return([p[2]])
+        p[0] = ast.Return(p[2])
 
 def p_statement_global(p):
     'statement : GLOBAL global_var_list SEMI'
-    p[0] = ast.Global([p[2]])
+    p[0] = ast.Global(p[2])
 
 def p_statement_static(p):
     'statement : STATIC static_var_list SEMI'
-    p[0] = ast.Static([p[2]])
+    p[0] = ast.Static(p[2])
 
 def p_statement_open_tag_with_echo(p):
     'statement : OPEN_TAG_WITH_ECHO expr CLOSE_TAG'
-    p[0] = ast.Echo([[p[2]]])
+    p[0] = ast.Echo([p[2]])
 
 def p_statement_echo(p):
     'statement : ECHO echo_expr_list SEMI'
-    p[0] = ast.Echo([p[2]])
+    p[0] = ast.Echo(p[2])
 
 def p_statement_inline_html(p):
     'statement : INLINE_HTML'
-    p[0] = ast.InlineHTML([p[1]])
+    p[0] = ast.InlineHTML(p[1])
 
 def p_statement_expr(p):
     'statement : expr SEMI'
@@ -141,7 +141,7 @@ def p_statement_expr(p):
 
 def p_statement_unset(p):
     'statement : UNSET LPAREN unset_variables RPAREN SEMI'
-    p[0] = ast.Unset([p[3]])
+    p[0] = ast.Unset(p[3])
 
 # todo: foreach
 
@@ -162,7 +162,7 @@ def p_global_var_list(p):
 
 def p_global_var(p):
     'global_var : VARIABLE'
-    p[0] = ast.Variable([p[1]])
+    p[0] = ast.Variable(p[1])
 
 def p_static_var_list(p):
     '''static_var_list : static_var_list COMMA static_var
@@ -176,9 +176,9 @@ def p_static_var(p):
     '''static_var : VARIABLE EQUALS static_scalar
                   | VARIABLE'''
     if len(p) == 4:
-        p[0] = ast.StaticVariable([p[1], p[3]])
+        p[0] = ast.StaticVariable(p[1], p[3])
     else:
-        p[0] = ast.StaticVariable([p[1], None])
+        p[0] = ast.StaticVariable(p[1], None)
 
 def p_echo_expr_list(p):
     '''echo_expr_list : echo_expr_list COMMA expr
@@ -202,7 +202,7 @@ def p_unset_variable(p):
 
 def p_function_declaration_statement(p):
     'function_declaration_statement : FUNCTION is_reference STRING LPAREN parameter_list RPAREN LBRACE inner_statement_list RBRACE'
-    p[0] = ast.Function([p[5], p[8], p[2]])
+    p[0] = ast.Function(p[5], p[8], p[2])
 
 def p_class_declaration_statement(p):
     'class_declaration_statement : CLASS'
@@ -231,13 +231,13 @@ def p_parameter(p):
                  | VARIABLE EQUALS static_scalar
                  | AND VARIABLE EQUALS static_scalar'''
     if len(p) == 2:
-        p[0] = ast.FormalParameter([p[1], None, False])
+        p[0] = ast.FormalParameter(p[1], None, False)
     elif len(p) == 3:
-        p[0] = ast.FormalParameter([p[2], None, True])
+        p[0] = ast.FormalParameter(p[2], None, True)
     elif len(p) == 4:
-        p[0] = ast.FormalParameter([p[1], p[3], False])
+        p[0] = ast.FormalParameter(p[1], p[3], False)
     else:
-        p[0] = ast.FormalParameter([p[2], p[4], True])
+        p[0] = ast.FormalParameter(p[2], p[4], True)
 
 def p_expr_variable(p):
     'expr : variable'
@@ -247,13 +247,13 @@ def p_expr_assign(p):
     '''expr : variable EQUALS expr
             | variable EQUALS AND expr'''
     if len(p) == 5:
-        p[0] = ast.Assignment([p[1], p[4], True])
+        p[0] = ast.Assignment(p[1], p[4], True)
     else:
-        p[0] = ast.Assignment([p[1], p[3], False])
+        p[0] = ast.Assignment(p[1], p[3], False)
 
 def p_expr_list_assign(p):
     'expr : LIST LPAREN assignment_list RPAREN EQUALS expr'
-    p[0] = ast.ListAssignment([p[3], p[6]])
+    p[0] = ast.ListAssignment(p[3], p[6])
 
 def p_assignment_list(p):
     '''assignment_list : assignment_list COMMA assignment_list_element
@@ -274,15 +274,15 @@ def p_assignment_list_element(p):
 
 def p_variable(p):
     'variable : VARIABLE'
-    p[0] = ast.Variable([p[1]])
+    p[0] = ast.Variable(p[1])
 
 def p_variable_array_offset(p):
     'variable : variable LBRACKET dim_offset RBRACKET'
-    p[0] = ast.ArrayOffset([p[1], p[3]])
+    p[0] = ast.ArrayOffset(p[1], p[3])
 
 def p_variable_string_offset(p):
     'variable : variable LBRACE expr RBRACE'
-    p[0] = ast.StringOffset([p[1], p[3]])
+    p[0] = ast.StringOffset(p[1], p[3])
 
 def p_dim_offset(p):
     '''dim_offset : expr
@@ -295,7 +295,7 @@ def p_expr_scalar(p):
 
 def p_expr_array(p):
     'expr : ARRAY LPAREN array_pair_list RPAREN'
-    p[0] = ast.Array([p[3]])
+    p[0] = ast.Array(p[3])
 
 def p_array_pair_list(p):
     '''array_pair_list : empty
@@ -311,13 +311,13 @@ def p_non_empty_array_pair_list_item(p):
                                  | AND variable
                                  | expr'''
     if len(p) == 5:
-        p[0] = p[1] + [ast.ArrayElement([None, p[4], True])]
+        p[0] = p[1] + [ast.ArrayElement(None, p[4], True)]
     elif len(p) == 4:
-        p[0] = p[1] + [ast.ArrayElement([None, p[3], False])]
+        p[0] = p[1] + [ast.ArrayElement(None, p[3], False)]
     elif len(p) == 3:
-        p[0] = [ast.ArrayElement([None, p[2], True])]
+        p[0] = [ast.ArrayElement(None, p[2], True)]
     else:
-        p[0] = [ast.ArrayElement([None, p[1], False])]
+        p[0] = [ast.ArrayElement(None, p[1], False)]
 
 def p_non_empty_array_pair_list_pair(p):
     '''non_empty_array_pair_list : non_empty_array_pair_list COMMA expr DOUBLE_ARROW AND variable
@@ -325,13 +325,13 @@ def p_non_empty_array_pair_list_pair(p):
                                  | expr DOUBLE_ARROW AND variable
                                  | expr DOUBLE_ARROW expr'''
     if len(p) == 7:
-        p[0] = p[1] + [ast.ArrayElement([p[3], p[6], True])]
+        p[0] = p[1] + [ast.ArrayElement(p[3], p[6], True)]
     elif len(p) == 6:
-        p[0] = p[1] + [ast.ArrayElement([p[3], p[5], False])]
+        p[0] = p[1] + [ast.ArrayElement(p[3], p[5], False)]
     elif len(p) == 5:
-        p[0] = [ast.ArrayElement([p[1], p[4], True])]
+        p[0] = [ast.ArrayElement(p[1], p[4], True)]
     else:
-        p[0] = [ast.ArrayElement([p[1], p[3], False])]
+        p[0] = [ast.ArrayElement(p[1], p[3], False)]
 
 def p_possible_comma(p):
     '''possible_comma : empty
@@ -340,7 +340,7 @@ def p_possible_comma(p):
 
 def p_expr_function_call(p):
     'expr : STRING LPAREN function_call_parameter_list RPAREN'
-    p[0] = ast.FunctionCall([p[1], p[3]])
+    p[0] = ast.FunctionCall(p[1], p[3])
 
 def p_function_call_parameter_list(p):
     '''function_call_parameter_list : function_call_parameter_list COMMA function_call_parameter
@@ -358,9 +358,9 @@ def p_function_call_parameter(p):
     '''function_call_parameter : expr
                                | AND variable'''
     if len(p) == 2:
-        p[0] = ast.Parameter([p[1], False])
+        p[0] = ast.Parameter(p[1], False)
     else:
-        p[0] = ast.Parameter([p[2], True])
+        p[0] = ast.Parameter(p[2], True)
 
 def p_expr_binary_op(p):
     '''expr : expr BOOLEAN_AND expr
@@ -387,14 +387,14 @@ def p_expr_binary_op(p):
             | expr IS_SMALLER_OR_EQUAL expr
             | expr IS_GREATER expr
             | expr IS_GREATER_OR_EQUAL expr'''
-    p[0] = ast.BinaryOp([p[2], p[1], p[3]])
+    p[0] = ast.BinaryOp(p[2], p[1], p[3])
 
 def p_expr_unary_op(p):
     '''expr : PLUS expr
             | MINUS expr
             | NOT expr
             | BOOLEAN_NOT expr'''
-    p[0] = ast.UnaryOp([p[1], p[2]])
+    p[0] = ast.UnaryOp(p[1], p[2])
 
 def p_expr_group(p):
     'expr : LPAREN expr RPAREN'
@@ -437,7 +437,7 @@ def p_static_scalar(p):
 
 def p_namespace_name(p):
     'namespace_name : STRING'
-    p[0] = ast.Constant([p[1]])
+    p[0] = ast.Constant(p[1])
 
 def p_encaps_list(p):
     '''encaps_list : encaps_list encaps_var
@@ -446,7 +446,7 @@ def p_encaps_list(p):
                    | ENCAPSED_AND_WHITESPACE encaps_var
                    | ENCAPSED_AND_WHITESPACE'''
     if len(p) == 3:
-        p[0] = ast.BinaryOp(['.', p[1], p[2]])
+        p[0] = ast.BinaryOp('.', p[1], p[2])
     else:
         p[0] = p[1]
 
@@ -456,7 +456,7 @@ def p_encaps_list_empty(p):
 
 def p_encaps_var(p):
     'encaps_var : VARIABLE'
-    p[0] = ast.Variable([p[1]])
+    p[0] = ast.Variable(p[1])
 
 def p_empty(t):
     'empty : '
