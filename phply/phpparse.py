@@ -101,11 +101,14 @@ def p_statement_do_while(p):
     'statement : DO statement WHILE LPAREN expr RPAREN SEMI'
     p[0] = ast.DoWhile(p[2], p[5])
 
+def p_statement_for(p):
+    'statement : FOR LPAREN for_expr SEMI for_expr SEMI for_expr RPAREN for_statement'
+    p[0] = ast.For(p[3], p[5], p[7], p[9])
+
 def p_statement_foreach(p):
     'statement : FOREACH LPAREN expr AS foreach_variable foreach_optional_arg RPAREN foreach_statement'
     p[0] = ast.ForEach(p[3], p[5], p[6], p[8])
 
-# todo: for
 # todo: switch
 
 def p_statement_break(p):
@@ -198,6 +201,27 @@ def p_new_else_single(p):
 def p_while_statement(p):
     '''while_statement : statement
                        | COLON inner_statement_list ENDWHILE SEMI'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = ast.Block(p[2])
+
+def p_for_expr(p):
+    '''for_expr : empty
+                | non_empty_for_expr'''
+    p[0] = p[1]
+
+def p_non_empty_for_expr(p):
+    '''non_empty_for_expr : non_empty_for_expr COMMA expr
+                          | expr'''
+    if len(p) == 4:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
+
+def p_for_statement(p):
+    '''for_statement : statement
+                     | COLON inner_statement_list ENDFOR SEMI'''
     if len(p) == 2:
         p[0] = p[1]
     else:
