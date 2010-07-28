@@ -442,17 +442,14 @@ def p_namespace_name(p):
 def p_encaps_list(p):
     '''encaps_list : encaps_list encaps_var
                    | encaps_list ENCAPSED_AND_WHITESPACE
-                   | encaps_var
-                   | ENCAPSED_AND_WHITESPACE encaps_var
-                   | ENCAPSED_AND_WHITESPACE'''
+                   | empty'''
     if len(p) == 3:
-        p[0] = ast.BinaryOp('.', p[1], p[2])
+        if p[1] == '':
+            p[0] = p[2]
+        else:
+            p[0] = ast.BinaryOp('.', p[1], p[2])
     else:
-        p[0] = p[1]
-
-def p_encaps_list_empty(p):
-    'encaps_list : empty'
-    p[0] = ''
+        p[0] = ''
 
 def p_encaps_var(p):
     'encaps_var : VARIABLE'
