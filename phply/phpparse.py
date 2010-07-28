@@ -101,6 +101,10 @@ def p_statement_do_while(p):
     'statement : DO statement WHILE LPAREN expr RPAREN SEMI'
     p[0] = ast.DoWhile(p[2], p[5])
 
+def p_statement_foreach(p):
+    'statement : FOREACH LPAREN expr AS foreach_variable foreach_optional_arg RPAREN foreach_statement'
+    p[0] = ast.ForEach(p[3], p[5], p[6], p[8])
+
 # todo: for
 # todo: switch
 
@@ -156,22 +160,12 @@ def p_statement_unset(p):
     'statement : UNSET LPAREN unset_variables RPAREN SEMI'
     p[0] = ast.Unset(p[3])
 
-# todo: foreach
-
 def p_statement_empty(p):
     'statement : SEMI'
     pass
 
 # todo: try/catch
 # todo: throw
-
-def p_while_statement(p):
-    '''while_statement : statement
-                       | COLON inner_statement_list ENDWHILE SEMI'''
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
-        p[0] = ast.Block(p[2])
 
 def p_elseif_list(p):
     '''elseif_list : empty
@@ -200,6 +194,36 @@ def p_new_else_single(p):
                        | ELSE COLON inner_statement_list'''
     if len(p) == 4:
         p[0] = ast.Else(ast.Block(p[3]))
+
+def p_while_statement(p):
+    '''while_statement : statement
+                       | COLON inner_statement_list ENDWHILE SEMI'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = ast.Block(p[2])
+
+def p_foreach_variable(p):
+    '''foreach_variable : VARIABLE
+                        | AND VARIABLE'''
+    if len(p) == 2:
+        p[0] = ast.ForEachVariable(p[1], False)
+    else:
+        p[0] = ast.ForEachVariable(p[2], True)
+
+def p_foreach_optional_arg(p):
+    '''foreach_optional_arg : empty
+                            | DOUBLE_ARROW foreach_variable'''
+    if len(p) == 3:
+        p[0] = p[2]
+
+def p_foreach_statement(p):
+    '''foreach_statement : statement
+                         | COLON inner_statement_list ENDFOREACH SEMI'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = ast.Block(p[2])
 
 def p_global_var_list(p):
     '''global_var_list : global_var_list COMMA global_var
