@@ -279,9 +279,67 @@ def p_variable(p):
     'variable : VARIABLE'
     p[0] = ast.Variable([p[1]])
 
+def p_variable_array_offset(p):
+    'variable : variable LBRACKET dim_offset RBRACKET'
+    p[0] = ast.ArrayOffset([p[1], p[3]])
+
+def p_variable_string_offset(p):
+    'variable : variable LBRACE expr RBRACE'
+    p[0] = ast.StringOffset([p[1], p[3]])
+
+def p_dim_offset(p):
+    '''dim_offset : expr
+                  | empty'''
+    p[0] = p[1]
+
 def p_expr_scalar(p):
     'expr : scalar'
     p[0] = p[1]
+
+def p_expr_array(p):
+    'expr : ARRAY LPAREN array_pair_list RPAREN'
+    p[0] = ast.Array([p[3]])
+
+def p_array_pair_list(p):
+    '''array_pair_list : empty
+                       | non_empty_array_pair_list possible_comma'''
+    if len(p) == 2:
+        p[0] = []
+    else:
+        p[0] = p[1]
+
+def p_non_empty_array_pair_list_item(p):
+    '''non_empty_array_pair_list : non_empty_array_pair_list COMMA AND variable
+                                 | non_empty_array_pair_list COMMA expr
+                                 | AND variable
+                                 | expr'''
+    if len(p) == 5:
+        p[0] = p[1] + [ast.ArrayElement([None, p[4], True])]
+    elif len(p) == 4:
+        p[0] = p[1] + [ast.ArrayElement([None, p[3], False])]
+    elif len(p) == 3:
+        p[0] = [ast.ArrayElement([None, p[2], True])]
+    else:
+        p[0] = [ast.ArrayElement([None, p[1], False])]
+
+def p_non_empty_array_pair_list_pair(p):
+    '''non_empty_array_pair_list : non_empty_array_pair_list COMMA expr DOUBLE_ARROW AND variable
+                                 | non_empty_array_pair_list COMMA expr DOUBLE_ARROW expr
+                                 | expr DOUBLE_ARROW AND variable
+                                 | expr DOUBLE_ARROW expr'''
+    if len(p) == 7:
+        p[0] = p[1] + [ast.ArrayElement([p[3], p[6], True])]
+    elif len(p) == 6:
+        p[0] = p[1] + [ast.ArrayElement([p[3], p[5], False])]
+    elif len(p) == 5:
+        p[0] = [ast.ArrayElement([p[1], p[4], True])]
+    else:
+        p[0] = [ast.ArrayElement([p[1], p[3], False])]
+
+def p_possible_comma(p):
+    '''possible_comma : empty
+                      | COMMA'''
+    pass
 
 def p_expr_function_call(p):
     'expr : STRING LPAREN function_call_parameter_list RPAREN'
