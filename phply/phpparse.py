@@ -93,34 +93,6 @@ def p_statement_if(p):
     else:
         p[0] = ast.If(p[3], ast.Block(p[6]), p[7], p[8])
 
-def p_elseif_list(p):
-    '''elseif_list : empty
-                   | elseif_list ELSEIF LPAREN expr RPAREN statement'''
-    if len(p) == 2:
-        p[0] = []
-    else:
-        p[0] = p[1] + [ast.ElseIf(p[4], p[6])]
-
-def p_else_single(p):
-    '''else_single : empty
-                   | ELSE statement'''
-    if len(p) == 3:
-        p[0] = ast.Else(p[2])
-
-def p_new_elseif_list(p):
-    '''new_elseif_list : empty
-                       | new_elseif_list ELSEIF LPAREN expr RPAREN COLON inner_statement_list'''
-    if len(p) == 2:
-        p[0] = []
-    else:
-        p[0] = p[1] + [ast.ElseIf(p[4], ast.Block(p[7]))]
-
-def p_new_else_single(p):
-    '''new_else_single : empty
-                       | ELSE COLON inner_statement_list'''
-    if len(p) == 4:
-        p[0] = ast.Else(ast.Block(p[3]))
-
 # todo: while
 # todo: do/while
 # todo: for
@@ -186,6 +158,34 @@ def p_statement_empty(p):
 
 # todo: try/catch
 # todo: throw
+
+def p_elseif_list(p):
+    '''elseif_list : empty
+                   | elseif_list ELSEIF LPAREN expr RPAREN statement'''
+    if len(p) == 2:
+        p[0] = []
+    else:
+        p[0] = p[1] + [ast.ElseIf(p[4], p[6])]
+
+def p_else_single(p):
+    '''else_single : empty
+                   | ELSE statement'''
+    if len(p) == 3:
+        p[0] = ast.Else(p[2])
+
+def p_new_elseif_list(p):
+    '''new_elseif_list : empty
+                       | new_elseif_list ELSEIF LPAREN expr RPAREN COLON inner_statement_list'''
+    if len(p) == 2:
+        p[0] = []
+    else:
+        p[0] = p[1] + [ast.ElseIf(p[4], ast.Block(p[7]))]
+
+def p_new_else_single(p):
+    '''new_else_single : empty
+                       | ELSE COLON inner_statement_list'''
+    if len(p) == 4:
+        p[0] = ast.Else(ast.Block(p[3]))
 
 def p_global_var_list(p):
     '''global_var_list : global_var_list COMMA global_var
