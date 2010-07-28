@@ -18,7 +18,8 @@ class Node(object):
 
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__,
-                           [getattr(self, field) for field in self.fields])
+                           ', '.join([repr(getattr(self, field))
+                                      for field in self.fields]))
 
     def generic(self):
         values = {}
