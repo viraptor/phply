@@ -93,8 +93,14 @@ def p_statement_if(p):
     else:
         p[0] = ast.If(p[3], ast.Block(p[6]), p[7], p[8])
 
-# todo: while
-# todo: do/while
+def p_statement_while(p):
+    'statement : WHILE LPAREN expr RPAREN while_statement'
+    p[0] = ast.While(p[3], p[5])
+
+def p_statement_do_while(p):
+    'statement : DO statement WHILE LPAREN expr RPAREN SEMI'
+    p[0] = ast.DoWhile(p[2], p[5])
+
 # todo: for
 # todo: switch
 
@@ -158,6 +164,14 @@ def p_statement_empty(p):
 
 # todo: try/catch
 # todo: throw
+
+def p_while_statement(p):
+    '''while_statement : statement
+                       | COLON inner_statement_list ENDWHILE SEMI'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = ast.Block(p[2])
 
 def p_elseif_list(p):
     '''elseif_list : empty
