@@ -459,6 +459,20 @@ def p_function_call_parameter(p):
     else:
         p[0] = ast.Parameter(p[2], True)
 
+def p_expr_assign_op(p):
+    '''expr : variable PLUS_EQUAL expr
+            | variable MINUS_EQUAL expr
+            | variable MUL_EQUAL expr
+            | variable DIV_EQUAL expr
+            | variable CONCAT_EQUAL expr
+            | variable MOD_EQUAL expr
+            | variable AND_EQUAL expr
+            | variable OR_EQUAL expr
+            | variable XOR_EQUAL expr
+            | variable SL_EQUAL expr
+            | variable SR_EQUAL expr'''
+    p[0] = ast.AssignOp(p[2], p[1], p[3])   
+
 def p_expr_binary_op(p):
     '''expr : expr BOOLEAN_AND expr
             | expr BOOLEAN_OR expr
@@ -492,6 +506,26 @@ def p_expr_unary_op(p):
             | NOT expr
             | BOOLEAN_NOT expr'''
     p[0] = ast.UnaryOp(p[1], p[2])
+
+def p_expr_pre_incdec(p):
+    '''expr : INC variable
+            | DEC variable'''
+    p[0] = ast.PreIncDecOp(p[1], p[2])
+
+def p_expr_post_incdec(p):
+    '''expr : variable INC
+            | variable DEC'''
+    p[0] = ast.PostIncDecOp(p[2], p[1])
+
+def p_expr_cast(p):
+    '''expr : INT_CAST expr
+            | DOUBLE_CAST expr
+            | STRING_CAST expr
+            | ARRAY_CAST expr
+            | OBJECT_CAST expr
+            | BOOL_CAST expr
+            | UNSET_CAST expr'''
+    p[0] = ast.Cast(p[1].strip('() \t'), p[2])
 
 def p_expr_group(p):
     'expr : LPAREN expr RPAREN'
