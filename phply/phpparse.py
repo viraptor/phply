@@ -527,6 +527,30 @@ def p_expr_cast(p):
             | UNSET_CAST expr'''
     p[0] = ast.Cast(p[1].strip('() \t'), p[2])
 
+def p_expr_isset(p):
+    'expr : ISSET LPAREN expr RPAREN'
+    p[0] = ast.IsSet(p[3])
+
+def p_expr_empty(p):
+    'expr : EMPTY LPAREN expr RPAREN'
+    p[0] = ast.Empty(p[3])
+
+def p_expr_include(p):
+    'expr : INCLUDE expr'
+    p[0] = ast.Include(p[2], False)
+
+def p_expr_include_once(p):
+    'expr : INCLUDE_ONCE expr'
+    p[0] = ast.Include(p[2], True)
+
+def p_expr_require(p):
+    'expr : REQUIRE expr'
+    p[0] = ast.Require(p[2], False)
+
+def p_expr_require_once(p):
+    'expr : REQUIRE_ONCE expr'
+    p[0] = ast.Require(p[2], True)
+
 def p_expr_group(p):
     'expr : LPAREN expr RPAREN'
     p[0] = p[2]
