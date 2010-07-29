@@ -87,7 +87,7 @@ def p_statement_block(p):
 
 def p_statement_if(p):
     '''statement : IF LPAREN expr RPAREN statement elseif_list else_single
-                 | IF LPAREN expr RPAREN COLON inner_statement_list new_elseif_list new_else_single ENDIF SEMI'''
+                 | IF LPAREN expr RPAREN COLON inner_statement_list new_elseif_list new_else_single ENDIF semi'''
     if len(p) == 8:
         p[0] = ast.If(p[3], p[5], p[6], p[7])
     else:
@@ -98,7 +98,7 @@ def p_statement_while(p):
     p[0] = ast.While(p[3], p[5])
 
 def p_statement_do_while(p):
-    'statement : DO statement WHILE LPAREN expr RPAREN SEMI'
+    'statement : DO statement WHILE LPAREN expr RPAREN semi'
     p[0] = ast.DoWhile(p[2], p[5])
 
 def p_statement_for(p):
@@ -112,35 +112,35 @@ def p_statement_foreach(p):
 # todo: switch
 
 def p_statement_break(p):
-    '''statement : BREAK SEMI
-                 | BREAK expr SEMI'''
+    '''statement : BREAK semi
+                 | BREAK expr semi'''
     if len(p) == 3:
         p[0] = ast.Break(None)
     else:
         p[0] = ast.Break(p[2])
 
 def p_statement_continue(p):
-    '''statement : CONTINUE SEMI
-                 | CONTINUE expr SEMI'''
+    '''statement : CONTINUE semi
+                 | CONTINUE expr semi'''
     if len(p) == 3:
         p[0] = ast.Continue(None)
     else:
         p[0] = ast.Continue(p[2])
 
 def p_statement_return(p):
-    '''statement : RETURN SEMI
-                 | RETURN expr SEMI'''
+    '''statement : RETURN semi
+                 | RETURN expr semi'''
     if len(p) == 3:
         p[0] = ast.Return(None)
     else:
         p[0] = ast.Return(p[2])
 
 def p_statement_global(p):
-    'statement : GLOBAL global_var_list SEMI'
+    'statement : GLOBAL global_var_list semi'
     p[0] = ast.Global(p[2])
 
 def p_statement_static(p):
-    'statement : STATIC static_var_list SEMI'
+    'statement : STATIC static_var_list semi'
     p[0] = ast.Static(p[2])
 
 def p_statement_open_tag_with_echo(p):
@@ -148,7 +148,7 @@ def p_statement_open_tag_with_echo(p):
     p[0] = ast.Echo([p[2]])
 
 def p_statement_echo(p):
-    'statement : ECHO echo_expr_list SEMI'
+    'statement : ECHO echo_expr_list semi'
     p[0] = ast.Echo(p[2])
 
 def p_statement_inline_html(p):
@@ -156,15 +156,15 @@ def p_statement_inline_html(p):
     p[0] = ast.InlineHTML(p[1])
 
 def p_statement_expr(p):
-    'statement : expr SEMI'
+    'statement : expr semi'
     p[0] = p[1]
 
 def p_statement_unset(p):
-    'statement : UNSET LPAREN unset_variables RPAREN SEMI'
+    'statement : UNSET LPAREN unset_variables RPAREN semi'
     p[0] = ast.Unset(p[3])
 
 def p_statement_empty(p):
-    'statement : SEMI'
+    'statement : semi'
     pass
 
 # todo: try/catch
@@ -200,7 +200,7 @@ def p_new_else_single(p):
 
 def p_while_statement(p):
     '''while_statement : statement
-                       | COLON inner_statement_list ENDWHILE SEMI'''
+                       | COLON inner_statement_list ENDWHILE semi'''
     if len(p) == 2:
         p[0] = p[1]
     else:
@@ -221,7 +221,7 @@ def p_non_empty_for_expr(p):
 
 def p_for_statement(p):
     '''for_statement : statement
-                     | COLON inner_statement_list ENDFOR SEMI'''
+                     | COLON inner_statement_list ENDFOR semi'''
     if len(p) == 2:
         p[0] = p[1]
     else:
@@ -243,7 +243,7 @@ def p_foreach_optional_arg(p):
 
 def p_foreach_statement(p):
     '''foreach_statement : statement
-                         | COLON inner_statement_list ENDFOREACH SEMI'''
+                         | COLON inner_statement_list ENDFOREACH semi'''
     if len(p) == 2:
         p[0] = p[1]
     else:
@@ -609,6 +609,11 @@ def p_encaps_list(p):
 def p_encaps_var(p):
     'encaps_var : VARIABLE'
     p[0] = ast.Variable(p[1])
+
+def p_semi(p):
+    '''semi : SEMI
+            | CLOSE_TAG'''
+    pass
 
 def p_empty(t):
     'empty : '
