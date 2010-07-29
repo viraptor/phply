@@ -102,7 +102,7 @@ t_php_IS_GREATER          = r'>'
 t_php_IS_SMALLER_OR_EQUAL = r'<='
 t_php_IS_GREATER_OR_EQUAL = r'>='
 t_php_IS_EQUAL            = r'=='
-t_php_IS_NOT_EQUAL        = r'(!=)|(<>)'
+t_php_IS_NOT_EQUAL        = r'(!=(?!=))|(<>)'
 t_php_IS_IDENTICAL        = r'==='
 t_php_IS_NOT_IDENTICAL    = r'!=='
 
