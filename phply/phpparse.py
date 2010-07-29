@@ -109,7 +109,9 @@ def p_statement_foreach(p):
     'statement : FOREACH LPAREN expr AS foreach_variable foreach_optional_arg RPAREN foreach_statement'
     p[0] = ast.ForEach(p[3], p[5], p[6], p[8])
 
-# todo: switch
+def p_statement_switch(p):
+    'statement : SWITCH LPAREN expr RPAREN switch_case_list'
+    p[0] = ast.Switch(p[3], p[5])
 
 def p_statement_break(p):
     '''statement : BREAK semi
@@ -248,6 +250,38 @@ def p_foreach_statement(p):
         p[0] = p[1]
     else:
         p[0] = ast.Block(p[2])
+
+def p_switch_case_list(p):
+    '''switch_case_list : LBRACE case_list RBRACE
+                        | LBRACE SEMI case_list RBRACE'''
+    if len(p) == 4:
+        p[0] = p[2]
+    else:
+        p[0] = p[3]
+
+def p_switch_case_list_colon(p):
+    '''switch_case_list : COLON case_list ENDSWITCH semi
+                        | COLON SEMI case_list ENDSWITCH semi'''
+    if len(p) == 5:
+        p[0] = p[2]
+    else:
+        p[0] = p[3]
+
+def p_case_list(p):
+    '''case_list : empty
+                 | case_list CASE expr case_separator inner_statement_list
+                 | case_list DEFAULT case_separator inner_statement_list'''
+    if len(p) == 6:
+        p[0] = p[1] + [ast.Case(p[3], p[5])]
+    elif len(p) == 5:
+        p[0] = p[1] + [ast.Default(p[4])]
+    else:
+        p[0] = []
+
+def p_case_separator(p):
+    '''case_separator : COLON
+                      | SEMI'''
+    pass
 
 def p_global_var_list(p):
     '''global_var_list : global_var_list COMMA global_var
