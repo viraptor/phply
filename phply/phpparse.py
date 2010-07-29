@@ -507,6 +507,10 @@ def p_expr_unary_op(p):
             | BOOLEAN_NOT expr'''
     p[0] = ast.UnaryOp(p[1], p[2])
 
+def p_expr_ternary_op(p):
+    'expr : expr QUESTION expr COLON expr'
+    p[0] = ast.TernaryOp(p[1], p[3], p[5])
+
 def p_expr_pre_incdec(p):
     '''expr : INC variable
             | DEC variable'''
