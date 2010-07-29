@@ -381,10 +381,22 @@ def p_variable_string_offset(p):
     'variable : variable LBRACE expr RBRACE'
     p[0] = ast.StringOffset(p[1], p[3])
 
+def p_variable_object_property(p):
+    'variable : variable OBJECT_OPERATOR object_property'
+    p[0] = ast.ObjectProperty(p[1], p[3])
+
 def p_dim_offset(p):
     '''dim_offset : expr
                   | empty'''
     p[0] = p[1]
+
+def p_object_property(p):
+    '''object_property : STRING
+                       | LBRACE expr RBRACE'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = p[2]
 
 def p_expr_scalar(p):
     'expr : scalar'
