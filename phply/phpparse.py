@@ -164,7 +164,7 @@ def p_statement_unset(p):
     p[0] = ast.Unset(p[3])
 
 def p_statement_empty(p):
-    'statement : semi'
+    'statement : SEMI'
     pass
 
 # todo: try/catch
