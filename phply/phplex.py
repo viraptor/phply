@@ -12,6 +12,8 @@ import ply.lex as lex
 # todo: binary string literals and casts
 # todo: BAD_CHARACTER
 # todo: CURLY_OPEN, DOLLAR_OPEN_CURLY_BRACES, STRING_VARNAME
+# todo: "$a->b->c" should not consider second "->" an OBJECT_OPERATOR
+# todo: "$a[b][c]" should lex as '$a' '[' 'b' ']' '[c]'
 # todo: <script> syntax (does anyone use this?)
 
 states = (

@@ -171,6 +171,7 @@ def p_statement_empty(p):
 
 # todo: try/catch
 # todo: throw
+# todo: declare
 
 def p_elseif_list(p):
     '''elseif_list : empty
@@ -381,6 +382,10 @@ def p_expr_assign(p):
         p[0] = ast.Assignment(p[1], p[4], True)
     else:
         p[0] = ast.Assignment(p[1], p[3], False)
+
+# todo: =& new
+# todo: new
+# todo: clone
 
 def p_expr_list_assign(p):
     'expr : LIST LPAREN assignment_list RPAREN EQUALS expr'
