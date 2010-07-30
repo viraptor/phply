@@ -419,6 +419,10 @@ def p_variable_object_property(p):
     'variable : variable OBJECT_OPERATOR object_property'
     p[0] = ast.ObjectProperty(p[1], p[3])
 
+def p_variable_method_call(p):
+    'variable : variable OBJECT_OPERATOR object_property LPAREN function_call_parameter_list RPAREN'
+    p[0] = ast.MethodCall(p[1], p[3], p[5])
+
 def p_dim_offset(p):
     '''dim_offset : expr
                   | empty'''
