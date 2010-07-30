@@ -221,7 +221,7 @@ def t_php_VARIABLE(t):
 
 # Floating literal
 def t_php_DNUMBER(t):
-    r'(\d*\.\d+([Ee][+-]?\d+)?)|(\d+(\.|[Ee][+-]?\d+))'
+    r'(\d*\.\d+|\d+\.\d*)([Ee][+-]?\d+)? | (\d+[Ee][+-]?\d+)'
     return t
 
 # Integer literal

@@ -38,8 +38,8 @@ setup(name="phply",
         'ply',
         ],
 
-      # test_requires=[
-      #   'nose == 0.11.3',
-      #   'alfajor',
-      #   ],
+      test_suite='nose.collector',
+      test_requires=[
+        'nose',
+        ],
       )
