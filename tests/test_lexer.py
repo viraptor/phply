@@ -1,6 +1,60 @@
 from phply.phplex import lexer
 import nose.tools
 
+def eq_tokens(input, expected, ignore=('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG')):
+    output = []
+    lexer.input(input)
+    while True:
+        tok = lexer.token()
+        if not tok: break
+        if tok.type in ignore: continue
+        output.append((tok.type, tok.value))
+    # print output
+    for out, exp in zip(output, expected):
+        nose.tools.eq_(out, exp)
+
+def test_whitespace():
+    input = ' <?  \t\r\n ?>\t\t <?php  ?> <?php\n ?>'
+    expected = [
+        ('INLINE_HTML', ' '),
+        ('OPEN_TAG', '<?'),
+        ('WHITESPACE', '  \t\r\n '),
+        ('CLOSE_TAG', '?>'),
+        ('INLINE_HTML', '\t\t '),
+        ('OPEN_TAG', '<?php '),
+        ('WHITESPACE', ' '),
+        ('CLOSE_TAG', '?>'),
+        ('INLINE_HTML', ' '),
+        ('OPEN_TAG', '<?php\n'),
+        ('WHITESPACE', ' '),
+        ('CLOSE_TAG', '?>'),
+    ]
+    eq_tokens(input, expected, ignore=())
+
+def test_open_close_tags():
+    input = '<? ?> <% %> <?php ?> <?= ?> <%= %>'
+    expected = [
+        ('OPEN_TAG', '<?'),
+        ('WHITESPACE', ' '),
+        ('CLOSE_TAG', '?>'),
+        ('INLINE_HTML', ' '),
+        ('OPEN_TAG', '<%'),
+        ('WHITESPACE', ' '),
+        ('CLOSE_TAG', '%>'),
+        ('INLINE_HTML', ' '),
+        ('OPEN_TAG', '<?php '),
+        ('CLOSE_TAG', '?>'),
+        ('INLINE_HTML', ' '),
+        ('OPEN_TAG_WITH_ECHO', '<?='),
+        ('WHITESPACE', ' '),
+        ('CLOSE_TAG', '?>'),
+        ('INLINE_HTML', ' '),
+        ('OPEN_TAG_WITH_ECHO', '<%='),
+        ('WHITESPACE', ' '),
+        ('CLOSE_TAG', '%>'),
+    ]
+    eq_tokens(input, expected, ignore=())
+
 def test_numbers():
     input = """<?
         0
@@ -32,12 +86,57 @@ def test_numbers():
         ('LNUMBER', '0x123456789abcdef'),
         ('LNUMBER', '0666'),
     ]
-    output = []
-    lexer.input(input)
-    while True:
-        tok = lexer.token()
-        if not tok: break
-        if tok.type in ('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG'): continue
-        output.append((tok.type, tok.value))
-    for out, exp in zip(output, expected):
-        nose.tools.eq_(out, exp)
+    eq_tokens(input, expected)
+
+def test_strings():
+    input = r"""<?
+        ''
+        'hello'
+        'what\'s up'
+        'newlines
+'
+        'backslash\
+escape'
+        ""
+        "hello"
+        "$world"
+        "hello $cruel \"world\""
+        "end$"
+        "newlines
+"
+        "backslash\
+escape"
+    ?>"""
+    expected = [
+        ('CONSTANT_ENCAPSED_STRING', "''"),
+        ('CONSTANT_ENCAPSED_STRING', "'hello'"),
+        ('CONSTANT_ENCAPSED_STRING', "'what\\'s up'"),
+        ('CONSTANT_ENCAPSED_STRING', "'newlines\n'"),
+        ('CONSTANT_ENCAPSED_STRING', "'backslash\\\nescape'"),
+        ('QUOTE', '"'), ('QUOTE', '"'),
+        ('QUOTE', '"'), ('ENCAPSED_AND_WHITESPACE', 'hello'), ('QUOTE', '"'),
+        ('QUOTE', '"'), ('VARIABLE', '$world'), ('QUOTE', '"'),
+        ('QUOTE', '"'), ('ENCAPSED_AND_WHITESPACE', 'hello '),
+        ('VARIABLE', '$cruel'), ('ENCAPSED_AND_WHITESPACE', ' \\"world\\"'), ('QUOTE', '"'),
+        ('QUOTE', '"'), ('ENCAPSED_AND_WHITESPACE', 'end$'), ('QUOTE', '"'),
+        ('QUOTE', '"'), ('ENCAPSED_AND_WHITESPACE', 'newlines\n'), ('QUOTE', '"'),
+        ('QUOTE', '"'), ('ENCAPSED_AND_WHITESPACE', 'backslash\\\nescape'), ('QUOTE', '"'),
+    ]
+    eq_tokens(input, expected)
+
+def test_punct():
+    input = '<? ([{}]):;,.@ ?>'
+    expected = [
+        ('LPAREN', '('),
+        ('LBRACKET', '['),
+        ('LBRACE', '{'),
+        ('RBRACE', '}'),
+        ('RBRACKET', ']'),
+        ('RPAREN', ')'),
+        ('COLON', ':'),
+        ('SEMI', ';'),
+        ('COMMA', ','),
+        ('CONCAT', '.'),
+        ('AT', '@'),
+    ]
+    eq_tokens(input, expected)

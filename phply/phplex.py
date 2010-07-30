@@ -169,14 +169,14 @@ def t_php_COMMENT(t):
 # Escaping from HTML
 
 def t_OPEN_TAG(t):
-    r'<[?%]((php)|=)?[ \t\r\n]?'
+    r'<[?%]((php[ \t\r\n]?)|=)?'
     if '=' in t.value: t.type = 'OPEN_TAG_WITH_ECHO'
     t.lexer.lineno += t.value.count("\n")
     t.lexer.push_state('php')
     return t
 
 def t_php_CLOSE_TAG(t):
-    r'[?%]>[ \t\r\n]?'
+    r'[?%]>'
     t.lexer.lineno += t.value.count("\n")
     t.lexer.pop_state()
     return t
