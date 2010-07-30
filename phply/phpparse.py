@@ -640,6 +640,39 @@ def p_static_scalar(p):
     else:
         p[0] = p[1]
 
+def p_static_scalar_unary_op(p):
+    '''static_scalar : PLUS static_scalar
+                     | MINUS static_scalar'''
+    p[0] = ast.UnaryOp(p[1], p[2])
+
+def p_static_scalar_array(p):
+    'static_scalar : ARRAY LPAREN static_array_pair_list RPAREN'
+    p[0] = ast.Array(p[3])
+
+def p_static_array_pair_list(p):
+    '''static_array_pair_list : empty
+                              | static_non_empty_array_pair_list possible_comma'''
+    if len(p) == 2:
+        p[0] = []
+    else:
+        p[0] = p[1]
+
+def p_static_non_empty_array_pair_list_item(p):
+    '''static_non_empty_array_pair_list : static_non_empty_array_pair_list COMMA static_scalar
+                                        | static_scalar'''
+    if len(p) == 4:
+        p[0] = p[1] + [ast.ArrayElement(None, p[3], False)]
+    else:
+        p[0] = [ast.ArrayElement(None, p[1], False)]
+
+def p_static_non_empty_array_pair_list_pair(p):
+    '''static_non_empty_array_pair_list : static_non_empty_array_pair_list COMMA static_scalar DOUBLE_ARROW static_scalar
+                                        | static_scalar DOUBLE_ARROW static_scalar'''
+    if len(p) == 6:
+        p[0] = p[1] + [ast.ArrayElement(p[3], p[5], False)]
+    else:
+        p[0] = [ast.ArrayElement(p[1], p[3], False)]
+
 def p_namespace_name(p):
     'namespace_name : STRING'
     p[0] = ast.Constant(p[1])
