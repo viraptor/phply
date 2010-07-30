@@ -95,8 +95,6 @@ def test_strings():
         'what\'s up'
         'newlines
 '
-        'backslash\
-escape'
         ""
         "hello"
         "$world"
@@ -104,15 +102,12 @@ escape'
         "end$"
         "newlines
 "
-        "backslash\
-escape"
     ?>"""
     expected = [
         ('CONSTANT_ENCAPSED_STRING', "''"),
         ('CONSTANT_ENCAPSED_STRING', "'hello'"),
         ('CONSTANT_ENCAPSED_STRING', "'what\\'s up'"),
         ('CONSTANT_ENCAPSED_STRING', "'newlines\n'"),
-        ('CONSTANT_ENCAPSED_STRING', "'backslash\\\nescape'"),
         ('QUOTE', '"'), ('QUOTE', '"'),
         ('QUOTE', '"'), ('ENCAPSED_AND_WHITESPACE', 'hello'), ('QUOTE', '"'),
         ('QUOTE', '"'), ('VARIABLE', '$world'), ('QUOTE', '"'),
@@ -120,7 +115,6 @@ escape"
         ('VARIABLE', '$cruel'), ('ENCAPSED_AND_WHITESPACE', ' \\"world\\"'), ('QUOTE', '"'),
         ('QUOTE', '"'), ('ENCAPSED_AND_WHITESPACE', 'end$'), ('QUOTE', '"'),
         ('QUOTE', '"'), ('ENCAPSED_AND_WHITESPACE', 'newlines\n'), ('QUOTE', '"'),
-        ('QUOTE', '"'), ('ENCAPSED_AND_WHITESPACE', 'backslash\\\nescape'), ('QUOTE', '"'),
     ]
     eq_tokens(input, expected)
 
