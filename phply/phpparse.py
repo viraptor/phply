@@ -693,6 +693,19 @@ def p_encaps_var(p):
     'encaps_var : VARIABLE'
     p[0] = ast.Variable(p[1])
 
+def p_encaps_var_array_offset(p):
+    'encaps_var : VARIABLE LBRACKET encaps_var_offset RBRACKET'
+    p[0] = ast.ArrayOffset(p[1], p[3])
+
+def p_encaps_var_object_property(p):
+    'encaps_var : VARIABLE OBJECT_OPERATOR STRING'
+    p[0] = ast.ObjectProperty(p[1], p[3])
+
+def p_encaps_var_offset(p):
+    '''encaps_var_offset : STRING
+                         | VARIABLE'''
+    p[0] = p[1]
+
 def p_semi(p):
     '''semi : SEMI
             | CLOSE_TAG'''
