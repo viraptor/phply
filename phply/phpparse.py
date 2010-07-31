@@ -610,6 +610,15 @@ def p_expr_require_once(p):
     'expr : REQUIRE_ONCE expr'
     p[0] = ast.Require(p[2], True)
 
+def p_expr_exit(p):
+    '''expr : EXIT
+            | EXIT LPAREN RPAREN
+            | EXIT LPAREN expr RPAREN'''
+    if len(p) == 5:
+        p[0] = ast.Exit(p[3])
+    else:
+        p[0] = ast.Exit(None)
+
 def p_expr_group(p):
     'expr : LPAREN expr RPAREN'
     p[0] = p[2]

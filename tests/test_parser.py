@@ -20,6 +20,14 @@ def test_echo():
     expected = [Echo(["hello, world!"])]
     eq_ast(input, expected)
 
+def test_exit():
+    input = '<?php exit; exit(); exit(123); die; die(); die(456); ?>'
+    expected = [
+        Exit(None), Exit(None), Exit(123),
+        Exit(None), Exit(None), Exit(456),
+    ]
+    eq_ast(input, expected)
+
 def test_unary_ops():
     input = r"""<?
         $a = -5;
