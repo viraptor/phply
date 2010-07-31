@@ -11,6 +11,7 @@ def eq_tokens(input, expected, ignore=('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG')):
         output.append((tok.type, tok.value))
     # print output
     for out, exp in zip(output, expected):
+        # print out, exp
         nose.tools.eq_(out, exp)
 
 def test_whitespace():
@@ -118,7 +119,112 @@ def test_strings():
     ]
     eq_tokens(input, expected)
 
-def test_punct():
+def test_complex_string_interpolation():
+    input = r"""<?
+    "
+        \$escape
+        \{$escape}
+        \${escape}
+        $array[offset]
+        $too[many][offsets]
+        $object->property
+        stray -> [ ]
+        a${dollar_curly}b
+        c{$curly_dollar}d
+        {$array[0][1]}
+        {$array['two'][3]}
+        {$object->items[4]->five}
+        {${$nasty}}
+        {${funcall()}}
+        {${$object->method()}}
+        {$object->$variable}
+        {$object->$variable[1]}
+        {${static_class::variable}}
+        {${static_class::$variable}}
+    "
+    ?>"""
+    expected = [
+        ('QUOTE', '"'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        \\$escape\n        \\{"),
+        ('VARIABLE', "$escape"),
+        ('ENCAPSED_AND_WHITESPACE', "}\n        \\${escape}\n        "),
+        ('VARIABLE', "$array"), ('LBRACKET', '['), ('STRING', "offset"), ('RBRACKET', ']'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        "),
+        ('VARIABLE', "$too"), ('LBRACKET', '['), ('STRING', "many"), ('RBRACKET', ']'),
+        ('ENCAPSED_AND_WHITESPACE', "[offsets]\n        "),
+        ('VARIABLE', "$object"), ('OBJECT_OPERATOR', "->"), ('STRING', "property"),
+        ('ENCAPSED_AND_WHITESPACE', "\n        stray -> [ ]\n        a"),
+        ('DOLLAR_OPEN_CURLY_BRACES', "${"), ('STRING_VARNAME', "dollar_curly"), ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "b\n        c"),
+        ('CURLY_OPEN', "{"), ('VARIABLE', "$curly_dollar"), ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "d\n        "),
+        ('CURLY_OPEN', "{"), ('VARIABLE', "$array"),
+        ('LBRACKET', '['), ('LNUMBER', "0"), ('RBRACKET', ']'),
+        ('LBRACKET', '['), ('LNUMBER', "1"), ('RBRACKET', ']'),
+        ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        "),
+        ('CURLY_OPEN', "{"), ('VARIABLE', "$array"),
+        ('LBRACKET', '['), ('CONSTANT_ENCAPSED_STRING', "'two'"), ('RBRACKET', ']'),
+        ('LBRACKET', '['), ('LNUMBER', "3"), ('RBRACKET', ']'),
+        ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        "),
+        ('CURLY_OPEN', "{"), ('VARIABLE', "$object"),
+        ('OBJECT_OPERATOR', "->"), ('STRING', "items"),
+        ('LBRACKET', '['), ('LNUMBER', "4"), ('RBRACKET', ']'),
+        ('OBJECT_OPERATOR', "->"), ('STRING', "five"),
+        ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        "),
+        ('CURLY_OPEN', "{"), ('DOLLAR', '$'), ('LBRACE', '{'),
+        ('VARIABLE', "$nasty"), ('RBRACE', '}'), ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        "),
+        ('CURLY_OPEN', "{"), ('DOLLAR', "$"), ('LBRACE', "{"), ('STRING', "funcall"),
+        ('LPAREN', "("), ('RPAREN', ")"), ('RBRACE', '}'), ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        "),
+        ('CURLY_OPEN', "{"), ('DOLLAR', "$"), ('LBRACE', "{"),
+        ('VARIABLE', "$object"), ('OBJECT_OPERATOR', "->"), ('STRING', "method"),
+        ('LPAREN', "("), ('RPAREN', ")"),
+        ('RBRACE', '}'), ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        "),
+        ('CURLY_OPEN', "{"),
+        ('VARIABLE', "$object"), ('OBJECT_OPERATOR', "->"), ('VARIABLE', "$variable"),
+        ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        "),
+        ('CURLY_OPEN', "{"),
+        ('VARIABLE', "$object"), ('OBJECT_OPERATOR', "->"), ('VARIABLE', "$variable"),
+        ('LBRACKET', '['), ('LNUMBER', "1"), ('RBRACKET', ']'),
+        ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        "),
+        ('CURLY_OPEN', "{"), ('DOLLAR', "$"), ('LBRACE', "{"),
+        ('STRING', "static_class"), ('DOUBLE_COLON', "::"), ('STRING', "variable"),
+        ('RBRACE', '}'), ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        "),
+        ('CURLY_OPEN', "{"), ('DOLLAR', "$"), ('LBRACE', "{"),
+        ('STRING', "static_class"), ('DOUBLE_COLON', "::"), ('VARIABLE', "$variable"),
+        ('RBRACE', '}'), ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "\n    "),
+        ('QUOTE', '"'),
+    ]
+    eq_tokens(input, expected)
+
+def test_commented_close_tag():
+    input = '<? {\n// ?>\n<?\n} ?>'
+    expected = [
+        ('OPEN_TAG', '<?'),
+        ('WHITESPACE', ' '),
+        ('LBRACE', '{'),
+        ('WHITESPACE', '\n'),
+        ('COMMENT', '// '),
+        ('CLOSE_TAG', '?>'),    # PHP seems inconsistent regarding
+        ('INLINE_HTML', '\n'),  # when \n is included in CLOSE_TAG
+        ('OPEN_TAG', '<?'),
+        ('WHITESPACE', '\n'),
+        ('RBRACE', '}'),
+        ('WHITESPACE', ' '),
+        ('CLOSE_TAG', '?>'),
+    ]
+    eq_tokens(input, expected, ignore=())
+
+def test_punctuation():
     input = '<? ([{}]):;,.@ ?>'
     expected = [
         ('LPAREN', '('),

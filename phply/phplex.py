@@ -11,14 +11,14 @@ import ply.lex as lex
 # todo: namespaces
 # todo: binary string literals and casts
 # todo: BAD_CHARACTER
-# todo: CURLY_OPEN, DOLLAR_OPEN_CURLY_BRACES, STRING_VARNAME
 # todo: "$a->b->c" should not consider second "->" an OBJECT_OPERATOR
-# todo: "$a[b][c]" should lex as '$a' '[' 'b' ']' '[c]'
 # todo: <script> syntax (does anyone use this?)
 
 states = (
     ('php', 'exclusive'),
     ('quoted', 'exclusive'),
+    ('varname', 'exclusive'),
+    ('offset', 'exclusive'),
     ('property', 'exclusive'),
 )
 
@@ -56,8 +56,8 @@ tokens = reserved + (
     'OBJECT_OPERATOR', 'DOUBLE_ARROW', 'DOUBLE_COLON',
 
     # Delimiters
-    'LPAREN', 'RPAREN', 'LBRACKET', 'RBRACKET', 'LBRACE', 'RBRACE', 'COMMA',
-    'CONCAT', 'QUESTION', 'COLON', 'SEMI', 'AT',
+    'LPAREN', 'RPAREN', 'LBRACKET', 'RBRACKET', 'LBRACE', 'RBRACE', 'DOLLAR',
+    'COMMA', 'CONCAT', 'QUESTION', 'COLON', 'SEMI', 'AT',
 
     # Casts
     'ARRAY_CAST', 'BOOL_CAST', 'DOUBLE_CAST', 'INT_CAST', 'OBJECT_CAST',
@@ -76,6 +76,7 @@ tokens = reserved + (
     'STRING', 'VARIABLE',
     'LNUMBER', 'DNUMBER',
     'CONSTANT_ENCAPSED_STRING', 'ENCAPSED_AND_WHITESPACE', 'QUOTE',
+    'DOLLAR_OPEN_CURLY_BRACES', 'STRING_VARNAME', 'CURLY_OPEN',
 )
 
 # Newlines
@@ -136,14 +137,23 @@ t_php_LPAREN               = r'\('
 t_php_RPAREN               = r'\)'
 t_php_LBRACKET             = r'\['
 t_php_RBRACKET             = r'\]'
-t_php_LBRACE               = r'\{'
-t_php_RBRACE               = r'\}'
+t_php_DOLLAR               = r'\$'
 t_php_COMMA                = r','
 t_php_CONCAT               = r'\.(?!\d|=)'
 t_php_QUESTION             = r'\?'
 t_php_COLON                = r':'
 t_php_SEMI                 = r';'
 t_php_AT                   = r'@'
+
+def t_php_LBRACE(t):
+    r'\{'
+    t.lexer.push_state('php')
+    return t
+
+def t_php_RBRACE(t):
+    r'\}'
+    t.lexer.pop_state()
+    return t
 
 # Casts
 t_php_ARRAY_CAST           = r'\([ \t]*[Aa][Rr][Rr][Aa][Yy][ \t]*\)'
@@ -172,13 +182,13 @@ def t_OPEN_TAG(t):
     r'<[?%]((php[ \t\r\n]?)|=)?'
     if '=' in t.value: t.type = 'OPEN_TAG_WITH_ECHO'
     t.lexer.lineno += t.value.count("\n")
-    t.lexer.push_state('php')
+    t.lexer.begin('php')
     return t
 
 def t_php_CLOSE_TAG(t):
     r'[?%]>'
     t.lexer.lineno += t.value.count("\n")
-    t.lexer.pop_state()
+    t.lexer.begin('INITIAL')
     return t
 
 def t_INLINE_HTML(t):
@@ -246,7 +256,7 @@ def t_quoted_QUOTE(t):
     return t
 
 def t_quoted_ENCAPSED_AND_WHITESPACE(t):
-    r'([^\\"$-] | \\(.|\n) | \$(?![A-Za-z_]) | -(?!>[A-Za-z_]))+'
+    r'( [^\\"$\-\[\{] | \\(.|\n) | \$(?![A-Za-z_{]) | -(?!>) | ->(?![A-Za-z_]) | (?<![\w_])\[ | \{(?!\$) )+'
     t.lexer.lineno += t.value.count("\n")
     return t
 
@@ -254,9 +264,42 @@ def t_quoted_VARIABLE(t):
     r'\$[A-Za-z_][\w_]*'
     return t
 
+def t_quoted_CURLY_OPEN(t):
+    r'\{(?=\$)'
+    t.lexer.push_state('php')
+    return t
+
+def t_quoted_DOLLAR_OPEN_CURLY_BRACES(t):
+    r'\$\{'
+    t.lexer.push_state('varname')
+    return t
+
+def t_quoted_LBRACKET(t):
+    r'\['
+    t.lexer.push_state('offset')
+    return t
+
 def t_quoted_OBJECT_OPERATOR(t):
     r'->'
     t.lexer.push_state('property')
+    return t
+
+def t_varname_STRING_VARNAME(t):
+    r'[A-Za-z_][\w_]*'
+    return t
+
+def t_varname_RBRACE(t):
+    r'\}'
+    t.lexer.pop_state()
+    return t
+
+def t_offset_STRING(t):
+    r'[A-Za-z_][\w_]*'
+    return t
+
+def t_offset_RBRACKET(t):
+    r'\]'
+    t.lexer.pop_state()
     return t
 
 def t_property_STRING(t):

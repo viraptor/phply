@@ -39,7 +39,7 @@ setup(name="phply",
         ],
 
       test_suite='nose.collector',
-      test_requires=[
+      tests_require=[
         'nose',
         ],
       )
