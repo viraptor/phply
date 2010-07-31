@@ -24,6 +24,8 @@ class Node(object):
                                       for field in self.fields]))
 
     def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
         for field in self.fields:
             if not (getattr(self, field) == getattr(other, field)):
                 return False
@@ -91,7 +93,7 @@ Else = node('Else', ['node'])
 While = node('While', ['expr', 'node'])
 DoWhile = node('DoWhile', ['node', 'expr'])
 For = node('For', ['start', 'test', 'count', 'node'])
-ForEach = node('ForEach', ['expr', 'name', 'value', 'node'])
+ForEach = node('ForEach', ['expr', 'keyvar', 'valvar', 'node'])
 ForEachVariable = node('ForEachVariable', ['name', 'is_ref'])
 Switch = node('Switch', ['expr', 'nodes'])
 Case = node('Case', ['expr', 'nodes'])

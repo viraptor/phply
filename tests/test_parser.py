@@ -58,6 +58,42 @@ def test_assignment_ops():
     ]
     eq_ast(input, expected)
 
+def test_foreach():
+    input = r"""<?
+        foreach ($foo as $bar) {
+            echo $bar;
+        }
+        foreach ($spam as $ham => $eggs) {
+            echo "$ham: $eggs";
+        }
+        foreach (complex($expression) as &$ref)
+            $ref++;
+        foreach ($what as &$de => &$dealy):
+            yo();
+            yo();
+        endforeach;
+    ?>"""
+    expected = [
+        ForEach(Variable('$foo'), None, ForEachVariable('$bar', False),
+                Block([Echo([Variable('$bar')])])),
+        ForEach(Variable('$spam'),
+                ForEachVariable('$ham', False),
+                ForEachVariable('$eggs', False),
+                Block([Echo([BinaryOp('.',
+                                      BinaryOp('.', Variable('$ham'), ': '),
+                                      Variable('$eggs'))])])),
+        ForEach(FunctionCall('complex', [Parameter(Variable('$expression'),
+                                                   False)]),
+                None, ForEachVariable('$ref', True),
+                PostIncDecOp('++', Variable('$ref'))),
+        ForEach(Variable('$what'),
+                ForEachVariable('$de', True),
+                ForEachVariable('$dealy', True),
+                Block([FunctionCall('yo', []),
+                       FunctionCall('yo', [])])),
+    ]
+    eq_ast(input, expected)
+
 # def test_variable_variables():
     # input = r"""<?
         # $$a = $$b;
