@@ -119,16 +119,47 @@ def test_strings():
     ]
     eq_tokens(input, expected)
 
-def test_complex_string_interpolation():
+def test_string_backslash_escapes():
     input = r"""<?
     "
         \$escape
         \{$escape}
         \${escape}
+    "
+    ?>"""
+    expected = [
+        ('QUOTE', '"'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        \\$escape\n        \\{"),
+        ('VARIABLE', "$escape"),
+        ('ENCAPSED_AND_WHITESPACE', "}\n        \\${escape}\n    "),
+    ]
+    eq_tokens(input, expected)
+
+def test_string_offset_lookups():
+    input = r"""<?
+    "
         $array[offset]
         $too[many][offsets]
         $object->property
         stray -> [ ]
+    "
+    ?>"""
+    expected = [
+        ('QUOTE', '"'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        "),
+        ('VARIABLE', "$array"), ('LBRACKET', '['), ('STRING', "offset"), ('RBRACKET', ']'),
+        ('ENCAPSED_AND_WHITESPACE', "\n        "),
+        ('VARIABLE', "$too"), ('LBRACKET', '['), ('STRING', "many"), ('RBRACKET', ']'),
+        ('ENCAPSED_AND_WHITESPACE', "[offsets]\n        "),
+        ('VARIABLE', "$object"), ('OBJECT_OPERATOR', "->"), ('STRING', "property"),
+        ('ENCAPSED_AND_WHITESPACE', "\n        stray -> [ ]\n    "),
+        ('QUOTE', '"'),
+    ]
+    eq_tokens(input, expected)
+
+def test_string_curly_dollar_expressions():
+    input = r"""<?
+    "
         a${dollar_curly}b
         c{$curly_dollar}d
         {$array[0][1]}
@@ -145,15 +176,7 @@ def test_complex_string_interpolation():
     ?>"""
     expected = [
         ('QUOTE', '"'),
-        ('ENCAPSED_AND_WHITESPACE', "\n        \\$escape\n        \\{"),
-        ('VARIABLE', "$escape"),
-        ('ENCAPSED_AND_WHITESPACE', "}\n        \\${escape}\n        "),
-        ('VARIABLE', "$array"), ('LBRACKET', '['), ('STRING', "offset"), ('RBRACKET', ']'),
-        ('ENCAPSED_AND_WHITESPACE', "\n        "),
-        ('VARIABLE', "$too"), ('LBRACKET', '['), ('STRING', "many"), ('RBRACKET', ']'),
-        ('ENCAPSED_AND_WHITESPACE', "[offsets]\n        "),
-        ('VARIABLE', "$object"), ('OBJECT_OPERATOR', "->"), ('STRING', "property"),
-        ('ENCAPSED_AND_WHITESPACE', "\n        stray -> [ ]\n        a"),
+        ('ENCAPSED_AND_WHITESPACE', "\n        a"),
         ('DOLLAR_OPEN_CURLY_BRACES', "${"), ('STRING_VARNAME', "dollar_curly"), ('RBRACE', '}'),
         ('ENCAPSED_AND_WHITESPACE', "b\n        c"),
         ('CURLY_OPEN', "{"), ('VARIABLE', "$curly_dollar"), ('RBRACE', '}'),
