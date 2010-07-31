@@ -8,7 +8,9 @@ class Node(object):
     fields = []
 
     def __init__(self, *args, **kwargs):
-        assert len(self.fields) == len(args)
+        assert len(self.fields) == len(args), \
+            '%s takes %d arguments' % (self.__class__.__name__,
+                                       len(self.fields))
         try:
             self.lineno = kwargs['lineno']
         except KeyError:
@@ -20,6 +22,12 @@ class Node(object):
         return "%s(%s)" % (self.__class__.__name__,
                            ', '.join([repr(getattr(self, field))
                                       for field in self.fields]))
+
+    def __eq__(self, other):
+        for field in self.fields:
+            if not (getattr(self, field) == getattr(other, field)):
+                return False
+        return True
 
     def generic(self):
         values = {}

@@ -9,9 +9,10 @@ def eq_tokens(input, expected, ignore=('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG')):
         if not tok: break
         if tok.type in ignore: continue
         output.append((tok.type, tok.value))
-    # print output
+    print output
+    assert len(output) == len(expected)
     for out, exp in zip(output, expected):
-        # print out, exp
+        print out, exp
         nose.tools.eq_(out, exp)
 
 def test_whitespace():
@@ -132,6 +133,7 @@ def test_string_backslash_escapes():
         ('ENCAPSED_AND_WHITESPACE', "\n        \\$escape\n        \\{"),
         ('VARIABLE', "$escape"),
         ('ENCAPSED_AND_WHITESPACE', "}\n        \\${escape}\n    "),
+        ('QUOTE', '"'),
     ]
     eq_tokens(input, expected)
 
