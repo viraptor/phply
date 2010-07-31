@@ -132,6 +132,16 @@ def unparse_node(node, is_expr=False):
         else:
             return '{{ %s(%s) }}' % (node.name, params)
 
+    if isinstance(node, MethodCall):
+        params = ', '.join(unparse_node(param.node, True)
+                           for param in node.params)
+        if is_expr:
+            return '%s.%s(%s)' % (unparse_node(node.node, True),
+                                  node.name, params)
+        else:
+            return '{{ %s.%s(%s) }}' % (unparse_node(node.node, True),
+                                        node.name, params)
+
     return '{# XXX %s #}' % node
 
 output.write(unparse(parser.parse(input.read())))
