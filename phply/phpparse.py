@@ -622,6 +622,10 @@ def p_expr_exit(p):
     else:
         p[0] = ast.Exit(None)
 
+def p_expr_silence(p):
+    'expr : AT expr'
+    p[0] = ast.Silence(p[2])
+
 def p_expr_group(p):
     'expr : LPAREN expr RPAREN'
     p[0] = p[2]
