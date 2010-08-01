@@ -94,17 +94,36 @@ def test_foreach():
     ]
     eq_ast(input, expected)
 
-# def test_variable_variables():
-    # input = r"""<?
-        # $$a = $$b;
-        # $$a =& $$b;
-        # ${$a} = ${$b};
-        # ${$a} =& ${$b};
-    # ?>"""
-    # expected = [
-        # Assignment(Variable(Variable('$a')), Variable(Variable('$b')), False),
-        # Assignment(Variable(Variable('$a')), Variable(Variable('$b')), True),
-        # Assignment(Variable(Variable('$a')), Variable(Variable('$b')), False),
-        # Assignment(Variable(Variable('$a')), Variable(Variable('$b')), True),
-    # ]
-    # eq_ast(input, expected)
+def test_global_variables():
+    input = r"""<?
+        global $foo, $bar;
+        global $$yo;
+        global ${$dawg};
+        global ${$obj->prop};
+    ?>"""
+    expected = [
+        Global([Variable('$foo'), Variable('$bar')]),
+        Global([Variable(Variable('$yo'))]),
+        Global([Variable(Variable('$dawg'))]),
+        Global([Variable(ObjectProperty(Variable('$obj'), 'prop'))]),
+    ]
+    eq_ast(input, expected)
+
+def test_variable_variables():
+    input = r"""<?
+        $$a = $$b;
+        $$a =& $$b;
+        ${$a} = ${$b};
+        ${$a} =& ${$b};
+        $$a->b;
+        $$$triple;
+    ?>"""
+    expected = [
+        Assignment(Variable(Variable('$a')), Variable(Variable('$b')), False),
+        Assignment(Variable(Variable('$a')), Variable(Variable('$b')), True),
+        Assignment(Variable(Variable('$a')), Variable(Variable('$b')), False),
+        Assignment(Variable(Variable('$a')), Variable(Variable('$b')), True),
+        ObjectProperty(Variable(Variable('$a')), 'b'),
+        Variable(Variable(Variable('$triple'))),
+    ]
+    eq_ast(input, expected)

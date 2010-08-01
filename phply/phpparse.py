@@ -300,8 +300,15 @@ def p_global_var_list(p):
         p[0] = [p[1]]
 
 def p_global_var(p):
-    'global_var : VARIABLE'
-    p[0] = ast.Variable(p[1])
+    '''global_var : VARIABLE
+                  | DOLLAR variable
+                  | DOLLAR LBRACE expr RBRACE'''
+    if len(p) == 2:
+        p[0] = ast.Variable(p[1])
+    elif len(p) == 3:
+        p[0] = ast.Variable(p[2])
+    else:
+        p[0] = ast.Variable(p[3])
 
 def p_static_var_list(p):
     '''static_var_list : static_var_list COMMA static_var
@@ -416,24 +423,45 @@ def p_assignment_list_element(p):
         p[0] = p[3]
 
 def p_variable(p):
-    'variable : VARIABLE'
-    p[0] = ast.Variable(p[1])
-
-def p_variable_array_offset(p):
-    'variable : variable LBRACKET dim_offset RBRACKET'
-    p[0] = ast.ArrayOffset(p[1], p[3])
-
-def p_variable_string_offset(p):
-    'variable : variable LBRACE expr RBRACE'
-    p[0] = ast.StringOffset(p[1], p[3])
-
-def p_variable_object_property(p):
-    'variable : variable OBJECT_OPERATOR object_property'
-    p[0] = ast.ObjectProperty(p[1], p[3])
+    'variable : base_variable'
+    p[0] = p[1]
 
 def p_variable_method_call(p):
-    'variable : variable OBJECT_OPERATOR object_property LPAREN function_call_parameter_list RPAREN'
+    'variable : base_variable OBJECT_OPERATOR object_property LPAREN function_call_parameter_list RPAREN'
     p[0] = ast.MethodCall(p[1], p[3], p[5])
+
+def p_variable_object_property(p):
+    'variable : base_variable OBJECT_OPERATOR object_property'
+    p[0] = ast.ObjectProperty(p[1], p[3])
+
+def p_base_variable(p):
+    '''base_variable : DOLLAR base_variable
+                     | reference_variable'''
+    # todo: static_member
+    if len(p) == 3:
+        p[0] = ast.Variable(p[2])
+    else:
+        p[0] = p[1]
+
+def p_reference_variable_array_offset(p):
+    'reference_variable : reference_variable LBRACKET dim_offset RBRACKET'
+    p[0] = ast.ArrayOffset(p[1], p[3])
+
+def p_reference_variable_string_offset(p):
+    'reference_variable : reference_variable LBRACE expr RBRACE'
+    p[0] = ast.StringOffset(p[1], p[3])
+
+def p_reference_variable_compound(p):
+    'reference_variable : compound_variable'
+    p[0] = p[1]
+
+def p_compound_variable(p):
+    '''compound_variable : VARIABLE
+                         | DOLLAR LBRACE expr RBRACE'''
+    if len(p) == 2:
+        p[0] = ast.Variable(p[1])
+    else:
+        p[0] = ast.Variable(p[3])
 
 def p_dim_offset(p):
     '''dim_offset : expr
