@@ -173,7 +173,11 @@ def p_statement_empty(p):
     pass
 
 # todo: try/catch
-# todo: throw
+
+def p_statement_throw(p):
+    'statement : THROW expr semi'
+    p[0] = ast.Throw(p[2])
+
 # todo: declare
 
 def p_elseif_list(p):
@@ -621,6 +625,10 @@ def p_expr_exit(p):
         p[0] = ast.Exit(p[3])
     else:
         p[0] = ast.Exit(None)
+
+def p_expr_print(p):
+    'expr : PRINT expr'
+    p[0] = ast.Print(p[2])
 
 def p_expr_silence(p):
     'expr : AT expr'
