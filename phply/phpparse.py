@@ -426,13 +426,18 @@ def p_variable(p):
     'variable : base_variable'
     p[0] = p[1]
 
+def p_variable_object_property(p):
+    'variable : variable OBJECT_OPERATOR object_property'
+    p[0] = ast.ObjectProperty(p[1], p[3])
+
 def p_variable_method_call(p):
-    'variable : base_variable OBJECT_OPERATOR object_property LPAREN function_call_parameter_list RPAREN'
+    'variable : variable OBJECT_OPERATOR object_property LPAREN function_call_parameter_list RPAREN'
     p[0] = ast.MethodCall(p[1], p[3], p[5])
 
-def p_variable_object_property(p):
-    'variable : base_variable OBJECT_OPERATOR object_property'
-    p[0] = ast.ObjectProperty(p[1], p[3])
+def p_base_variable_function_call(p):
+    'base_variable : STRING LPAREN function_call_parameter_list RPAREN'
+    # todo: p[1] should be namespace_name, but this gives us a Constant
+    p[0] = ast.FunctionCall(p[1], p[3])
 
 def p_base_variable(p):
     '''base_variable : DOLLAR base_variable
@@ -524,10 +529,6 @@ def p_possible_comma(p):
     '''possible_comma : empty
                       | COMMA'''
     pass
-
-def p_expr_function_call(p):
-    'expr : STRING LPAREN function_call_parameter_list RPAREN'
-    p[0] = ast.FunctionCall(p[1], p[3])
 
 def p_function_call_parameter_list(p):
     '''function_call_parameter_list : function_call_parameter_list COMMA function_call_parameter

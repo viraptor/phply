@@ -58,6 +58,36 @@ def test_assignment_ops():
     ]
     eq_ast(input, expected)
 
+def test_function_calls():
+    input = r"""<?
+        f();
+        doit($arg1, &$arg2, 3 + 4);
+    ?>"""
+    expected = [
+        FunctionCall('f', []),
+        FunctionCall('doit',
+                     [Parameter(Variable('$arg1'), False),
+                      Parameter(Variable('$arg2'), True),
+                      Parameter(BinaryOp('+', 3, 4), False)]),
+    ]
+    eq_ast(input, expected)                   
+
+def test_method_calls():
+    input = r"""<?
+        $obj->meth($a, &$b, $c . $d);
+        $chain->one($x)->two(&$y);
+    ?>"""
+    expected = [
+        MethodCall(Variable('$obj'), 'meth',
+                   [Parameter(Variable('$a'), False),
+                    Parameter(Variable('$b'), True),
+                    Parameter(BinaryOp('.', Variable('$c'), Variable('$d')), False)]),
+        MethodCall(MethodCall(Variable('$chain'),
+                              'one', [Parameter(Variable('$x'), False)]),
+                   'two', [Parameter(Variable('$y'), True)]),
+    ]
+    eq_ast(input, expected)                   
+
 def test_foreach():
     input = r"""<?
         foreach ($foo as $bar) {
