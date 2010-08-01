@@ -601,6 +601,10 @@ def p_expr_empty(p):
     'expr : EMPTY LPAREN expr RPAREN'
     p[0] = ast.Empty(p[3])
 
+def p_expr_eval(p):
+    'expr : EVAL LPAREN expr RPAREN'
+    p[0] = ast.Eval(p[3])
+
 def p_expr_include(p):
     'expr : INCLUDE expr'
     p[0] = ast.Include(p[2], False)
