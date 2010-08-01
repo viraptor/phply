@@ -92,7 +92,36 @@ def test_string_offset_lookups():
         BinaryOp('.', ObjectProperty('$adjacent', 'object'), Variable('$lookup')),
         'stray -> [ ]',
         'not[array]',
-        'non->object']
+        'non->object',
+    ]
+    eq_ast(input, expected)
+
+def test_string_curly_dollar_expressions():
+    input = r"""<?
+        "a${dollar_curly}b";
+        "c{$curly_dollar}d";
+        "e${$dollar_curly_dollar}f";
+        "{$array[0][1]}";
+        "{$array['two'][3]}";
+        "{$object->items[4]->five}";
+        "{${$nasty}}";
+        "{${funcall()}}";
+        "{${$object->method()}}";
+        // "{$object->$variable}";
+        // "{$object->$variable[1]}";
+        // "{${static_class::variable}}";
+        // "{${static_class::$variable}}";
+    ?>"""
+    expected = [
+        BinaryOp('.', BinaryOp('.', 'a', Variable('$dollar_curly')), 'b'),
+        BinaryOp('.', BinaryOp('.', 'c', Variable('$curly_dollar')), 'd'),
+        BinaryOp('.', BinaryOp('.', 'e', Variable('$dollar_curly_dollar')), 'f'),
+        ArrayOffset(ArrayOffset(Variable('$array'), 0), 1),
+        ArrayOffset(ArrayOffset(Variable('$array'), 'two'), 3),
+        ObjectProperty(ArrayOffset(ObjectProperty(Variable('$object'), 'items'), 4), 'five'),
+        Variable(Variable('$nasty')),
+        Variable(FunctionCall('funcall', [])),
+        Variable(MethodCall(Variable('$object'), 'method', [])),
     ]
     eq_ast(input, expected)
 
