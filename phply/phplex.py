@@ -5,6 +5,7 @@
 # ----------------------------------------------------------------------
 
 import ply.lex as lex
+import re
 
 # todo: heredocs, nowdocs
 # todo: backticks
@@ -271,7 +272,10 @@ def t_quoted_CURLY_OPEN(t):
 
 def t_quoted_DOLLAR_OPEN_CURLY_BRACES(t):
     r'\$\{'
-    t.lexer.push_state('varname')
+    if re.match(r'[A-Za-z_]', peek(t.lexer)):
+        t.lexer.push_state('varname')
+    else:
+        t.lexer.push_state('php')
     return t
 
 def t_quotedvar_LBRACKET(t):
@@ -302,14 +306,15 @@ def t_quotedvar_VARIABLE(t):
 
 def t_quotedvar_CURLY_OPEN(t):
     r'\{(?=\$)'
-    t.lexer.pop_state()
-    t.lexer.push_state('php')
+    t.lexer.begin('php')
     return t
 
 def t_quotedvar_DOLLAR_OPEN_CURLY_BRACES(t):
     r'\$\{'
-    t.lexer.pop_state()
-    t.lexer.push_state('varname')
+    if re.match(r'[A-Za-z_]', peek(t.lexer)):
+        t.lexer.begin('varname')
+    else:
+        t.lexer.begin('php')
     return t
 
 def t_varname_STRING_VARNAME(t):
@@ -338,6 +343,12 @@ def t_property_STRING(t):
 def t_ANY_error(t):
     print("Illegal character %s" % repr(t.value[0]))
     t.lexer.skip(1)
+
+def peek(lexer):
+    try:
+        return lexer.lexdata[lexer.lexpos]
+    except IndexError:
+        return ''
 
 lexer = lex.lex(optimize=0)
 

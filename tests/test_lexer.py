@@ -176,6 +176,7 @@ def test_string_curly_dollar_expressions():
     "
         a${dollar_curly}b
         c{$curly_dollar}d
+        e${$dollar_curly_dollar}f
         {$array[0][1]}
         {$array['two'][3]}
         {$object->items[4]->five}
@@ -194,7 +195,9 @@ def test_string_curly_dollar_expressions():
         ('DOLLAR_OPEN_CURLY_BRACES', "${"), ('STRING_VARNAME', "dollar_curly"), ('RBRACE', '}'),
         ('ENCAPSED_AND_WHITESPACE', "b\n        c"),
         ('CURLY_OPEN', "{"), ('VARIABLE', "$curly_dollar"), ('RBRACE', '}'),
-        ('ENCAPSED_AND_WHITESPACE', "d\n        "),
+        ('ENCAPSED_AND_WHITESPACE', "d\n        e"),
+        ('DOLLAR_OPEN_CURLY_BRACES', "${"), ('VARIABLE', "$dollar_curly_dollar"), ('RBRACE', '}'),
+        ('ENCAPSED_AND_WHITESPACE', "f\n        "),
         ('CURLY_OPEN', "{"), ('VARIABLE', "$array"),
         ('LBRACKET', '['), ('LNUMBER', "0"), ('RBRACKET', ']'),
         ('LBRACKET', '['), ('LNUMBER', "1"), ('RBRACKET', ']'),
