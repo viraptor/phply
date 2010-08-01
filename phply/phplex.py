@@ -11,12 +11,12 @@ import ply.lex as lex
 # todo: namespaces
 # todo: binary string literals and casts
 # todo: BAD_CHARACTER
-# todo: "$a->b->c" should not consider second "->" an OBJECT_OPERATOR
 # todo: <script> syntax (does anyone use this?)
 
 states = (
     ('php', 'exclusive'),
     ('quoted', 'exclusive'),
+    ('quotedvar', 'exclusive'),
     ('varname', 'exclusive'),
     ('offset', 'exclusive'),
     ('property', 'exclusive'),
@@ -255,12 +255,13 @@ def t_quoted_QUOTE(t):
     return t
 
 def t_quoted_ENCAPSED_AND_WHITESPACE(t):
-    r'( [^\\"$\-\[\{] | \\(.|\n) | \$(?![A-Za-z_{]) | -(?!>) | ->(?![A-Za-z_]) | (?<![\w_])\[ | \{(?!\$) )+'
+    r'( [^"\\${] | \\(.|\n) | \$(?![A-Za-z_{]) | \{(?!\$) )+'
     t.lexer.lineno += t.value.count("\n")
     return t
 
 def t_quoted_VARIABLE(t):
     r'\$[A-Za-z_][\w_]*'
+    t.lexer.push_state('quotedvar')
     return t
 
 def t_quoted_CURLY_OPEN(t):
@@ -273,14 +274,42 @@ def t_quoted_DOLLAR_OPEN_CURLY_BRACES(t):
     t.lexer.push_state('varname')
     return t
 
-def t_quoted_LBRACKET(t):
+def t_quotedvar_LBRACKET(t):
     r'\['
-    t.lexer.push_state('offset')
+    t.lexer.begin('offset')
     return t
 
-def t_quoted_OBJECT_OPERATOR(t):
+def t_quotedvar_OBJECT_OPERATOR(t):
     r'->'
-    t.lexer.push_state('property')
+    t.lexer.begin('property')
+    return t
+
+def t_quotedvar_QUOTE(t):
+    r'"'
+    t.lexer.pop_state()
+    t.lexer.pop_state()
+    return t
+
+def t_quotedvar_ENCAPSED_AND_WHITESPACE(t):
+    r'( [^"\\${] | \\(.|\n) | \$(?![A-Za-z_{]) | \{(?!\$) )+'
+    t.lexer.lineno += t.value.count("\n")
+    t.lexer.pop_state()
+    return t
+
+def t_quotedvar_VARIABLE(t):
+    r'\$[A-Za-z_][\w_]*'
+    return t
+
+def t_quotedvar_CURLY_OPEN(t):
+    r'\{(?=\$)'
+    t.lexer.pop_state()
+    t.lexer.push_state('php')
+    return t
+
+def t_quotedvar_DOLLAR_OPEN_CURLY_BRACES(t):
+    r'\$\{'
+    t.lexer.pop_state()
+    t.lexer.push_state('varname')
     return t
 
 def t_varname_STRING_VARNAME(t):

@@ -142,19 +142,31 @@ def test_string_offset_lookups():
     "
         $array[offset]
         $too[many][offsets]
+        $next[to]$array
         $object->property
+        $too->many->properties
+        $adjacent->object$lookup
         stray -> [ ]
+        not[array]
+        non->object
     "
     ?>"""
     expected = [
         ('QUOTE', '"'),
-        ('ENCAPSED_AND_WHITESPACE', "\n        "),
-        ('VARIABLE', "$array"), ('LBRACKET', '['), ('STRING', "offset"), ('RBRACKET', ']'),
-        ('ENCAPSED_AND_WHITESPACE', "\n        "),
-        ('VARIABLE', "$too"), ('LBRACKET', '['), ('STRING', "many"), ('RBRACKET', ']'),
-        ('ENCAPSED_AND_WHITESPACE', "[offsets]\n        "),
-        ('VARIABLE', "$object"), ('OBJECT_OPERATOR', "->"), ('STRING', "property"),
-        ('ENCAPSED_AND_WHITESPACE', "\n        stray -> [ ]\n    "),
+        ('ENCAPSED_AND_WHITESPACE', '\n        '),
+        ('VARIABLE', '$array'), ('LBRACKET', '['), ('STRING', 'offset'), ('RBRACKET', ']'),
+        ('ENCAPSED_AND_WHITESPACE', '\n        '),
+        ('VARIABLE', '$too'), ('LBRACKET', '['), ('STRING', 'many'), ('RBRACKET', ']'),
+        ('ENCAPSED_AND_WHITESPACE', '[offsets]\n        '),
+        ('VARIABLE', '$next'), ('LBRACKET', '['), ('STRING', 'to'), ('RBRACKET', ']'),
+        ('VARIABLE', '$array'), ('ENCAPSED_AND_WHITESPACE', '\n        '),
+        ('VARIABLE', '$object'), ('OBJECT_OPERATOR', '->'), ('STRING', 'property'),
+        ('ENCAPSED_AND_WHITESPACE', '\n        '),
+        ('VARIABLE', '$too'), ('OBJECT_OPERATOR', '->'), ('STRING', 'many'),
+        ('ENCAPSED_AND_WHITESPACE', '->properties\n        '),
+        ('VARIABLE', '$adjacent'), ('OBJECT_OPERATOR', '->'), ('STRING', 'object'),
+        ('VARIABLE', '$lookup'),
+        ('ENCAPSED_AND_WHITESPACE', '\n        stray -> [ ]\n        not[array]\n        non->object\n    '),
         ('QUOTE', '"'),
     ]
     eq_tokens(input, expected)
