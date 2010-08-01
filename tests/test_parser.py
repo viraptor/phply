@@ -71,6 +71,31 @@ def test_assignment_ops():
     ]
     eq_ast(input, expected)
 
+def test_string_offset_lookups():
+    input = r"""<?
+        "$array[offset]";
+        "$too[many][offsets]";
+        "$next[to]$array";
+        "$object->property";
+        "$too->many->properties";
+        "$adjacent->object$lookup";
+        "stray -> [ ]";
+        "not[array]";
+        "non->object";
+    ?>"""
+    expected = [
+        ArrayOffset('$array', 'offset'),
+        BinaryOp('.', ArrayOffset('$too', 'many'), '[offsets]'),
+        BinaryOp('.', ArrayOffset('$next', 'to'), Variable('$array')),
+        ObjectProperty('$object', 'property'),
+        BinaryOp('.', ObjectProperty('$too', 'many'), '->properties'),
+        BinaryOp('.', ObjectProperty('$adjacent', 'object'), Variable('$lookup')),
+        'stray -> [ ]',
+        'not[array]',
+        'non->object']
+    ]
+    eq_ast(input, expected)
+
 def test_function_calls():
     input = r"""<?
         f();
