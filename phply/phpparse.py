@@ -652,6 +652,34 @@ def p_common_scalar_string(p):
     'common_scalar : CONSTANT_ENCAPSED_STRING'
     p[0] = p[1][1:-1]
 
+def p_common_scalar_magic_line(p):
+    'common_scalar : LINE'
+    p[0] = ast.MagicConstant(p[1], 'TODO')
+
+def p_common_scalar_magic_file(p):
+    'common_scalar : FILE'
+    p[0] = ast.MagicConstant(p[1], 'TODO')
+
+def p_common_scalar_magic_dir(p):
+    'common_scalar : DIR'
+    p[0] = ast.MagicConstant(p[1], 'TODO')
+
+def p_common_scalar_magic_class(p):
+    'common_scalar : CLASS_C'
+    p[0] = ast.MagicConstant(p[1], 'TODO')
+
+def p_common_scalar_magic_method(p):
+    'common_scalar : METHOD_C'
+    p[0] = ast.MagicConstant(p[1], 'TODO')
+
+def p_common_scalar_magic_func(p):
+    'common_scalar : FUNC_C'
+    p[0] = ast.MagicConstant(p[1], 'TODO')
+
+def p_common_scalar_magic_ns(p):
+    'common_scalar : NS_C'
+    p[0] = ast.MagicConstant(p[1], 'TODO')
+
 def p_static_scalar(p):
     '''static_scalar : common_scalar
                      | namespace_name
