@@ -57,7 +57,7 @@ tokens = reserved + (
 
     # Delimiters
     'LPAREN', 'RPAREN', 'LBRACKET', 'RBRACKET', 'LBRACE', 'RBRACE', 'DOLLAR',
-    'COMMA', 'CONCAT', 'QUESTION', 'COLON', 'SEMI', 'AT',
+    'COMMA', 'CONCAT', 'QUESTION', 'COLON', 'SEMI', 'AT', 'NS_SEPARATOR',
 
     # Casts
     'ARRAY_CAST', 'BOOL_CAST', 'DOUBLE_CAST', 'INT_CAST', 'OBJECT_CAST',
@@ -144,6 +144,7 @@ t_php_QUESTION             = r'\?'
 t_php_COLON                = r':'
 t_php_SEMI                 = r';'
 t_php_AT                   = r'@'
+t_php_NS_SEPARATOR         = r'\\'
 
 def t_php_LBRACE(t):
     r'\{'

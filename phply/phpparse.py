@@ -435,8 +435,7 @@ def p_variable_method_call(p):
     p[0] = ast.MethodCall(p[1], p[3], p[5])
 
 def p_base_variable_function_call(p):
-    'base_variable : STRING LPAREN function_call_parameter_list RPAREN'
-    # todo: p[1] should be namespace_name, but this gives us a Constant
+    'base_variable : namespace_name LPAREN function_call_parameter_list RPAREN'
     p[0] = ast.FunctionCall(p[1], p[3])
 
 def p_base_variable(p):
@@ -673,12 +672,15 @@ def p_expr_group(p):
 
 def p_scalar(p):
     '''scalar : common_scalar
-              | namespace_name
               | QUOTE encaps_list QUOTE'''
     if len(p) == 4:
         p[0] = p[2]
     else:
         p[0] = p[1]
+
+def p_scalar_namespace_name(p):
+    'scalar : namespace_name'
+    p[0] = ast.Constant(p[1])
 
 def p_common_scalar_lnumber(p):
     'common_scalar : LNUMBER'
@@ -727,12 +729,15 @@ def p_common_scalar_magic_ns(p):
 
 def p_static_scalar(p):
     '''static_scalar : common_scalar
-                     | namespace_name
                      | QUOTE ENCAPSED_AND_WHITESPACE QUOTE'''
     if len(p) == 4:
         p[0] = p[2]
     else:
         p[0] = p[1]
+
+def p_static_scalar_namespace_name(p):
+    'static_scalar : namespace_name'
+    p[0] = ast.Constant(p[1])
 
 def p_static_scalar_unary_op(p):
     '''static_scalar : PLUS static_scalar
@@ -768,8 +773,12 @@ def p_static_non_empty_array_pair_list_pair(p):
         p[0] = [ast.ArrayElement(p[1], p[3], False)]
 
 def p_namespace_name(p):
-    'namespace_name : STRING'
-    p[0] = ast.Constant(p[1])
+    '''namespace_name : namespace_name NS_SEPARATOR STRING
+                      | STRING'''
+    if len(p) == 4:
+        p[0] = p[1] + p[2] + p[3]
+    else:
+        p[0] = p[1]
 
 def p_encaps_list(p):
     '''encaps_list : encaps_list encaps_var

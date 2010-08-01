@@ -28,6 +28,19 @@ def test_exit():
     ]
     eq_ast(input, expected)
 
+def test_namespace_names():
+    input = r"""<?php
+        foo;
+        bar\baz;
+        one\too\tree;
+    ?>"""
+    expected = [
+        Constant(r'foo'),
+        Constant(r'bar\baz'),
+        Constant(r'one\too\tree'),
+    ]
+    eq_ast(input, expected)
+
 def test_unary_ops():
     input = r"""<?
         $a = -5;
