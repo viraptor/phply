@@ -469,8 +469,25 @@ def p_dim_offset(p):
     p[0] = p[1]
 
 def p_object_property(p):
-    '''object_property : STRING
-                       | LBRACE expr RBRACE'''
+    '''object_property : variable_name
+                       | object_dim_list'''
+    p[0] = p[1]
+
+def p_object_dim_list_variable(p):
+    'object_dim_list : VARIABLE'
+    p[0] = ast.Variable(p[1])
+
+def p_object_dim_list_array_offset(p):
+    'object_dim_list : object_dim_list LBRACKET dim_offset RBRACKET'
+    p[0] = ast.ArrayOffset(p[1], p[3])
+
+def p_object_dim_list_string_offset(p):
+    'object_dim_list : object_dim_list LBRACE expr RBRACE'
+    p[0] = ast.StringOffset(p[1], p[3])
+
+def p_variable_name(p):
+    '''variable_name : STRING
+                     | LBRACE expr RBRACE'''
     if len(p) == 2:
         p[0] = p[1]
     else:

@@ -107,8 +107,8 @@ def test_string_curly_dollar_expressions():
         "{${$nasty}}";
         "{${funcall()}}";
         "{${$object->method()}}";
-        // "{$object->$variable}";
-        // "{$object->$variable[1]}";
+        "{$object->$variable}";
+        "{$object->$variable[1]}";
         // "{${static_class::variable}}";
         // "{${static_class::$variable}}";
     ?>"""
@@ -122,6 +122,10 @@ def test_string_curly_dollar_expressions():
         Variable(Variable('$nasty')),
         Variable(FunctionCall('funcall', [])),
         Variable(MethodCall(Variable('$object'), 'method', [])),
+        ObjectProperty(Variable('$object'), Variable('$variable')),
+        ObjectProperty(Variable('$object'), ArrayOffset(Variable('$variable'), 1)),
+        # StaticProperty('static_class', 'variable'),
+        # StaticProperty('static_class', Variable('$variable')),
     ]
     eq_ast(input, expected)
 
