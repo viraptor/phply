@@ -86,13 +86,13 @@ def test_string_offset_lookups():
         "non->object";
     ?>"""
     expected = [
-        ArrayOffset('$array', 'offset'),
-        ArrayOffset('$array', Variable('$variable')),
-        BinaryOp('.', ArrayOffset('$too', 'many'), '[offsets]'),
-        BinaryOp('.', ArrayOffset('$next', 'to'), Variable('$array')),
-        ObjectProperty('$object', 'property'),
-        BinaryOp('.', ObjectProperty('$too', 'many'), '->properties'),
-        BinaryOp('.', ObjectProperty('$adjacent', 'object'), Variable('$lookup')),
+        ArrayOffset(Variable('$array'), 'offset'),
+        ArrayOffset(Variable('$array'), Variable('$variable')),
+        BinaryOp('.', ArrayOffset(Variable('$too'), 'many'), '[offsets]'),
+        BinaryOp('.', ArrayOffset(Variable('$next'), 'to'), Variable('$array')),
+        ObjectProperty(Variable('$object'), 'property'),
+        BinaryOp('.', ObjectProperty(Variable('$too'), 'many'), '->properties'),
+        BinaryOp('.', ObjectProperty(Variable('$adjacent'), 'object'), Variable('$lookup')),
         BinaryOp('.', BinaryOp('.', Variable('$two'), '->'), Variable('$variables')),
         'stray -> [ ]',
         'not[array]',

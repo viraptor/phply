@@ -815,11 +815,11 @@ def p_encaps_var(p):
 
 def p_encaps_var_array_offset(p):
     'encaps_var : VARIABLE LBRACKET encaps_var_offset RBRACKET'
-    p[0] = ast.ArrayOffset(p[1], p[3])
+    p[0] = ast.ArrayOffset(ast.Variable(p[1]), p[3])
 
 def p_encaps_var_object_property(p):
     'encaps_var : VARIABLE OBJECT_OPERATOR STRING'
-    p[0] = ast.ObjectProperty(p[1], p[3])
+    p[0] = ast.ObjectProperty(ast.Variable(p[1]), p[3])
 
 def p_encaps_var_dollar_curly_expr(p):
     'encaps_var : DOLLAR_OPEN_CURLY_BRACES expr RBRACE'
@@ -828,7 +828,7 @@ def p_encaps_var_dollar_curly_expr(p):
 def p_encaps_var_dollar_curly_array_offset(p):
     'encaps_var : DOLLAR_OPEN_CURLY_BRACES STRING_VARNAME LBRACKET expr RBRACKET RBRACE'
     # todo: this needs lexer support
-    p[0] = ast.ArrayOffset(p[2], p[4])
+    p[0] = ast.ArrayOffset(ast.Variable('$' + p[2]), p[4])
 
 def p_encaps_var_curly_variable(p):
     'encaps_var : CURLY_OPEN variable RBRACE'
