@@ -285,7 +285,7 @@ def t_quotedvar_LBRACKET(t):
     return t
 
 def t_quotedvar_OBJECT_OPERATOR(t):
-    r'->'
+    r'->(?=[A-Za-z])'
     t.lexer.begin('property')
     return t
 
@@ -329,6 +329,10 @@ def t_varname_RBRACE(t):
 
 def t_offset_STRING(t):
     r'[A-Za-z_][\w_]*'
+    return t
+
+def t_offset_VARIABLE(t):
+    r'\$[A-Za-z_][\w_]*'
     return t
 
 def t_offset_RBRACKET(t):

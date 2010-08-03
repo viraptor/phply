@@ -74,22 +74,26 @@ def test_assignment_ops():
 def test_string_offset_lookups():
     input = r"""<?
         "$array[offset]";
+        "$array[$variable]";
         "$too[many][offsets]";
         "$next[to]$array";
         "$object->property";
         "$too->many->properties";
         "$adjacent->object$lookup";
+        "$two->$variables";
         "stray -> [ ]";
         "not[array]";
         "non->object";
     ?>"""
     expected = [
         ArrayOffset('$array', 'offset'),
+        ArrayOffset('$array', Variable('$variable')),
         BinaryOp('.', ArrayOffset('$too', 'many'), '[offsets]'),
         BinaryOp('.', ArrayOffset('$next', 'to'), Variable('$array')),
         ObjectProperty('$object', 'property'),
         BinaryOp('.', ObjectProperty('$too', 'many'), '->properties'),
         BinaryOp('.', ObjectProperty('$adjacent', 'object'), Variable('$lookup')),
+        BinaryOp('.', BinaryOp('.', Variable('$two'), '->'), Variable('$variables')),
         'stray -> [ ]',
         'not[array]',
         'non->object',
