@@ -526,7 +526,42 @@ def p_expr_assign(p):
         p[0] = ast.Assignment(p[1], p[3], False)
 
 # todo: =& new
-# todo: new
+
+def p_expr_new(p):
+    'expr : NEW class_name_reference ctor_arguments'
+    p[0] = ast.New(p[2], p[3])
+
+def p_class_name_reference(p):
+    '''class_name_reference : class_name
+                            | dynamic_class_name_reference'''
+    p[0] = p[1]
+
+def p_class_name(p):
+    'class_name : namespace_name'
+    p[0] = p[1]                  
+
+def p_dynamic_class_name_reference(p):
+    '''dynamic_class_name_reference : base_variable OBJECT_OPERATOR object_property dynamic_class_name_variable_properties
+                                    | base_variable'''
+    # todo
+    pass
+
+def p_dynamic_class_name_variable_properties(p):
+    '''dynamic_class_name_variable_properties : dynamic_class_name_variable_properties dynamic_class_name_variable_property
+                                              | empty'''
+    # todo
+    pass
+
+def p_dynamic_class_name_variable_property(p):
+    'dynamic_class_name_variable_property : OBJECT_OPERATOR object_property'
+    # todo
+    pass
+
+def p_ctor_arguments(p):
+    '''ctor_arguments : LPAREN function_call_parameter_list RPAREN
+                      | empty'''
+    p[0] = p[2]
+
 # todo: clone
 
 def p_expr_list_assign(p):
