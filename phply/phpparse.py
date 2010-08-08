@@ -351,8 +351,136 @@ def p_function_declaration_statement(p):
     p[0] = ast.Function(p[3], p[5], p[8], p[2])
 
 def p_class_declaration_statement(p):
-    'class_declaration_statement : CLASS'
-    # todo
+    '''class_declaration_statement : class_entry_type STRING extends_from implements_list LBRACE class_statement_list RBRACE
+                                   | INTERFACE STRING interface_extends_list LBRACE class_statement_list RBRACE'''
+    if len(p) == 8:
+        p[0] = ast.Class(p[2], p[1], p[3], p[4], p[6])
+    else:
+        p[0] = ast.Interface(p[2], p[3], p[5])
+
+def p_class_entry_type(p):
+    '''class_entry_type : CLASS
+                        | ABSTRACT CLASS
+                        | FINAL CLASS'''
+    if len(p) == 3:
+        p[0] = p[1].lower()
+
+def p_extends_from(p):
+    '''extends_from : empty
+                    | EXTENDS fully_qualified_class_name'''
+    if len(p) == 3:
+        p[0] = p[2]
+
+def p_fully_qualified_class_name(p):
+    'fully_qualified_class_name : namespace_name'
+    p[0] = p[1]
+
+def p_implements_list(p):
+    '''implements_list : IMPLEMENTS interface_list
+                       | empty'''
+    if len(p) == 3:
+        p[0] = p[2]
+    else:
+        p[0] = []
+
+def p_class_statement_list(p):
+    '''class_statement_list : class_statement_list class_statement
+                            | empty'''
+
+    if len(p) == 3:
+        p[0] = p[1] + [p[2]]
+    else:
+        p[0] = []
+
+def p_class_statement(p):
+    '''class_statement : method_modifiers FUNCTION is_reference STRING LPAREN parameter_list RPAREN method_body
+                       | variable_modifiers class_variable_declaration SEMI
+                       | class_constant_declaration SEMI'''
+    if len(p) == 9:
+        p[0] = ast.Method(p[4], p[1], p[6], p[8], p[3])
+    elif len(p) == 4:
+        p[0] = ast.ClassVariables(p[1], p[2])
+    else:
+        p[0] = ast.ClassConstants(p[1])
+
+def p_class_variable_declaration_initial(p):
+    '''class_variable_declaration : class_variable_declaration COMMA VARIABLE EQUALS static_scalar
+                                  | VARIABLE EQUALS static_scalar'''
+    if len(p) == 6:
+        p[0] = p[1] + [ast.ClassVariable(p[3], p[5])]
+    else:
+        p[0] = [ast.ClassVariable(p[1], p[3])]
+
+def p_class_variable_declaration_no_initial(p):
+    '''class_variable_declaration : class_variable_declaration COMMA VARIABLE
+                                  | VARIABLE'''
+    if len(p) == 4:
+        p[0] = p[1] + [ast.ClassVariable(p[3], None)]
+    else:
+        p[0] = [ast.ClassVariable(p[1], None)]
+
+def p_class_constant_declaration(p):
+    '''class_constant_declaration : class_constant_declaration COMMA STRING EQUALS static_scalar
+                                  | CONST STRING EQUALS static_scalar'''
+    if len(p) == 6:
+        p[0] = p[1] + [ast.ClassConstant(p[3], p[5])]
+    else:
+        p[0] = [ast.ClassConstant(p[2], p[4])]
+
+def p_interface_list(p):
+    '''interface_list : interface_list COMMA fully_qualified_class_name
+                      | fully_qualified_class_name'''
+    if len(p) == 4:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
+
+def p_interface_extends_list(p):
+    '''interface_extends_list : EXTENDS interface_list
+                              | empty'''
+    if len(p) == 3:
+        p[0] = p[2]
+
+def p_variable_modifiers_non_empty(p):
+    'variable_modifiers : non_empty_member_modifiers'
+    p[0] = p[1]
+
+def p_variable_modifiers_var(p):
+    'variable_modifiers : VAR'
+    p[0] = []
+
+def p_method_modifiers_non_empty(p):
+    'method_modifiers : non_empty_member_modifiers'
+    p[0] = p[1]
+
+def p_method_modifiers_empty(p):
+    'method_modifiers : empty'
+    p[0] = []
+
+def p_method_body(p):
+    '''method_body : LBRACE inner_statement_list RBRACE
+                   | SEMI'''
+    if len(p) == 4:
+        p[0] = p[2]
+    else:
+        p[0] = []
+
+def p_non_empty_member_modifiers(p):
+    '''non_empty_member_modifiers : non_empty_member_modifiers member_modifier
+                                  | member_modifier'''
+    if len(p) == 3:
+        p[0] = p[1] + [p[2]]
+    else:
+        p[0] = [p[1]]
+
+def p_member_modifier(p):
+    '''member_modifier : PUBLIC
+                       | PROTECTED
+                       | PRIVATE
+                       | STATIC
+                       | ABSTRACT
+                       | FINAL'''
+    p[0] = p[1].lower()
 
 def p_is_reference(p):
     '''is_reference : AND

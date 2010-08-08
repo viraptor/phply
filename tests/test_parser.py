@@ -232,3 +232,36 @@ def test_variable_variables():
         Variable(Variable(Variable('$triple'))),
     ]
     eq_ast(input, expected)
+
+def test_classes():
+    input = r"""<?
+        FINAL class Clown extends Unicycle implements RedNose, FacePaint {
+            const the = 'only', constant = 'is';
+            const change = 'chump';
+            var $iable = 999, $nein;
+            protected sTaTiC $x;
+            public function conjunction_junction($arg1, $arg2) {
+                return $arg1 . $arg2;
+            }
+        }
+        class Stub {}
+    ?>"""
+    expected = [
+        Class('Clown', 'final', 'Unicycle', ['RedNose', 'FacePaint'], [
+            ClassConstants([ClassConstant('the', 'only'),
+                            ClassConstant('constant', 'is')]),
+            ClassConstants([ClassConstant('change', 'chump')]),
+            ClassVariables([], [ClassVariable('$iable', 999),
+                                ClassVariable('$nein', None)]),
+            ClassVariables(['protected', 'static'],
+                           [ClassVariable('$x', None)]),
+            Method('conjunction_junction',
+                   ['public'], 
+                   [FormalParameter('$arg1', None, False),
+                    FormalParameter('$arg2', None, False)],
+                   [Return(BinaryOp('.', Variable('$arg1'), Variable('$arg2')))],
+                   False),
+        ]),
+        Class('Stub', None, None, [], []),
+    ]
+    eq_ast(input, expected)
