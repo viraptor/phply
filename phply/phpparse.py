@@ -1003,6 +1003,10 @@ def p_encaps_var_offset_string(p):
     'encaps_var_offset : STRING'
     p[0] = p[1]
 
+def p_encaps_var_offset_num_string(p):
+    'encaps_var_offset : NUM_STRING'
+    p[0] = int(p[1])
+
 def p_encaps_var_offset_variable(p):
     'encaps_var_offset : VARIABLE'
     p[0] = ast.Variable(p[1])

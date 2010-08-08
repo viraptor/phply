@@ -74,7 +74,7 @@ tokens = reserved + (
     'LOGICAL_AND', 'LOGICAL_OR', 'LOGICAL_XOR',
     'HALT_COMPILER',
     'STRING', 'VARIABLE',
-    'LNUMBER', 'DNUMBER',
+    'LNUMBER', 'DNUMBER', 'NUM_STRING',
     'CONSTANT_ENCAPSED_STRING', 'ENCAPSED_AND_WHITESPACE', 'QUOTE',
     'DOLLAR_OPEN_CURLY_BRACES', 'STRING_VARNAME', 'CURLY_OPEN',
 )
@@ -333,6 +333,10 @@ def t_offset_STRING(t):
 
 def t_offset_VARIABLE(t):
     r'\$[A-Za-z_][\w_]*'
+    return t
+
+def t_offset_NUM_STRING(t):
+    r'\d+'
     return t
 
 def t_offset_RBRACKET(t):

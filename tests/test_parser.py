@@ -74,6 +74,7 @@ def test_assignment_ops():
 def test_string_offset_lookups():
     input = r"""<?
         "$array[offset]";
+        "$array[42]";
         "$array[$variable]";
         "$too[many][offsets]";
         "$next[to]$array";
@@ -87,6 +88,7 @@ def test_string_offset_lookups():
     ?>"""
     expected = [
         ArrayOffset(Variable('$array'), 'offset'),
+        ArrayOffset(Variable('$array'), 42),
         ArrayOffset(Variable('$array'), Variable('$variable')),
         BinaryOp('.', ArrayOffset(Variable('$too'), 'many'), '[offsets]'),
         BinaryOp('.', ArrayOffset(Variable('$next'), 'to'), Variable('$array')),
