@@ -558,7 +558,10 @@ def p_dynamic_class_name_variable_property(p):
 def p_ctor_arguments(p):
     '''ctor_arguments : LPAREN function_call_parameter_list RPAREN
                       | empty'''
-    p[0] = p[2]
+    if len(p) == 4:
+        p[0] = p[2]
+    else:
+        p[0] = []
 
 # todo: clone
 

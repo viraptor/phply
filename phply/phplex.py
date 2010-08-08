@@ -13,6 +13,7 @@ import re
 # todo: binary string literals and casts
 # todo: BAD_CHARACTER
 # todo: <script> syntax (does anyone use this?)
+# todo: don't look for keywords after -> (eg. "$this->use")
 
 states = (
     ('php', 'exclusive'),

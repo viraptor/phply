@@ -270,11 +270,13 @@ def test_classes():
 
 def test_new():
     input = r"""<?
+        new Foo;
         new Foo();
         new Bar(1, 2, 3);
         $crusty =& new OldSyntax();
     ?>"""
     expected = [
+        New('Foo', []),
         New('Foo', []),
         New('Bar', [Parameter(1, False),
                     Parameter(2, False),
