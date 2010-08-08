@@ -563,7 +563,9 @@ def p_ctor_arguments(p):
     else:
         p[0] = []
 
-# todo: clone
+def p_expr_clone(p):
+    'expr : CLONE expr'
+    p[0] = ast.Clone(p[2])
 
 def p_expr_list_assign(p):
     'expr : LIST LPAREN assignment_list RPAREN EQUALS expr'
