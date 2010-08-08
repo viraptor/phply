@@ -603,6 +603,10 @@ def p_variable_function_call(p):
     'variable : namespace_name LPAREN function_call_parameter_list RPAREN'
     p[0] = ast.FunctionCall(p[1], p[3])
 
+def p_variable_class_member_function_call(p):
+    'variable : class_name DOUBLE_COLON STRING LPAREN function_call_parameter_list RPAREN'
+    p[0] = ast.FunctionCall(ast.ScopeResolution(p[1], p[3]), p[5])
+
 def p_variable_method_call(p):
     'variable : variable OBJECT_OPERATOR object_property LPAREN function_call_parameter_list RPAREN'
     p[0] = ast.MethodCall(p[1], p[3], p[5])
