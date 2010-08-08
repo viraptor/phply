@@ -12,7 +12,7 @@ def eq_ast(input, expected):
 
 def test_inline_html():
     input = 'html <?php // php ?> more html'
-    expected = [InlineHTML('html '), InlineHTML(' more html')]
+    expected = [InlineHTML('html '), InlineHTML('more html')]
     eq_ast(input, expected)
 
 def test_echo():
