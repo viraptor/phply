@@ -28,6 +28,21 @@ def test_exit():
     ]
     eq_ast(input, expected)
 
+def test_isset():
+    input = r"""<?php
+        isset($a);
+        isset($b->c);
+        isset($d['e']);
+        isset($f, $g);
+    ?>"""
+    expected = [
+        IsSet([Variable('$a')]),
+        IsSet([ObjectProperty(Variable('$b'), 'c')]),
+        IsSet([ArrayOffset(Variable('$d'), 'e')]),
+        IsSet([Variable('$f'), Variable('$g')]),
+    ]
+    eq_ast(input, expected)
+
 def test_namespace_names():
     input = r"""<?php
         foo;

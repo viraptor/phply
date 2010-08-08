@@ -805,8 +805,16 @@ def p_expr_cast(p):
     p[0] = ast.Cast(p[1].strip('() \t'), p[2])
 
 def p_expr_isset(p):
-    'expr : ISSET LPAREN expr RPAREN'
+    'expr : ISSET LPAREN isset_variables RPAREN'
     p[0] = ast.IsSet(p[3])
+
+def p_isset_variables(p):
+    '''isset_variables : isset_variables COMMA variable
+                       | variable'''
+    if len(p) == 4:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
 
 def p_expr_empty(p):
     'expr : EMPTY LPAREN expr RPAREN'

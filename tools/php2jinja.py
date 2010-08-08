@@ -89,7 +89,12 @@ def unparse_node(node, is_expr=False):
                                        unparse_node(node.iffalse, True))
 
     if isinstance(node, IsSet):
-        return '(%s is defined)' % unparse_node(node.expr, True)
+        if len(node.nodes) == 1:
+            return '(%s is defined)' % unparse_node(node.nodes[0], True)
+        else:
+            tests = ['(%s is defined)' % unparse_node(n, True)
+                     for n in node.nodes]
+            return '(' + ' and '.join(tests) + ')'
 
     if isinstance(node, Empty):
         return '(not %s)' % (unparse_node(node.expr, True))
