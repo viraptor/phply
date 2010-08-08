@@ -266,15 +266,15 @@ def test_classes():
     ]
     eq_ast(input, expected)
 
-    def test_new():
-        input = r"""<?
-            new Foo();
-            new Bar(1, 2, 3);
-        ?>"""
-        expected = [
-            New('Foo', []),
-            New('Bar', [Parameter(1, False),
-                        Parameter(2, False),
-                        Parameter(3, False)]),
-        ]
-        eq_ast(input, expected)
+def test_new():
+    input = r"""<?
+        new Foo();
+        new Bar(1, 2, 3);
+    ?>"""
+    expected = [
+        New('Foo', []),
+        New('Bar', [Parameter(1, False),
+                    Parameter(2, False),
+                    Parameter(3, False)]),
+    ]
+    eq_ast(input, expected)
