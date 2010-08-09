@@ -110,10 +110,10 @@ def unparse_node(node, is_expr=False):
                                                  body)
 
     if isinstance(node, While):
-        dummy = ForEach(node.expr, None, ForEachVariable('$XXX', False), node.node)
+        dummy = Foreach(node.expr, None, ForeachVariable('$XXX', False), node.node)
         return unparse_node(dummy)
 
-    if isinstance(node, ForEach):
+    if isinstance(node, Foreach):
         var = node.valvar.name[1:]
         if node.keyvar:
             var = '%s, %s' % (node.keyvar.name[1:], var)

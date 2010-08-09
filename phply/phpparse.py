@@ -108,9 +108,9 @@ def p_statement_for(p):
 def p_statement_foreach(p):
     'statement : FOREACH LPAREN expr AS foreach_variable foreach_optional_arg RPAREN foreach_statement'
     if p[6] is None:
-        p[0] = ast.ForEach(p[3], None, p[5], p[8])
+        p[0] = ast.Foreach(p[3], None, p[5], p[8])
     else:
-        p[0] = ast.ForEach(p[3], p[5], p[6], p[8])
+        p[0] = ast.Foreach(p[3], p[5], p[6], p[8])
 
 def p_statement_switch(p):
     'statement : SWITCH LPAREN expr RPAREN switch_case_list'
@@ -241,9 +241,9 @@ def p_foreach_variable(p):
     '''foreach_variable : VARIABLE
                         | AND VARIABLE'''
     if len(p) == 2:
-        p[0] = ast.ForEachVariable(p[1], False)
+        p[0] = ast.ForeachVariable(p[1], False)
     else:
-        p[0] = ast.ForEachVariable(p[2], True)
+        p[0] = ast.ForeachVariable(p[2], True)
 
 def p_foreach_optional_arg(p):
     '''foreach_optional_arg : empty
