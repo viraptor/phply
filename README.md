@@ -17,7 +17,7 @@ Things I'm interested in doing with it:
 
 * phply -> PHP PLY
 * phply -> PHP Hypertext Preprocessor Python Lex YACC
-* phply -> PHP Hypertext Preprocessor Hypertext Preprocessor Python Lexx Yet Another Compiler Compiler
+* phply -> PHP Hypertext Preprocessor Hypertext Preprocessor Python Lex Yet Another Compiler Compiler
 * (... to be completed ...)
 
 ## How do you pronounce it?
