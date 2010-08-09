@@ -59,16 +59,16 @@ def unparse_node(node, is_expr=False):
         elems = []
         for elem in node.nodes:
             elems.append(unparse_node(elem, True))
-        if node.nodes and node.nodes[0].name is not None:
+        if node.nodes and node.nodes[0].key is not None:
             return '{%s}' % ', '.join(elems)
         else:
             return '[%s]' % ', '.join(elems)
 
     if isinstance(node, ArrayElement):
-        if node.name:
-            return '%s: %s' % (repr(node.name), unparse_node(node.node, True))
+        if node.key:
+            return '%s: %s' % (repr(node.key), unparse_node(node.value, True))
         else:
-            return unparse_node(node.node, True)
+            return unparse_node(node.value, True)
 
     if isinstance(node, Assignment):
         return '{%% set %s = %s %%}' % (unparse_node(node.node, True),
