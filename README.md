@@ -41,10 +41,8 @@ is still a fair amount of work to do:
 * Heredocs/Nowdocs
 * Namespaces
 * Anonymous functions
-* Some string interpolation syntax, such as: `"$foo["$bar"]"`
 * Variable function calls: `$f()`
 * Class variables: `ClassName::$variable`
-* Methods named after keywords: `$this->use()`
 * Some other stuff, probably
 
 ## Who's working on it?

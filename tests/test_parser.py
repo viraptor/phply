@@ -110,6 +110,7 @@ def test_string_offset_lookups():
         "$array[offset]";
         "$array[42]";
         "$array[$variable]";
+        "${curly['offset']}";
         "$too[many][offsets]";
         "$next[to]$array";
         "$object->property";
@@ -124,6 +125,7 @@ def test_string_offset_lookups():
         ArrayOffset(Variable('$array'), 'offset'),
         ArrayOffset(Variable('$array'), 42),
         ArrayOffset(Variable('$array'), Variable('$variable')),
+        ArrayOffset(Variable('$curly'), 'offset'),
         BinaryOp('.', ArrayOffset(Variable('$too'), 'many'), '[offsets]'),
         BinaryOp('.', ArrayOffset(Variable('$next'), 'to'), Variable('$array')),
         ObjectProperty(Variable('$object'), 'property'),

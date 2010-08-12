@@ -1005,7 +1005,6 @@ def p_encaps_var_dollar_curly_expr(p):
 
 def p_encaps_var_dollar_curly_array_offset(p):
     'encaps_var : DOLLAR_OPEN_CURLY_BRACES STRING_VARNAME LBRACKET expr RBRACKET RBRACE'
-    # todo: this needs lexer support
     p[0] = ast.ArrayOffset(ast.Variable('$' + p[2]), p[4])
 
 def p_encaps_var_curly_variable(p):

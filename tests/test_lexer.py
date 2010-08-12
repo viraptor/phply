@@ -138,6 +138,7 @@ def test_string_offset_lookups():
         $array[offset]
         $too[many][offsets]
         $next[to]$array
+        ${curly['offset']}
         $object->property
         $too->many->properties
         $adjacent->object$lookup
@@ -155,6 +156,9 @@ def test_string_offset_lookups():
         ('ENCAPSED_AND_WHITESPACE', '[offsets]\n        '),
         ('VARIABLE', '$next'), ('LBRACKET', '['), ('STRING', 'to'), ('RBRACKET', ']'),
         ('VARIABLE', '$array'), ('ENCAPSED_AND_WHITESPACE', '\n        '),
+        ('DOLLAR_OPEN_CURLY_BRACES', '${'), ('STRING_VARNAME', 'curly'),
+        ('LBRACKET', '['), ('CONSTANT_ENCAPSED_STRING', "'offset'"), ('RBRACKET', ']'),
+        ('RBRACE', '}'), ('ENCAPSED_AND_WHITESPACE', '\n        '),
         ('VARIABLE', '$object'), ('OBJECT_OPERATOR', '->'), ('STRING', 'property'),
         ('ENCAPSED_AND_WHITESPACE', '\n        '),
         ('VARIABLE', '$too'), ('OBJECT_OPERATOR', '->'), ('STRING', 'many'),

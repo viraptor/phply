@@ -128,19 +128,18 @@ t_php_INC                  = r'\+\+'
 t_php_DEC                  = r'--'
 
 # Arrows
+t_php_DOUBLE_ARROW         = r'=>'
+t_php_DOUBLE_COLON         = r'::'
+
 def t_php_OBJECT_OPERATOR(t):
     r'->'
     if re.match(r'[A-Za-z_]', peek(t.lexer)):
         t.lexer.push_state('property')
     return t
-t_php_DOUBLE_ARROW         = r'=>'
-t_php_DOUBLE_COLON         = r'::'
 
 # Delimeters
 t_php_LPAREN               = r'\('
 t_php_RPAREN               = r'\)'
-t_php_LBRACKET             = r'\['
-t_php_RBRACKET             = r'\]'
 t_php_DOLLAR               = r'\$'
 t_php_COMMA                = r','
 t_php_CONCAT               = r'\.(?!\d|=)'
@@ -149,6 +148,16 @@ t_php_COLON                = r':'
 t_php_SEMI                 = r';'
 t_php_AT                   = r'@'
 t_php_NS_SEPARATOR         = r'\\'
+
+def t_php_LBRACKET(t):
+    r'\['
+    t.lexer.push_state('php')
+    return t
+
+def t_php_RBRACKET(t):
+    r'\]'
+    t.lexer.pop_state()
+    return t
 
 def t_php_LBRACE(t):
     r'\{'
@@ -329,6 +338,11 @@ def t_varname_STRING_VARNAME(t):
 def t_varname_RBRACE(t):
     r'\}'
     t.lexer.pop_state()
+    return t
+
+def t_varname_LBRACKET(t):
+    r'\['
+    t.lexer.push_state('php')
     return t
 
 def t_offset_STRING(t):
