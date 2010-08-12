@@ -13,7 +13,6 @@ import re
 # todo: binary string literals and casts
 # todo: BAD_CHARACTER
 # todo: <script> syntax (does anyone use this?)
-# todo: don't look for keywords after -> (eg. "$this->use")
 
 states = (
     ('php', 'exclusive'),
@@ -129,7 +128,11 @@ t_php_INC                  = r'\+\+'
 t_php_DEC                  = r'--'
 
 # Arrows
-t_php_OBJECT_OPERATOR      = r'->'
+def t_php_OBJECT_OPERATOR(t):
+    r'->'
+    if re.match(r'[A-Za-z_]', peek(t.lexer)):
+        t.lexer.push_state('property')
+    return t
 t_php_DOUBLE_ARROW         = r'=>'
 t_php_DOUBLE_COLON         = r'::'
 

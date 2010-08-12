@@ -86,6 +86,25 @@ def test_assignment_ops():
     ]
     eq_ast(input, expected)
 
+def test_object_properties():
+    input = r"""<?
+        $object->property;
+        $object->foreach;
+        $object->$variable;
+        $object->$variable->schmariable;
+        $object->$variable->$schmariable;
+    ?>"""
+    expected = [
+        ObjectProperty(Variable('$object'), 'property'),
+        ObjectProperty(Variable('$object'), 'foreach'),
+        ObjectProperty(Variable('$object'), Variable('$variable')),
+        ObjectProperty(ObjectProperty(Variable('$object'), Variable('$variable')),
+                       'schmariable'),
+        ObjectProperty(ObjectProperty(Variable('$object'), Variable('$variable')),
+                       Variable('$schmariable')),
+    ]
+    eq_ast(input, expected)
+
 def test_string_offset_lookups():
     input = r"""<?
         "$array[offset]";
