@@ -7,7 +7,7 @@
 import ply.lex as lex
 import re
 
-# todo: heredocs, nowdocs
+# todo: nowdocs
 # todo: backticks
 # todo: namespaces
 # todo: binary string literals and casts
@@ -21,6 +21,8 @@ states = (
     ('varname', 'exclusive'),
     ('offset', 'exclusive'),
     ('property', 'exclusive'),
+    ('heredoc', 'exclusive'),
+    ('heredocvar', 'exclusive'),
 )
 
 # Reserved words
@@ -77,6 +79,9 @@ tokens = reserved + (
     'LNUMBER', 'DNUMBER', 'NUM_STRING',
     'CONSTANT_ENCAPSED_STRING', 'ENCAPSED_AND_WHITESPACE', 'QUOTE',
     'DOLLAR_OPEN_CURLY_BRACES', 'STRING_VARNAME', 'CURLY_OPEN',
+
+    # Heredocs
+    'START_HEREDOC', 'END_HEREDOC',
 )
 
 # Newlines
@@ -365,6 +370,80 @@ def t_offset_RBRACKET(t):
 def t_property_STRING(t):
     r'[A-Za-z_][\w_]*'
     t.lexer.pop_state()
+    return t
+
+# Heredocs
+
+def t_php_START_HEREDOC(t):
+    r'<<<[ \t]*(?P<label>[A-Za-z_][\w_]*)\n'
+    t.lexer.lineno += t.value.count("\n")
+    t.lexer.push_state('heredoc')
+    t.lexer.heredoc_label = t.lexer.lexmatch.group('label')
+    return t   
+
+def t_heredoc_END_HEREDOC(t):
+    r'(?<=\n)[A-Za-z_][\w_]*'
+    if t.value == t.lexer.heredoc_label:
+        del t.lexer.heredoc_label
+        t.lexer.pop_state()
+    else:
+        t.type = 'ENCAPSED_AND_WHITESPACE'
+    return t
+
+def t_heredoc_ENCAPSED_AND_WHITESPACE(t):
+    r'( [^\n\\${] | \\. | \$(?![A-Za-z_{]) | \{(?!\$) )+\n? | \\\n'
+    t.lexer.lineno += t.value.count("\n")
+    return t
+
+def t_heredoc_VARIABLE(t):
+    r'\$[A-Za-z_][\w_]*'
+    t.lexer.push_state('heredocvar')
+    return t
+
+def t_heredoc_CURLY_OPEN(t):
+    r'\{(?=\$)'
+    t.lexer.push_state('php')
+    return t
+
+def t_heredoc_DOLLAR_OPEN_CURLY_BRACES(t):
+    r'\$\{'
+    if re.match(r'[A-Za-z_]', peek(t.lexer)):
+        t.lexer.push_state('varname')
+    else:
+        t.lexer.push_state('php')
+    return t
+
+def t_heredocvar_LBRACKET(t):
+    r'\['
+    t.lexer.begin('offset')
+    return t
+
+def t_heredocvar_OBJECT_OPERATOR(t):
+    r'->(?=[A-Za-z])'
+    t.lexer.begin('property')
+    return t
+
+def t_heredocvar_ENCAPSED_AND_WHITESPACE(t):
+    r'( [^\n\\${] | \\. | \$(?![A-Za-z_{]) | \{(?!\$) )+\n? | \\\n'
+    t.lexer.lineno += t.value.count("\n")
+    t.lexer.pop_state()
+    return t
+
+def t_heredocvar_VARIABLE(t):
+    r'\$[A-Za-z_][\w_]*'
+    return t
+
+def t_heredocvar_CURLY_OPEN(t):
+    r'\{(?=\$)'
+    t.lexer.begin('php')
+    return t
+
+def t_heredocvar_DOLLAR_OPEN_CURLY_BRACES(t):
+    r'\$\{'
+    if re.match(r'[A-Za-z_]', peek(t.lexer)):
+        t.lexer.begin('varname')
+    else:
+        t.lexer.begin('php')
     return t
 
 def t_ANY_error(t):

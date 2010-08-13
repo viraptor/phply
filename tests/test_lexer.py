@@ -245,6 +245,58 @@ def test_string_curly_dollar_expressions():
     ]
     eq_tokens(input, expected)
 
+def test_heredoc():
+    input = r"""<?
+        echo <<<EOT
+This is a "$heredoc" with some $embedded->variables.
+This is not the EOT; this is:
+EOT;
+    ?>"""
+    expected = [
+        ('OPEN_TAG', '<?'),
+        ('WHITESPACE', '\n        '),
+        ('ECHO', 'echo'),
+        ('WHITESPACE', ' '),
+        ('START_HEREDOC', '<<<EOT\n'),
+        ('ENCAPSED_AND_WHITESPACE', 'This'),     # We fudge a bit, producing more
+        ('ENCAPSED_AND_WHITESPACE', ' is a "'),  # tokens than necessary.
+        ('VARIABLE', '$heredoc'),
+        ('ENCAPSED_AND_WHITESPACE', '" with some '),
+        ('VARIABLE', '$embedded'),
+        ('OBJECT_OPERATOR', '->'),
+        ('STRING', 'variables'),
+        ('ENCAPSED_AND_WHITESPACE', '.\n'),
+        ('ENCAPSED_AND_WHITESPACE', 'This'),
+        ('ENCAPSED_AND_WHITESPACE', ' is not the EOT; this is:\n'),
+        ('END_HEREDOC', 'EOT'),
+        ('SEMI', ';'),
+        ('WHITESPACE', '\n    '),
+        ('CLOSE_TAG', '?>'),
+    ]
+    eq_tokens(input, expected, ignore=())
+
+def test_heredoc_backslash_newline():
+    input = r"""<?
+        echo <<<EOT
+oh noes!\
+EOT;
+    ?>"""
+    expected = [
+        ('OPEN_TAG', '<?'),
+        ('WHITESPACE', '\n        '),
+        ('ECHO', 'echo'),
+        ('WHITESPACE', ' '),
+        ('START_HEREDOC', '<<<EOT\n'),
+        ('ENCAPSED_AND_WHITESPACE', 'oh'),
+        ('ENCAPSED_AND_WHITESPACE', ' noes!'),
+        ('ENCAPSED_AND_WHITESPACE', '\\\n'),
+        ('END_HEREDOC', 'EOT'),
+        ('SEMI', ';'),
+        ('WHITESPACE', '\n    '),
+        ('CLOSE_TAG', '?>'),
+    ]
+    eq_tokens(input, expected, ignore=())
+    
 def test_commented_close_tag():
     input = '<? {\n// ?>\n<?\n} ?>'
     expected = [

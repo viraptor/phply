@@ -171,6 +171,33 @@ def test_string_curly_dollar_expressions():
     ]
     eq_ast(input, expected)
 
+def test_heredoc():
+    input = r"""<?
+        echo <<<EOT
+This is a "$heredoc" with some $embedded->variables.
+This is not the EOT; this is:
+EOT;
+    ?>"""
+    expected = [
+        Echo([BinaryOp('.',
+                       BinaryOp('.',
+                                BinaryOp('.',
+                                         BinaryOp('.',
+                                                  BinaryOp('.',
+                                                           BinaryOp('.',
+                                                                    BinaryOp('.',
+                                                                             'This',
+                                                                             ' is a "'),
+                                                                    Variable('$heredoc')),
+                                                           '" with some '),
+                                                  ObjectProperty(Variable('$embedded'),
+                                                                 'variables')),
+                                         '.\n'),
+                                'This'),
+                       ' is not the EOT; this is:\n')]),
+    ]
+    eq_ast(input, expected)
+
 def test_function_calls():
     input = r"""<?
         f();

@@ -863,7 +863,8 @@ def p_expr_group(p):
 
 def p_scalar(p):
     '''scalar : common_scalar
-              | QUOTE encaps_list QUOTE'''
+              | QUOTE encaps_list QUOTE
+              | START_HEREDOC encaps_list END_HEREDOC'''
     if len(p) == 4:
         p[0] = p[2]
     else:

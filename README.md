@@ -38,7 +38,7 @@ to tell you what to do?
 Some things can't be parsed yet. They are getting fewer by the day, but there
 is still a fair amount of work to do:
 
-* Heredocs/Nowdocs
+* Nowdocs
 * Namespaces
 * Anonymous functions
 * Variable function calls: `$f()`
