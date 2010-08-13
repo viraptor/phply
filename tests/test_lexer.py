@@ -248,7 +248,7 @@ def test_string_curly_dollar_expressions():
 def test_heredoc():
     input = r"""<?
         echo <<<EOT
-This is a "$heredoc" with some $embedded->variables.
+This is a "$heredoc" with some $embedded->variables
 This is not the EOT; this is:
 EOT;
     ?>"""
@@ -265,7 +265,7 @@ EOT;
         ('VARIABLE', '$embedded'),
         ('OBJECT_OPERATOR', '->'),
         ('STRING', 'variables'),
-        ('ENCAPSED_AND_WHITESPACE', '.\n'),
+        ('ENCAPSED_AND_WHITESPACE', '\n'),
         ('ENCAPSED_AND_WHITESPACE', 'This'),
         ('ENCAPSED_AND_WHITESPACE', ' is not the EOT; this is:\n'),
         ('END_HEREDOC', 'EOT'),

@@ -376,7 +376,7 @@ def t_heredoc_END_HEREDOC(t):
     return t
 
 def t_heredoc_ENCAPSED_AND_WHITESPACE(t):
-    r'( [^\n\\${] | \\. | \$(?![A-Za-z_{]) | \{(?!\$) )+\n? | \\\n'
+    r'( [^\n\\${] | \\. | \$(?![A-Za-z_{]) | \{(?!\$) )+\n? | \\?\n'
     t.lexer.lineno += t.value.count("\n")
     return t
 
@@ -389,7 +389,7 @@ t_heredoc_CURLY_OPEN = t_quoted_CURLY_OPEN
 t_heredoc_DOLLAR_OPEN_CURLY_BRACES = t_quoted_DOLLAR_OPEN_CURLY_BRACES
 
 def t_heredocvar_ENCAPSED_AND_WHITESPACE(t):
-    r'( [^\n\\${] | \\. | \$(?![A-Za-z_{]) | \{(?!\$) )+\n? | \\\n'
+    r'( [^\n\\${] | \\. | \$(?![A-Za-z_{]) | \{(?!\$) )+\n? | \\?\n'
     t.lexer.lineno += t.value.count("\n")
     t.lexer.pop_state()
     return t
