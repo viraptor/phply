@@ -297,6 +297,12 @@ def t_quoted_DOLLAR_OPEN_CURLY_BRACES(t):
         t.lexer.push_state('php')
     return t
 
+def t_quotedvar_QUOTE(t):
+    r'"'
+    t.lexer.pop_state()
+    t.lexer.pop_state()
+    return t
+
 def t_quotedvar_LBRACKET(t):
     r'\['
     t.lexer.begin('offset')
@@ -307,21 +313,13 @@ def t_quotedvar_OBJECT_OPERATOR(t):
     t.lexer.begin('property')
     return t
 
-def t_quotedvar_QUOTE(t):
-    r'"'
-    t.lexer.pop_state()
-    t.lexer.pop_state()
-    return t
-
 def t_quotedvar_ENCAPSED_AND_WHITESPACE(t):
     r'( [^"\\${] | \\(.|\n) | \$(?![A-Za-z_{]) | \{(?!\$) )+'
     t.lexer.lineno += t.value.count("\n")
     t.lexer.pop_state()
     return t
 
-def t_quotedvar_VARIABLE(t):
-    r'\$[A-Za-z_][\w_]*'
-    return t
+t_quotedvar_VARIABLE = t_php_VARIABLE
 
 def t_quotedvar_CURLY_OPEN(t):
     r'\{(?=\$)'
@@ -340,32 +338,19 @@ def t_varname_STRING_VARNAME(t):
     r'[A-Za-z_][\w_]*'
     return t
 
-def t_varname_RBRACE(t):
-    r'\}'
-    t.lexer.pop_state()
-    return t
-
-def t_varname_LBRACKET(t):
-    r'\['
-    t.lexer.push_state('php')
-    return t
+t_varname_RBRACE = t_php_RBRACE
+t_varname_LBRACKET = t_php_LBRACKET
 
 def t_offset_STRING(t):
     r'[A-Za-z_][\w_]*'
-    return t
-
-def t_offset_VARIABLE(t):
-    r'\$[A-Za-z_][\w_]*'
     return t
 
 def t_offset_NUM_STRING(t):
     r'\d+'
     return t
 
-def t_offset_RBRACKET(t):
-    r'\]'
-    t.lexer.pop_state()
-    return t
+t_offset_VARIABLE = t_php_VARIABLE
+t_offset_RBRACKET = t_php_RBRACKET
 
 def t_property_STRING(t):
     r'[A-Za-z_][\w_]*'
@@ -400,28 +385,8 @@ def t_heredoc_VARIABLE(t):
     t.lexer.push_state('heredocvar')
     return t
 
-def t_heredoc_CURLY_OPEN(t):
-    r'\{(?=\$)'
-    t.lexer.push_state('php')
-    return t
-
-def t_heredoc_DOLLAR_OPEN_CURLY_BRACES(t):
-    r'\$\{'
-    if re.match(r'[A-Za-z_]', peek(t.lexer)):
-        t.lexer.push_state('varname')
-    else:
-        t.lexer.push_state('php')
-    return t
-
-def t_heredocvar_LBRACKET(t):
-    r'\['
-    t.lexer.begin('offset')
-    return t
-
-def t_heredocvar_OBJECT_OPERATOR(t):
-    r'->(?=[A-Za-z])'
-    t.lexer.begin('property')
-    return t
+t_heredoc_CURLY_OPEN = t_quoted_CURLY_OPEN
+t_heredoc_DOLLAR_OPEN_CURLY_BRACES = t_quoted_DOLLAR_OPEN_CURLY_BRACES
 
 def t_heredocvar_ENCAPSED_AND_WHITESPACE(t):
     r'( [^\n\\${] | \\. | \$(?![A-Za-z_{]) | \{(?!\$) )+\n? | \\\n'
@@ -429,22 +394,11 @@ def t_heredocvar_ENCAPSED_AND_WHITESPACE(t):
     t.lexer.pop_state()
     return t
 
-def t_heredocvar_VARIABLE(t):
-    r'\$[A-Za-z_][\w_]*'
-    return t
-
-def t_heredocvar_CURLY_OPEN(t):
-    r'\{(?=\$)'
-    t.lexer.begin('php')
-    return t
-
-def t_heredocvar_DOLLAR_OPEN_CURLY_BRACES(t):
-    r'\$\{'
-    if re.match(r'[A-Za-z_]', peek(t.lexer)):
-        t.lexer.begin('varname')
-    else:
-        t.lexer.begin('php')
-    return t
+t_heredocvar_LBRACKET = t_quotedvar_LBRACKET
+t_heredocvar_OBJECT_OPERATOR = t_quotedvar_OBJECT_OPERATOR
+t_heredocvar_VARIABLE = t_quotedvar_VARIABLE
+t_heredocvar_CURLY_OPEN = t_quotedvar_CURLY_OPEN
+t_heredocvar_DOLLAR_OPEN_CURLY_BRACES = t_quotedvar_DOLLAR_OPEN_CURLY_BRACES
 
 def t_ANY_error(t):
     print("Illegal character %s" % repr(t.value[0]))
