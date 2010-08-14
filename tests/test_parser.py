@@ -396,3 +396,17 @@ def test_declare():
         ])),
     ]
     eq_ast(input, expected)
+
+def test_instanceof():
+    input = r"""<?
+        if ($foo iNsTaNcEoF Bar) {
+            echo '$foo is a bar';
+        }
+        $foo instanceof $bar;
+    ?>"""
+    expected = [
+        If(BinaryOp('instanceof', Variable('$foo'), Constant('Bar')),
+           Block([Echo(['$foo is a bar'])]), [], None),
+        BinaryOp('instanceof', Variable('$foo'), Variable('$bar')),
+    ]
+    eq_ast(input, expected)

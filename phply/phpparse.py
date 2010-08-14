@@ -805,8 +805,9 @@ def p_expr_binary_op(p):
             | expr IS_SMALLER expr
             | expr IS_SMALLER_OR_EQUAL expr
             | expr IS_GREATER expr
-            | expr IS_GREATER_OR_EQUAL expr'''
-    p[0] = ast.BinaryOp(p[2], p[1], p[3], lineno=p.lineno(2))
+            | expr IS_GREATER_OR_EQUAL expr
+            | expr INSTANCEOF expr'''
+    p[0] = ast.BinaryOp(p[2].lower(), p[1], p[3], lineno=p.lineno(2))
 
 def p_expr_unary_op(p):
     '''expr : PLUS expr
