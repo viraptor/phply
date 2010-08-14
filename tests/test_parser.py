@@ -347,3 +347,31 @@ def test_new():
         Assignment(Variable('$crusty'), New('OldSyntax', []), True),
     ]
     eq_ast(input, expected)
+
+def test_exceptions():
+    input = r"""<?
+        try {
+            $a = $b + $c;
+            throw new Food($a);
+        } catch (Food $f) {
+            echo "Received food: $f";
+        } catch (Exception $e) {
+            echo "Problem?";
+        }
+    ?>"""
+    expected = [
+        Try([
+            Assignment(Variable('$a'),
+                       BinaryOp('+', Variable('$b'), Variable('$c')),
+                       False),
+            Throw(New('Food', [Parameter(Variable('$a'), False)])),
+        ], [
+            Catch('Food', Variable('$f'), [
+                Echo([BinaryOp('.', 'Received food: ', Variable('$f'))])
+            ]),
+            Catch('Exception', Variable('$e'), [
+                Echo(['Problem?']),
+            ]),
+        ])
+    ]
+    eq_ast(input, expected)

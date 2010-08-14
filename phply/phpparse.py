@@ -172,7 +172,17 @@ def p_statement_empty(p):
     'statement : SEMI'
     pass
 
-# todo: try/catch
+def p_statement_try(p):
+    'statement : TRY LBRACE inner_statement_list RBRACE CATCH LPAREN fully_qualified_class_name VARIABLE RPAREN LBRACE inner_statement_list RBRACE additional_catches'
+    p[0] = ast.Try(p[3], [ast.Catch(p[7], ast.Variable(p[8]), p[11])] + p[13])
+
+def p_additional_catches(p):
+    '''additional_catches : additional_catches CATCH LPAREN fully_qualified_class_name VARIABLE RPAREN LBRACE inner_statement_list RBRACE
+                          | empty'''
+    if len(p) == 10:
+        p[0] = p[1] + [ast.Catch(p[4], ast.Variable(p[5]), p[8])]
+    else:
+        p[0] = []
 
 def p_statement_throw(p):
     'statement : THROW expr semi'
