@@ -31,18 +31,20 @@ class Node(object):
                 return False
         return True
 
-    def generic(self):
+    def generic(self, with_lineno=False):
         values = {}
+        if with_lineno:
+            values['lineno'] = self.lineno
         for field in self.fields:
             value = getattr(self, field)
             if hasattr(value, 'generic'):
-                value = value.generic()
+                value = value.generic(with_lineno)
             elif isinstance(value, list):
                 items = value
                 value = []
                 for item in items:
                     if hasattr(item, 'generic'):
-                        item = item.generic()
+                        item = item.generic(with_lineno)
                     value.append(item)
             values[field] = value
         return (self.__class__.__name__, values)

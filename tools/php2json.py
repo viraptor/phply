@@ -11,15 +11,18 @@ import simplejson
 
 input = sys.stdin
 output = sys.stdout
+with_lineno = True
 
 def export(items):
     result = []
     if items:
        for item in items:
            if hasattr(item, 'generic'):
-               item = item.generic()
+               item = item.generic(with_lineno=with_lineno)
            result.append(item)
     return result
 
-simplejson.dump(export(parser.parse(input.read())), output, indent=2)
+simplejson.dump(export(parser.parse(input.read(),
+                                    tracking=with_lineno)),
+                output, indent=2)
 output.write('\n')
