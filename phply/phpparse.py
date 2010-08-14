@@ -192,7 +192,25 @@ def p_statement_throw(p):
     'statement : THROW expr semi'
     p[0] = ast.Throw(p[2], lineno=p.lineno(1))
 
-# todo: declare
+def p_statement_declare(p):
+    'statement : DECLARE LPAREN declare_list RPAREN declare_statement'
+    p[0] = ast.Declare(p[3], p[5], lineno=p.lineno(1))
+
+def p_declare_list(p):
+    '''declare_list : STRING EQUALS static_scalar
+                    | declare_list COMMA STRING EQUALS static_scalar'''
+    if len(p) == 4:
+        p[0] = [ast.Directive(p[1], p[3], lineno=p.lineno(1))]
+    else:
+        p[0] = p[1] + [ast.Directive(p[3], p[5], lineno=p.lineno(2))]
+
+def p_declare_statement(p):
+    '''declare_statement : statement
+                         | COLON inner_statement_list ENDDECLARE semi'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = ast.Block(p[2], lineno=p.lineno(1))
 
 def p_elseif_list(p):
     '''elseif_list : empty

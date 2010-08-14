@@ -375,3 +375,24 @@ def test_exceptions():
         ])
     ]
     eq_ast(input, expected)
+
+def test_declare():
+    input = r"""<?
+        declare(ticks=1) {
+            echo 'hi';
+        }
+        declare(ticks=2);
+        declare(ticks=3):
+        echo 'bye';
+        enddeclare;
+    ?>"""
+    expected = [
+        Declare([Directive('ticks', 1)], Block([
+            Echo(['hi']),
+        ])),
+        Declare([Directive('ticks', 2)], None),
+        Declare([Directive('ticks', 3)], Block([
+            Echo(['bye']),
+        ])),
+    ]
+    eq_ast(input, expected)
