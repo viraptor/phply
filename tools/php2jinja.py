@@ -108,6 +108,12 @@ def unparse_node(node, is_expr=False):
     if isinstance(node, Silence):
         return unparse_node(node.expr, True)
 
+    if isinstance(node, Cast):
+        filter = ''
+        if node.type in ('int', 'float', 'string'):
+            filter = '|%s' % node.type
+        return '%s%s' % (unparse_node(node.expr, True), filter)
+
     if isinstance(node, If):
         body = unparse_node(node.node)
         for elseif in node.elseifs:
@@ -132,7 +138,15 @@ def unparse_node(node, is_expr=False):
 
     if isinstance(node, Function):
         name = node.name
-        params = ', '.join(param.name[1:] for param in node.params)
+        params = []
+        for param in node.params:
+            params.append(param.name[1:])
+            # if param.default is not None:
+            #     params.append('%s=%s' % (param.name[1:],
+            #                              unparse_node(param.default, True)))
+            # else:
+            #     params.append(param.name[1:])
+        params = ', '.join(params)
         body = '\n    '.join(unparse_node(node) for node in node.nodes)
         return '{%% macro %s(%s) -%%}\n    %s\n{%%- endmacro -%%}\n\n' % (name, params, body)
 
@@ -141,13 +155,13 @@ def unparse_node(node, is_expr=False):
 
     if isinstance(node, FunctionCall):
         if node.name.endswith('printf'):
-            dummy = BinaryOp('%', node.params[0].node,
-                             Array([ArrayElement(None, x.node, False)
-                                    for x in node.params[1:]]))
+            params = [unparse_node(x.node, True) for x in node.params[1:]]
             if is_expr:
-                return unparse_node(dummy, True)
+                return '%s %% (%s,)' % (unparse_node(node.params[0].node, True),
+                                        ', '.join(params))
             else:
-                return '{{ %s }}' % (unparse_node(dummy, True))
+                return '{{ %s %% (%s,) }}' % (unparse_node(node.params[0].node, True),
+                                              ', '.join(params))
         params = ', '.join(unparse_node(param.node, True)
                            for param in node.params)
         if is_expr:
