@@ -41,8 +41,6 @@ is still a fair amount of work to do:
 * Nowdocs
 * Namespaces
 * Anonymous functions
-* Variable function calls: `$f()`
-* Class variables: `ClassName::$variable`
 * Some other stuff, probably
 
 ## Who's working on it?

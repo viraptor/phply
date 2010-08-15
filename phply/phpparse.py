@@ -623,42 +623,92 @@ def p_assignment_list_element(p):
         p[0] = p[3]
 
 def p_variable(p):
-    'variable : base_variable'
+    '''variable : base_variable_with_function_calls OBJECT_OPERATOR object_property method_or_not variable_properties
+                | base_variable_with_function_calls'''
+    if len(p) == 6:
+        if p[4] is not None:
+            p[0] = ast.MethodCall(p[1], p[3], p[4], lineno=p.lineno(2))
+        else:
+            p[0] = ast.ObjectProperty(p[1], p[3], lineno=p.lineno(2))
+        for name, params in p[5]:
+            if params is not None:
+                p[0] = ast.MethodCall(p[0], name, params, lineno=p.lineno(2))
+            else:
+                p[0] = ast.ObjectProperty(p[0], name, lineno=p.lineno(2))
+    else:
+        p[0] = p[1]
+
+def p_base_variable_with_function_calls(p):
+    '''base_variable_with_function_calls : base_variable
+                                         | function_call'''
     p[0] = p[1]
 
-def p_variable_array_offset(p):
-    'variable : variable LBRACKET dim_offset RBRACKET'
-    p[0] = ast.ArrayOffset(p[1], p[3], lineno=p.lineno(2))
-
-def p_variable_string_offset(p):
-    'variable : variable LBRACE expr RBRACE'
-    p[0] = ast.StringOffset(p[1], p[3], lineno=p.lineno(2))
-
-def p_variable_object_property(p):
-    'variable : variable OBJECT_OPERATOR object_property'
-    p[0] = ast.ObjectProperty(p[1], p[3], lineno=p.lineno(2))
-
-def p_variable_function_call(p):
-    'variable : namespace_name LPAREN function_call_parameter_list RPAREN'
+def p_function_call(p):
+    'function_call : namespace_name LPAREN function_call_parameter_list RPAREN'
     p[0] = ast.FunctionCall(p[1], p[3], lineno=p.lineno(2))
 
-def p_variable_class_member_function_call(p):
-    'variable : class_name DOUBLE_COLON STRING LPAREN function_call_parameter_list RPAREN'
-    p[0] = ast.FunctionCall(ast.ScopeResolution(p[1], p[3], lineno=p.lineno(2)),
-                            p[5], lineno=p.lineno(3))
+def p_function_call_static(p):
+    '''function_call : class_name DOUBLE_COLON STRING LPAREN function_call_parameter_list RPAREN
+                     | class_name DOUBLE_COLON variable_without_objects LPAREN function_call_parameter_list RPAREN
+                     | variable_class_name DOUBLE_COLON STRING LPAREN function_call_parameter_list RPAREN
+                     | variable_class_name DOUBLE_COLON variable_without_objects LPAREN function_call_parameter_list RPAREN'''
+    p[0] = ast.StaticMethodCall(p[1], p[3], p[5], lineno=p.lineno(2))
 
-def p_variable_method_call(p):
-    'variable : variable OBJECT_OPERATOR object_property LPAREN function_call_parameter_list RPAREN'
-    p[0] = ast.MethodCall(p[1], p[3], p[5], lineno=p.lineno(2))
+def p_function_call_variable(p):
+    'function_call : variable_without_objects LPAREN function_call_parameter_list RPAREN'
+    p[0] = ast.FunctionCall(p[1], p[3], lineno=p.lineno(2))
+
+def p_method_or_not(p):
+    '''method_or_not : LPAREN function_call_parameter_list RPAREN
+                     | empty'''
+    if len(p) == 4:
+        p[0] = p[2]
+
+def p_variable_properties(p):
+    '''variable_properties : variable_properties variable_property
+                           | empty'''
+    if len(p) == 3:
+        p[0] = p[1] + [p[2]]
+    else:
+        p[0] = []
+
+def p_variable_property(p):
+    'variable_property : OBJECT_OPERATOR object_property method_or_not'
+    p[0] = (p[2], p[3])
 
 def p_base_variable(p):
-    '''base_variable : DOLLAR base_variable
-                     | compound_variable'''
-    # todo: static_member
+    '''base_variable : simple_indirect_reference
+                     | static_member'''
+    p[0] = p[1]
+
+def p_simple_indirect_reference(p):
+    '''simple_indirect_reference : DOLLAR simple_indirect_reference
+                                 | reference_variable'''
     if len(p) == 3:
         p[0] = ast.Variable(p[2], lineno=p.lineno(1))
     else:
         p[0] = p[1]
+
+def p_static_member(p):
+    '''static_member : class_name DOUBLE_COLON variable_without_objects
+                     | variable_class_name DOUBLE_COLON variable_without_objects'''
+    p[0] = ast.StaticProperty(p[1], p[3], lineno=p.lineno(2))
+
+def p_variable_class_name(p):
+    'variable_class_name : reference_variable'
+    p[0] = p[1]
+
+def p_reference_variable_array_offset(p):
+    'reference_variable : reference_variable LBRACKET dim_offset RBRACKET'
+    p[0] = ast.ArrayOffset(p[1], p[3], lineno=p.lineno(2))
+
+def p_reference_variable_string_offset(p):
+    'reference_variable : reference_variable LBRACE expr RBRACE'
+    p[0] = ast.StringOffset(p[1], p[3], lineno=p.lineno(2))
+
+def p_reference_variable_compound_variable(p):
+    'reference_variable : compound_variable'
+    p[0] = p[1]
 
 def p_compound_variable(p):
     '''compound_variable : VARIABLE
@@ -674,13 +724,13 @@ def p_dim_offset(p):
     p[0] = p[1]
 
 def p_object_property(p):
-    '''object_property : variable_name
-                       | object_dim_list'''
+    '''object_property : object_dim_list
+                       | variable_without_objects'''
     p[0] = p[1]
 
-def p_object_dim_list_variable(p):
-    'object_dim_list : VARIABLE'
-    p[0] = ast.Variable(p[1], lineno=p.lineno(1))
+def p_variable_without_objects(p):
+    'variable_without_objects : simple_indirect_reference'
+    p[0] = p[1]
 
 def p_object_dim_list_array_offset(p):
     'object_dim_list : object_dim_list LBRACKET dim_offset RBRACKET'
@@ -689,6 +739,10 @@ def p_object_dim_list_array_offset(p):
 def p_object_dim_list_string_offset(p):
     'object_dim_list : object_dim_list LBRACE expr RBRACE'
     p[0] = ast.StringOffset(p[1], p[3], lineno=p.lineno(2))
+
+def p_object_dim_list_variable(p):
+    'object_dim_list : variable_name'
+    p[0] = p[1]
 
 def p_variable_name(p):
     '''variable_name : STRING
@@ -898,7 +952,8 @@ def p_expr_group(p):
     p[0] = p[2]
 
 def p_scalar(p):
-    '''scalar : common_scalar
+    '''scalar : class_constant
+              | common_scalar
               | QUOTE encaps_list QUOTE
               | START_HEREDOC encaps_list END_HEREDOC'''
     if len(p) == 4:
@@ -913,6 +968,11 @@ def p_scalar_string_varname(p):
 def p_scalar_namespace_name(p):
     'scalar : namespace_name'
     p[0] = ast.Constant(p[1], lineno=p.lineno(1))
+
+def p_class_constant(p):
+    '''class_constant : class_name DOUBLE_COLON STRING
+                      | variable_class_name DOUBLE_COLON STRING'''
+    p[0] = ast.StaticProperty(p[1], p[3], lineno=p.lineno(2))
 
 def p_common_scalar_lnumber(p):
     'common_scalar : LNUMBER'

@@ -145,14 +145,14 @@ def test_string_curly_dollar_expressions():
         "e${$dollar_curly_dollar}f";
         "{$array[0][1]}";
         "{$array['two'][3]}";
-        "{$object->items[4]->five}";
+        // "{$object->items[4]->five}";
         "{${$nasty}}";
         "{${funcall()}}";
         "{${$object->method()}}";
         "{$object->$variable}";
         "{$object->$variable[1]}";
-        // "{${static_class::variable}}";
-        // "{${static_class::$variable}}";
+        "{${static_class::constant}}";
+        "{${static_class::$variable}}";
     ?>"""
     expected = [
         BinaryOp('.', BinaryOp('.', 'a', Variable('$dollar_curly')), 'b'),
@@ -160,14 +160,14 @@ def test_string_curly_dollar_expressions():
         BinaryOp('.', BinaryOp('.', 'e', Variable('$dollar_curly_dollar')), 'f'),
         ArrayOffset(ArrayOffset(Variable('$array'), 0), 1),
         ArrayOffset(ArrayOffset(Variable('$array'), 'two'), 3),
-        ObjectProperty(ArrayOffset(ObjectProperty(Variable('$object'), 'items'), 4), 'five'),
+        # ObjectProperty(ArrayOffset(ObjectProperty(Variable('$object'), 'items'), 4), 'five'),
         Variable(Variable('$nasty')),
         Variable(FunctionCall('funcall', [])),
         Variable(MethodCall(Variable('$object'), 'method', [])),
         ObjectProperty(Variable('$object'), Variable('$variable')),
         ObjectProperty(Variable('$object'), ArrayOffset(Variable('$variable'), 1)),
-        # StaticProperty('static_class', 'variable'),
-        # StaticProperty('static_class', Variable('$variable')),
+        Variable(StaticProperty('static_class', 'constant')),
+        Variable(StaticProperty('static_class', Variable('$variable'))),
     ]
     eq_ast(input, expected)
 
@@ -408,5 +408,20 @@ def test_instanceof():
         If(BinaryOp('instanceof', Variable('$foo'), Constant('Bar')),
            Block([Echo(['$foo is a bar'])]), [], None),
         BinaryOp('instanceof', Variable('$foo'), Variable('$bar')),
+    ]
+    eq_ast(input, expected)
+
+def test_static_members():
+    input = r"""<?
+        Ztatic::constant;
+        Ztatic::$variable;
+        Ztatic::method();
+        Ztatic::$variable_method();
+    ?>"""
+    expected = [
+        StaticProperty('Ztatic', 'constant'),
+        StaticProperty('Ztatic', Variable('$variable')),
+        StaticMethodCall('Ztatic', 'method', []),
+        StaticMethodCall('Ztatic', Variable('$variable_method'), []),
     ]
     eq_ast(input, expected)
