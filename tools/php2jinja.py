@@ -121,6 +121,15 @@ def unparse_node(node, is_expr=False):
                                                          unparse_node(node.expr, True),
                                                          unparse_node(node.node))
 
+    if isinstance(node, Function):
+        name = node.name
+        params = ', '.join(param.name[1:] for param in node.params)
+        body = '\n    '.join(unparse_node(node) for node in node.nodes)
+        return '{%% macro %s(%s) %%}\n    %s\n{%% endmacro %%}\n\n' % (name, params, body)
+
+    if isinstance(node, Return):
+        return '{{ %s }}' % unparse_node(node.node, True)
+
     if isinstance(node, FunctionCall):
         if node.name.endswith('printf'):
             dummy = BinaryOp('%', node.params[0].node,
