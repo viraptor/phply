@@ -16,7 +16,8 @@ op_map = {
     '&&':  'and',
     '||':  'or',
     '!':   'not',
-    '===': 'is',
+    '!==': '!=',
+    '===': '==',
     '.':   '~',
 }
 
@@ -43,7 +44,7 @@ def unparse_node(node, is_expr=False):
         return '{{ %s }}' % (''.join(unparse_node(x, True) for x in node.nodes))
 
     if isinstance(node, (Include, Require)):
-        return '{%% include %s %%}' % (unparse_node(node.expr, True))
+        return '{%% include %s -%%}' % (unparse_node(node.expr, True))
 
     if isinstance(node, Block):
         return ''.join(unparse_node(x) for x in node.nodes)
@@ -66,13 +67,18 @@ def unparse_node(node, is_expr=False):
 
     if isinstance(node, ArrayElement):
         if node.key:
-            return '%s: %s' % (repr(node.key), unparse_node(node.value, True))
+            return '%s: %s' % (unparse_node(node.key, True),
+                               unparse_node(node.value, True))
         else:
             return unparse_node(node.value, True)
 
     if isinstance(node, Assignment):
-        return '{%% set %s = %s %%}' % (unparse_node(node.node, True),
-                                        unparse_node(node.expr, True))
+        if isinstance(node.node, ArrayOffset) and node.node.expr is None:
+            return '{%% do %s.append(%s) -%%}' % (unparse_node(node.node.node, None),
+                                                 unparse_node(node.expr, True))
+        else:
+            return '{%% set %s = %s -%%}' % (unparse_node(node.node, True),
+                                            unparse_node(node.expr, True))
 
     if isinstance(node, UnaryOp):
         op = op_map.get(node.op, node.op)
@@ -99,14 +105,17 @@ def unparse_node(node, is_expr=False):
     if isinstance(node, Empty):
         return '(not %s)' % (unparse_node(node.expr, True))
 
+    if isinstance(node, Silence):
+        return unparse_node(node.expr, True)
+
     if isinstance(node, If):
         body = unparse_node(node.node)
         for elseif in node.elseifs:
-            body += '{%% elif %s %%}%s' % (unparse_node(elseif.expr, True),
+            body += '{%% elif %s -%%}%s' % (unparse_node(elseif.expr, True),
                                            unparse_node(elseif.node))
         if node.else_:
-            body += '{%% else %%}%s' % (unparse_node(node.else_.node))
-        return '{%% if %s %%}%s{%% endif %%}' % (unparse_node(node.expr, True),
+            body += '{%% else -%%}%s' % (unparse_node(node.else_.node))
+        return '{%% if %s -%%}%s{%% endif -%%}' % (unparse_node(node.expr, True),
                                                  body)
 
     if isinstance(node, While):
@@ -117,7 +126,7 @@ def unparse_node(node, is_expr=False):
         var = node.valvar.name[1:]
         if node.keyvar:
             var = '%s, %s' % (node.keyvar.name[1:], var)
-        return '{%% for %s in %s %%}%s{%% endfor %%}' % (var,
+        return '{%% for %s in %s -%%}%s{%% endfor -%%}' % (var,
                                                          unparse_node(node.expr, True),
                                                          unparse_node(node.node))
 
@@ -125,7 +134,7 @@ def unparse_node(node, is_expr=False):
         name = node.name
         params = ', '.join(param.name[1:] for param in node.params)
         body = '\n    '.join(unparse_node(node) for node in node.nodes)
-        return '{%% macro %s(%s) %%}\n    %s\n{%% endmacro %%}\n\n' % (name, params, body)
+        return '{%% macro %s(%s) -%%}\n    %s\n{%%- endmacro -%%}\n\n' % (name, params, body)
 
     if isinstance(node, Return):
         return '{{ %s }}' % unparse_node(node.node, True)
@@ -156,6 +165,9 @@ def unparse_node(node, is_expr=False):
             return '{{ %s.%s(%s) }}' % (unparse_node(node.node, True),
                                         node.name, params)
 
-    return '{# XXX %s #}' % node
+    if is_expr:
+        return 'XXX(%r)' % str(node)
+    else:
+        return '{# XXX %s #}' % node
 
 output.write(unparse(parser.parse(input.read())))
