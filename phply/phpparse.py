@@ -626,15 +626,21 @@ def p_variable(p):
     '''variable : base_variable_with_function_calls OBJECT_OPERATOR object_property method_or_not variable_properties
                 | base_variable_with_function_calls'''
     if len(p) == 6:
-        if p[4] is not None:
-            p[0] = ast.MethodCall(p[1], p[3], p[4], lineno=p.lineno(2))
+        name, dims = p[3]
+        params = p[4]
+        if params is not None:
+            p[0] = ast.MethodCall(p[1], name, params, lineno=p.lineno(2))
         else:
-            p[0] = ast.ObjectProperty(p[1], p[3], lineno=p.lineno(2))
-        for name, params in p[5]:
+            p[0] = ast.ObjectProperty(p[1], name, lineno=p.lineno(2))
+        for class_, dim, lineno in dims:
+            p[0] = class_(p[0], dim, lineno=lineno)
+        for (name, dims), params in p[5]:
             if params is not None:
                 p[0] = ast.MethodCall(p[0], name, params, lineno=p.lineno(2))
             else:
                 p[0] = ast.ObjectProperty(p[0], name, lineno=p.lineno(2))
+            for class_, dim, lineno in dims:
+                p[0] = class_(p[0], dim, lineno=lineno)
     else:
         p[0] = p[1]
 
@@ -724,25 +730,24 @@ def p_dim_offset(p):
     p[0] = p[1]
 
 def p_object_property(p):
-    '''object_property : object_dim_list
+    '''object_property : variable_name object_dim_list
                        | variable_without_objects'''
-    p[0] = p[1]
+    if len(p) == 3:
+        p[0] = (p[1], p[2])
+    else:
+        p[0] = (p[1], [])
 
-def p_variable_without_objects(p):
-    'variable_without_objects : simple_indirect_reference'
-    p[0] = p[1]
+def p_object_dim_list_empty(p):
+    'object_dim_list : empty'
+    p[0] = []
 
 def p_object_dim_list_array_offset(p):
     'object_dim_list : object_dim_list LBRACKET dim_offset RBRACKET'
-    p[0] = ast.ArrayOffset(p[1], p[3], lineno=p.lineno(2))
+    p[0] = p[1] + [(ast.ArrayOffset, p[3], p.lineno(2))]
 
 def p_object_dim_list_string_offset(p):
     'object_dim_list : object_dim_list LBRACE expr RBRACE'
-    p[0] = ast.StringOffset(p[1], p[3], lineno=p.lineno(2))
-
-def p_object_dim_list_variable(p):
-    'object_dim_list : variable_name'
-    p[0] = p[1]
+    p[0] = p[1] + [(ast.StringOffset, p[3], p.lineno(2))]
 
 def p_variable_name(p):
     '''variable_name : STRING
@@ -751,6 +756,10 @@ def p_variable_name(p):
         p[0] = p[1]
     else:
         p[0] = p[2]
+
+def p_variable_without_objects(p):
+    'variable_without_objects : simple_indirect_reference'
+    p[0] = p[1]
 
 def p_expr_scalar(p):
     'expr : scalar'
