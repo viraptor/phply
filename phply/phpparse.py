@@ -893,15 +893,33 @@ def p_expr_post_incdec(p):
             | variable DEC'''
     p[0] = ast.PostIncDecOp(p[2], p[1], lineno=p.lineno(2))
 
-def p_expr_cast(p):
-    '''expr : INT_CAST expr
-            | DOUBLE_CAST expr
-            | STRING_CAST expr
-            | ARRAY_CAST expr
-            | OBJECT_CAST expr
-            | BOOL_CAST expr
-            | UNSET_CAST expr'''
-    p[0] = ast.Cast(p[1].lower().strip('() \t'), p[2], lineno=p.lineno(1))
+def p_expr_cast_int(p):
+    'expr : INT_CAST expr'
+    p[0] = ast.Cast('int', p[2], lineno=p.lineno(1))
+
+def p_expr_cast_double(p):
+    'expr : DOUBLE_CAST expr'
+    p[0] = ast.Cast('double', p[2], lineno=p.lineno(1))
+
+def p_expr_cast_string(p):
+    'expr : STRING_CAST expr'
+    p[0] = ast.Cast('string', p[2], lineno=p.lineno(1))
+
+def p_expr_cast_array(p):
+    'expr : ARRAY_CAST expr'
+    p[0] = ast.Cast('array', p[2], lineno=p.lineno(1))
+
+def p_expr_cast_object(p):
+    'expr : OBJECT_CAST expr'
+    p[0] = ast.Cast('object', p[2], lineno=p.lineno(1))
+
+def p_expr_cast_bool(p):
+    'expr : BOOL_CAST expr'
+    p[0] = ast.Cast('bool', p[2], lineno=p.lineno(1))
+
+def p_expr_cast_unset(p):
+    'expr : UNSET_CAST expr'
+    p[0] = ast.Cast('unset', p[2], lineno=p.lineno(1))
 
 def p_expr_isset(p):
     'expr : ISSET LPAREN isset_variables RPAREN'
