@@ -1183,6 +1183,7 @@ if __name__ == '__main__':
     import readline
     import pprint
     s = ''
+    lexer = phplex.lexer
     while True:
        try:
            s += raw_input('     ' if s else 'php> ')
@@ -1191,7 +1192,8 @@ if __name__ == '__main__':
        if not s: continue
        s += '\n'
        try:
-           result = parser.parse(s)
+           lexer.lineno = 1
+           result = parser.parse(s, lexer=lexer)
        except SyntaxError, e:
            if e.lineno is not None:
                print e, 'near', repr(e.text)
