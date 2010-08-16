@@ -35,6 +35,8 @@ def unparse_node(node, is_expr=False):
         return str(node.data)
 
     if isinstance(node, Constant):
+        if node.name.lower() == 'null':
+            return 'None'
         return str(node.name)
 
     if isinstance(node, Variable):
