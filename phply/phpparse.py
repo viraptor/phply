@@ -1162,39 +1162,44 @@ def p_semi(p):
             | CLOSE_TAG'''
     pass
 
-def p_empty(t):
+def p_empty(p):
     'empty : '
     pass
 
 # Error rule for syntax errors
 def p_error(t):
-    if t and t.type in ('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG', 'COMMENT', 'DOC_COMMENT'):
-        yacc.errok()
+    if t:
+        if t.type in ('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG', 'COMMENT', 'DOC_COMMENT'):
+            yacc.errok()
+        else:
+            raise SyntaxError('invalid syntax', (None, t.lineno, None, t.value))
     else:
-        print 'Parse error at', t
+        raise SyntaxError('unexpected EOF while parsing', (None, None, None, None))
 
 # Build the grammar
-parser = yacc.yacc(debug=1)
-# parser = yacc.yacc(method='LALR')
-
-# import profile
-# profile.run("yacc.yacc(method='LALR')")
+parser = yacc.yacc()
 
 if __name__ == '__main__':
     import readline
     import pprint
+    s = ''
     while True:
        try:
-           s = raw_input('php> ')
+           s += raw_input('     ' if s else 'php> ')
        except EOFError:
            break
        if not s: continue
-       # result = parser.parse('<?php ' + s + '; ?>')
-       # result = parser.parse('<?= ' + s + ' ?>')
-       result = parser.parse(s)
-       # print result
+       s += '\n'
+       try:
+           result = parser.parse(s)
+       except SyntaxError, e:
+           if e.lineno is not None:
+               print e, 'near', repr(e.text)
+               s = ''
+           continue
        if result:
            for item in result:
                if hasattr(item, 'generic'):
                    item = item.generic()
                pprint.pprint(item)
+       s = ''

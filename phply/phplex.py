@@ -401,8 +401,7 @@ t_heredocvar_CURLY_OPEN = t_quotedvar_CURLY_OPEN
 t_heredocvar_DOLLAR_OPEN_CURLY_BRACES = t_quotedvar_DOLLAR_OPEN_CURLY_BRACES
 
 def t_ANY_error(t):
-    print("Illegal character %s" % repr(t.value[0]))
-    t.lexer.skip(1)
+    raise SyntaxError('illegal character', (None, t.lineno, None, t.value))
 
 def peek(lexer):
     try:
@@ -410,7 +409,7 @@ def peek(lexer):
     except IndexError:
         return ''
 
-lexer = lex.lex(optimize=0)
+lexer = lex.lex()
 
 if __name__ == "__main__":
     lex.runmain(lexer)
