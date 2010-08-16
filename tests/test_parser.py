@@ -237,7 +237,56 @@ def test_method_calls():
                               'one', [Parameter(Variable('$x'), False)]),
                    'two', [Parameter(Variable('$y'), True)]),
     ]
-    eq_ast(input, expected)                   
+    eq_ast(input, expected)
+
+def test_if():
+    input = r"""<?
+        if (1)
+            if (2)
+                echo 3;
+            else
+                echo 4;
+        else
+            echo 5;
+        if ($a < $b) {
+            return -1;
+        } elseif ($a > $b) {
+            return 1;
+        } elseif ($a == $b) {
+            return 0;
+        } else {
+            return 'firetruck';
+        }
+        if ($if):
+            echo 'a';
+        elseif ($elseif):
+            echo 'b';
+        else:
+            echo 'c';
+        endif;
+    ?>"""
+    expected = [
+        If(1,
+           If(2,
+              Echo([3]),
+              [],
+              Else(Echo([4]))),
+           [],
+           Else(Echo([5]))),
+        If(BinaryOp('<', Variable('$a'), Variable('$b')),
+           Block([Return(UnaryOp('-', 1))]),
+           [ElseIf(BinaryOp('>', Variable('$a'), Variable('$b')),
+                   Block([Return(1)])),
+            ElseIf(BinaryOp('==', Variable('$a'), Variable('$b')),
+                   Block([Return(0)]))],
+           Else(Block([Return('firetruck')]))),
+        If(Variable('$if'),
+           Block([Echo(['a'])]),
+           [ElseIf(Variable('$elseif'),
+                   Block([Echo(['b'])]))],
+           Else(Block([Echo(['c'])]))),
+    ]
+    eq_ast(input, expected)
 
 def test_foreach():
     input = r"""<?
