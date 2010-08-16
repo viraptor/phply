@@ -436,3 +436,31 @@ def test_static_members():
         StaticMethodCall('Ztatic', Variable('$variable_method'), []),
     ]
     eq_ast(input, expected)
+
+def test_casts():
+    # array bool boolean real double float int integer string unset
+    input = r"""<?
+        (aRray) $x;
+        (bOol) $x;
+        (bOolean) $x;
+        (rEal) $x;
+        (dOuble) $x;
+        (fLoat) $x;
+        (iNt) $x;
+        (iNteger) $x;
+        (sTring) $x;
+        (uNset) $x;
+    ?>"""
+    expected = [
+        Cast('array', Variable('$x')),
+        Cast('bool', Variable('$x')),
+        Cast('boolean', Variable('$x')),
+        Cast('real', Variable('$x')),
+        Cast('double', Variable('$x')),
+        Cast('float', Variable('$x')),
+        Cast('int', Variable('$x')),
+        Cast('integer', Variable('$x')),
+        Cast('string', Variable('$x')),
+        Cast('unset', Variable('$x')),
+    ]
+    eq_ast(input, expected)

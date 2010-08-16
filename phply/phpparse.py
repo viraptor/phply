@@ -901,7 +901,7 @@ def p_expr_cast(p):
             | OBJECT_CAST expr
             | BOOL_CAST expr
             | UNSET_CAST expr'''
-    p[0] = ast.Cast(p[1].strip('() \t'), p[2], lineno=p.lineno(1))
+    p[0] = ast.Cast(p[1].lower().strip('() \t'), p[2], lineno=p.lineno(1))
 
 def p_expr_isset(p):
     'expr : ISSET LPAREN isset_variables RPAREN'
