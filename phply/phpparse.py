@@ -998,7 +998,7 @@ def p_common_scalar_dnumber(p):
 
 def p_common_scalar_string(p):
     'common_scalar : CONSTANT_ENCAPSED_STRING'
-    p[0] = p[1][1:-1]
+    p[0] = p[1][1:-1].replace("\\'", "'").replace('\\\\', '\\')
 
 def p_common_scalar_magic_line(p):
     'common_scalar : LINE'
@@ -1032,7 +1032,7 @@ def p_static_scalar(p):
     '''static_scalar : common_scalar
                      | QUOTE ENCAPSED_AND_WHITESPACE QUOTE'''
     if len(p) == 4:
-        p[0] = p[2]
+        p[0] = p[2].decode('string_escape')
     else:
         p[0] = p[1]
 
@@ -1083,7 +1083,6 @@ def p_namespace_name(p):
 
 def p_encaps_list(p):
     '''encaps_list : encaps_list encaps_var
-                   | encaps_list ENCAPSED_AND_WHITESPACE
                    | empty'''
     if len(p) == 3:
         if p[1] == '':
@@ -1092,6 +1091,14 @@ def p_encaps_list(p):
             p[0] = ast.BinaryOp('.', p[1], p[2], lineno=p.lineno(2))
     else:
         p[0] = ''
+
+def p_encaps_list_string(p):
+    'encaps_list : encaps_list ENCAPSED_AND_WHITESPACE'
+    if p[1] == '':
+        p[0] = p[2].decode('string_escape')
+    else:
+        p[0] = ast.BinaryOp('.', p[1], p[2].decode('string_escape'),
+                            lineno=p.lineno(2))
 
 def p_encaps_var(p):
     'encaps_var : VARIABLE'

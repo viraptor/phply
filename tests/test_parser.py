@@ -105,6 +105,17 @@ def test_object_properties():
     ]
     eq_ast(input, expected)
 
+def test_string_unescape():
+    input = r"""<?
+        '\r\n\t\\\'';
+        "\r\n\t\\\"";
+    ?>"""
+    expected = [
+        r"\r\n\t\'",
+        "\r\n\t\\\"",
+    ]
+    eq_ast(input, expected)
+
 def test_string_offset_lookups():
     input = r"""<?
         "$array[offset]";
