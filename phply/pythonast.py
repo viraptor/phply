@@ -67,6 +67,22 @@ def from_phpast(node):
     if isinstance(node, (int, float)):
         return py.Num(node, **pos(node))
 
+    if isinstance(node, php.Array):
+        if node.nodes:
+            if node.nodes[0].key is not None:
+                keys = []
+                values = []
+                for elem in node.nodes:
+                    keys.append(from_phpast(elem.key))
+                    values.append(from_phpast(elem.value))
+                return py.Dict(keys, values, **pos(node))
+            else:
+                return py.List([from_phpast(x.value) for x in node.nodes],
+                               py.Load(**pos(node)),
+                               **pos(node))
+        else:
+            return py.List([], py.Load(**pos(node)), **pos(node))
+
     if isinstance(node, php.InlineHTML):
         args = [py.Str(node.data, **pos(node))]
         return py.Call(py.Name('inline_html',
@@ -98,6 +114,9 @@ def from_phpast(node):
     if isinstance(node, php.Silence):
         return from_phpast(node.expr)
 
+    if isinstance(node, php.Block):
+        return from_phpast(php.If(1, node, [], None, lineno=node.lineno))
+
     if isinstance(node, php.Unset):
         return py.Delete(map(from_phpast, node.nodes), **pos(node))
 
@@ -109,6 +128,12 @@ def from_phpast(node):
     if isinstance(node, php.ArrayOffset):
         return py.Subscript(from_phpast(node.node),
                             py.Index(from_phpast(node.expr), **pos(node)),
+                            py.Load(**pos(node)),
+                            **pos(node))
+
+    if isinstance(node, php.ObjectProperty):
+        return py.Attribute(from_phpast(node.node),
+                            node.name,
                             py.Load(**pos(node)),
                             **pos(node))
 
@@ -173,12 +198,37 @@ def from_phpast(node):
                      map(to_stmt, map(from_phpast, deblock(node.node))),
                      orelse, **pos(node))
 
+    if isinstance(node, php.Function):
+        args = []
+        defaults = []
+        for param in node.params:
+            args.append(py.Name(param.name[1:],
+                                py.Param(**pos(node)),
+                                **pos(node)))
+            if param.default is not None:
+                defaults.append(from_phpast(param.default))
+        body = map(to_stmt, map(from_phpast, node.nodes))
+        return py.FunctionDef(node.name,
+                              py.arguments(args, None, None, defaults),
+                              body, [], **pos(node))
+
     if isinstance(node, php.FunctionCall):
         name = node.name
         args = []
         for param in node.params:
             args.append(from_phpast(param.node))
         return py.Call(py.Name(name, py.Load(**pos(node)), **pos(node)),
+                       args, [], None, None, **pos(node))
+
+    if isinstance(node, php.MethodCall):
+        name = node.name
+        args = []
+        for param in node.params:
+            args.append(from_phpast(param.node))
+        return py.Call(py.Attribute(from_phpast(node.node),
+                                    name,
+                                    py.Load(**pos(node)),
+                                    **pos(node)),
                        args, [], None, None, **pos(node))
 
     return py.Call(py.Name('XXX', py.Load(**pos(node)), **pos(node)),
