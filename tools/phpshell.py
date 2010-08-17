@@ -19,7 +19,7 @@ def echo(obj):
 inline_html = echo
 
 def XXX(obj):
-    print 'Not implemented:', obj
+    print 'Not implemented:\n ', obj
 
 def ast_dump(code):
     print 'AST dump:'
@@ -29,33 +29,59 @@ def php_eval(nodes):
     body = []
     for node in nodes:
         stmt = pythonast.to_stmt(pythonast.from_phpast(node))
-        # if not isinstance(stmt, ast.stmt):
-            # stmt = ast.Expr(stmt, lineno=stmt.lineno, col_offset=0)
         body.append(stmt)
     code = ast.Module(body)
-    ast_dump(code)
+    # ast_dump(code)
     eval(compile(ast.parse(code), '<string>', mode='exec'), globals())
 
 s = ''
 lexer = phplex.lexer
+parser.parse('<?', lexer=lexer)
+
 while True:
+   if s:
+       prompt = '     '
+   else:
+       prompt = lexer.current_state()
+       if prompt == 'INITIAL': prompt = 'html'
+       prompt += '> '
+
    try:
-       s += raw_input('     ' if s else 'php> ')
+       s += raw_input(prompt)
    except EOFError:
        break
+
    if not s: continue
    s += '\n'
+
+   # Catch all exceptions and print tracebacks.
    try:
-       lexer.lineno = 1
-       result = parser.parse(s, lexer=lexer)
-   except SyntaxError, e:
-       if e.lineno is not None:
-           print e, 'near', repr(e.text)
-           s = ''
-       continue
-   if result:
+       # Try parsing the input normally.
        try:
+           lexer.lineno = 1
+           result = parser.parse(s, lexer=lexer)
            php_eval(result)
-       except:
-           traceback.print_exc()
+       except SyntaxError, e:
+           # Parsing failed. See if it can be parsed as an expression.
+           try:
+               lexer.lineno = 1
+               result = parser.parse('print ' + s + ';', lexer=lexer)
+               php_eval(result)
+           except (SyntaxError, TypeError):
+               # That also failed. Try adding a semicolon.
+               try:
+                   lexer.lineno = 1
+                   result = parser.parse(s + ';', lexer=lexer)
+                   php_eval(result)
+               except SyntaxError:
+                   # Did we get an EOF? If so, we're still waiting for input.
+                   # If not, it's a syntax error for sure.
+                   if e.lineno is None:
+                       continue
+                   else:
+                       print e, 'near', repr(e.text)
+                       s = ''
+   except:
+       traceback.print_exc()
+
    s = ''
