@@ -1186,7 +1186,13 @@ if __name__ == '__main__':
     lexer = phplex.lexer
     while True:
        try:
-           s += raw_input('     ' if s else 'php> ')
+           if s:
+               prompt = '     '
+           else:
+               prompt = lexer.current_state()
+               if prompt == 'INITIAL': prompt = 'html'
+               prompt += '> '
+           s += raw_input(prompt)
        except EOFError:
            break
        if not s: continue
