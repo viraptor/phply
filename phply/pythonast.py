@@ -37,19 +37,6 @@ binary_ops = {
     '^': py.BitXor,
 }
 
-def pos(node):
-    return {'lineno': getattr(node, 'lineno', 0), 'col_offset': 0}
-
-def store(name):
-    name.ctx = py.Store(**pos(name))
-    return name
-
-def deblock(node):
-    if isinstance(node, php.Block):
-        return node.nodes
-    else:
-        return [node]
-
 def to_stmt(pynode):
     if not isinstance(pynode, py.stmt):
         pynode = py.Expr(pynode,
@@ -213,24 +200,42 @@ def from_phpast(node):
                               body, [], **pos(node))
 
     if isinstance(node, php.FunctionCall):
-        name = node.name
-        args = []
-        for param in node.params:
-            args.append(from_phpast(param.node))
-        return py.Call(py.Name(name, py.Load(**pos(node)), **pos(node)),
-                       args, [], None, None, **pos(node))
+        args, kwargs = build_args(node.params)
+        return py.Call(py.Name(node.name, py.Load(**pos(node)), **pos(node)),
+                       args, kwargs, None, None, **pos(node))
 
     if isinstance(node, php.MethodCall):
-        name = node.name
-        args = []
-        for param in node.params:
-            args.append(from_phpast(param.node))
+        args, kwargs = build_args(node.params)
         return py.Call(py.Attribute(from_phpast(node.node),
-                                    name,
+                                    node.name,
                                     py.Load(**pos(node)),
                                     **pos(node)),
-                       args, [], None, None, **pos(node))
+                       args, kwargs, None, None, **pos(node))
 
     return py.Call(py.Name('XXX', py.Load(**pos(node)), **pos(node)),
                    [py.Str(str(node), **pos(node))],
                    [], None, None, **pos(node))
+
+def pos(node):
+    return {'lineno': getattr(node, 'lineno', 0), 'col_offset': 0}
+
+def store(name):
+    name.ctx = py.Store(**pos(name))
+    return name
+
+def deblock(node):
+    if isinstance(node, php.Block):
+        return node.nodes
+    else:
+        return [node]
+
+def build_args(params):
+    args = []
+    kwargs = []
+    for param in params:
+        node = from_phpast(param.node)
+        if isinstance(node, py.Assign):
+            kwargs.append(py.keyword(node.targets[0].id, node.value))
+        else:
+            args.append(node)
+    return args, kwargs
