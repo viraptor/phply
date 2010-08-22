@@ -11,6 +11,8 @@ unary_ops = {
 bool_ops = {
     '&&': py.And,
     '||': py.Or,
+    'and': py.And,
+    'or': py.Or,
 }
 
 cmp_ops = {
@@ -98,6 +100,14 @@ def from_phpast(node):
     if isinstance(node, php.Return):
         return py.Return(from_phpast(node.node), **pos(node))
 
+    if isinstance(node, php.Break):
+        assert node.node is None, 'level on break not supported'
+        return py.Break(**pos(node))
+
+    if isinstance(node, php.Continue):
+        assert node.node is None, 'level on continue not supported'
+        return py.Continue(**pos(node))
+
     if isinstance(node, php.Silence):
         return from_phpast(node.expr)
 
@@ -107,13 +117,18 @@ def from_phpast(node):
     if isinstance(node, php.Unset):
         return py.Delete(map(from_phpast, node.nodes), **pos(node))
 
-    if (isinstance(node, php.IsSet)
-        and len(node.nodes) == 1
-        and isinstance(node.nodes[0], php.ArrayOffset)):
-        return py.Compare(from_phpast(node.nodes[0].expr),
-                          [py.In(**pos(node))],
-                          [from_phpast(node.nodes[0].node)],
-                          **pos(node))
+    if isinstance(node, php.IsSet) and len(node.nodes) == 1:
+        if isinstance(node.nodes[0], php.ArrayOffset):
+            return py.Compare(from_phpast(node.nodes[0].expr),
+                              [py.In(**pos(node))],
+                              [from_phpast(node.nodes[0].node)],
+                              **pos(node))
+        if isinstance(node.nodes[0], php.ObjectProperty):
+            return py.Call(py.Name('hasattr', py.Load(**pos(node)),
+                                   **pos(node)),
+                           [from_phpast(node.nodes[0].node),
+                            from_phpast(node.nodes[0].name)],
+                           [], None, None, **pos(node))
 
     if isinstance(node, php.Assignment):
         if (isinstance(node.node, php.ArrayOffset)
@@ -126,6 +141,15 @@ def from_phpast(node):
         return py.Assign([store(from_phpast(node.node))],
                          from_phpast(node.expr),
                          **pos(node))
+
+    if isinstance(node, php.AssignOp):
+        return from_phpast(php.Assignment(node.left,
+                                          php.BinaryOp(node.op[:-1],
+                                                       node.left,
+                                                       node.right,
+                                                       lineno=node.lineno),
+                                          False,
+                                          lineno=node.lineno))
 
     if isinstance(node, php.ArrayOffset):
         return py.Subscript(from_phpast(node.node),
@@ -150,6 +174,9 @@ def from_phpast(node):
         name = node.name[1:]
         if name == 'this': name = 'self'
         return py.Name(name, py.Load(**pos(node)), **pos(node))
+
+    if isinstance(node, php.Global):
+        return py.Global([var.name[1:] for var in node.nodes], **pos(node))
 
     if isinstance(node, (php.Include, php.Require)):
         return py.Call(py.Name('execfile', py.Load(**pos(node)),
