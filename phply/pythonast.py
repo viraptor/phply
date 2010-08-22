@@ -116,6 +116,13 @@ def from_phpast(node):
                           **pos(node))
 
     if isinstance(node, php.Assignment):
+        if (isinstance(node.node, php.ArrayOffset)
+            and node.node.expr is None):
+            return py.Call(py.Attribute(from_phpast(node.node.node),
+                                        'append', py.Load(**pos(node)),
+                                        **pos(node)),
+                           [from_phpast(node.expr)],
+                           [], None, None, **pos(node))
         return py.Assign([store(from_phpast(node.node))],
                          from_phpast(node.expr),
                          **pos(node))
