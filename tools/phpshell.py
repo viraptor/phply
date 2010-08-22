@@ -32,7 +32,7 @@ def php_eval(nodes):
         body.append(stmt)
     code = ast.Module(body)
     # ast_dump(code)
-    eval(compile(ast.parse(code), '<string>', mode='exec'), globals())
+    eval(compile(code, '<string>', mode='exec'), globals())
 
 s = ''
 lexer = phplex.lexer
