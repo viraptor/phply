@@ -148,10 +148,15 @@ def from_phpast(node):
 
     if isinstance(node, php.BinaryOp):
         if node.op == '.':
-            return py.BinOp(py.Str('%s%s', **pos(node)),
+            pattern = '%s%s'
+            pieces = [node.left, node.right]
+            while (isinstance(pieces[0], php.BinaryOp)
+                   and pieces[0].op == '.'):
+                pattern += '%s'
+                pieces[0:1] = [pieces[0].left, pieces[0].right]
+            return py.BinOp(py.Str(pattern, **pos(node)),
                             py.Mod(**pos(node)),
-                            py.Tuple([from_phpast(node.left),
-                                      from_phpast(node.right)],
+                            py.Tuple(map(from_phpast, pieces),
                                      py.Load(**pos(node)),
                                      **pos(node)),
                             **pos(node))
