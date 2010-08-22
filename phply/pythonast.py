@@ -130,6 +130,15 @@ def from_phpast(node):
                             from_phpast(node.nodes[0].name)],
                            [], None, None, **pos(node))
 
+    if isinstance(node, php.Empty):
+        return from_phpast(php.UnaryOp('!',
+                                       php.BinaryOp('&&',
+                                                    php.IsSet([node.expr],
+                                                              lineno=node.lineno),
+                                                    node.expr,
+                                                    lineno=node.lineno),
+                                       lineno=node.lineno))
+
     if isinstance(node, php.Assignment):
         if (isinstance(node.node, php.ArrayOffset)
             and node.node.expr is None):
