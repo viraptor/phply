@@ -107,6 +107,14 @@ def from_phpast(node):
     if isinstance(node, php.Unset):
         return py.Delete(map(from_phpast, node.nodes), **pos(node))
 
+    if (isinstance(node, php.IsSet)
+        and len(node.nodes) == 1
+        and isinstance(node.nodes[0], php.ArrayOffset)):
+        return py.Compare(from_phpast(node.nodes[0].expr),
+                          [py.In(**pos(node))],
+                          [from_phpast(node.nodes[0].node)],
+                          **pos(node))
+
     if isinstance(node, php.Assignment):
         return py.Assign([store(from_phpast(node.node))],
                          from_phpast(node.expr),
@@ -132,7 +140,9 @@ def from_phpast(node):
         return py.Name(name, py.Load(**pos(node)), **pos(node))
 
     if isinstance(node, php.Variable):
-        return py.Name(node.name[1:], py.Load(**pos(node)), **pos(node))
+        name = node.name[1:]
+        if name == 'this': name = 'self'
+        return py.Name(name, py.Load(**pos(node)), **pos(node))
 
     if isinstance(node, (php.Include, php.Require)):
         return py.Call(py.Name('execfile', py.Load(**pos(node)),
@@ -175,6 +185,12 @@ def from_phpast(node):
                         from_phpast(node.right),
                         **pos(node))
 
+    if isinstance(node, php.TernaryOp):
+        return py.IfExp(from_phpast(node.expr),
+                        from_phpast(node.iftrue),
+                        from_phpast(node.iffalse),
+                        **pos(node))
+
     if isinstance(node, php.If):
         orelse = []
         if node.else_:
@@ -188,6 +204,20 @@ def from_phpast(node):
                      map(to_stmt, map(from_phpast, deblock(node.node))),
                      orelse, **pos(node))
 
+    if isinstance(node, php.Foreach):
+        if node.keyvar is None:
+            target = py.Name(node.valvar.name[1:], py.Store(**pos(node)),
+                             **pos(node))
+        else:
+            target = py.Tuple([py.Name(node.keyvar.name[1:],
+                                       py.Store(**pos(node))),
+                               py.Name(node.valvar.name[1:],
+                                       py.Store(**pos(node)))],
+                              py.Store(**pos(node)), **pos(node))
+        return py.For(target, from_phpast(node.expr),
+                      map(to_stmt, map(from_phpast, deblock(node.node))),
+                      [], **pos(node))
+
     if isinstance(node, php.Function):
         args = []
         defaults = []
@@ -198,11 +228,53 @@ def from_phpast(node):
             if param.default is not None:
                 defaults.append(from_phpast(param.default))
         body = map(to_stmt, map(from_phpast, node.nodes))
+        if not body: body = [py.Pass(**pos(node))]
         return py.FunctionDef(node.name,
                               py.arguments(args, None, None, defaults),
                               body, [], **pos(node))
 
-    if isinstance(node, php.FunctionCall):
+    if isinstance(node, php.Method):
+        args = []
+        defaults = []
+        decorator_list = []
+        if 'static' in node.modifiers:
+            decorator_list.append(py.Name('classmethod',
+                                          py.Load(**pos(node)),
+                                          **pos(node)))
+            args.append(py.Name('cls', py.Param(**pos(node)), **pos(node)))
+        else:
+            args.append(py.Name('self', py.Param(**pos(node)), **pos(node)))
+        for param in node.params:
+            args.append(py.Name(param.name[1:],
+                                py.Param(**pos(node)),
+                                **pos(node)))
+            if param.default is not None:
+                defaults.append(from_phpast(param.default))
+        body = map(to_stmt, map(from_phpast, node.nodes))
+        if not body: body = [py.Pass(**pos(node))]
+        return py.FunctionDef(node.name,
+                              py.arguments(args, None, None, defaults),
+                              body, decorator_list, **pos(node))
+
+    if isinstance(node, php.Class):
+        name = node.name
+        bases = []
+        extends = node.extends or 'object'
+        bases.append(py.Name(extends, py.Load(**pos(node)), **pos(node)))
+        body = map(to_stmt, map(from_phpast, node.nodes))
+        for stmt in body:
+            if (isinstance(stmt, py.FunctionDef)
+                and stmt.name in (name, '__construct')):
+                stmt.name = '__init__'
+        if not body: body = [py.Pass(**pos(node))]
+        return py.ClassDef(name, bases, body, [], **pos(node))
+
+    # ClassConstants = node('ClassConstants', ['nodes'])
+    # ClassConstant = node('ClassConstant', ['name', 'initial'])
+    # ClassVariables = node('ClassVariables', ['modifiers', 'nodes'])
+    # ClassVariable = node('ClassVariable', ['name', 'initial'])
+
+    if isinstance(node, (php.FunctionCall, php.New)):
         args, kwargs = build_args(node.params)
         return py.Call(py.Name(node.name, py.Load(**pos(node)), **pos(node)),
                        args, kwargs, None, None, **pos(node))
@@ -210,6 +282,17 @@ def from_phpast(node):
     if isinstance(node, php.MethodCall):
         args, kwargs = build_args(node.params)
         return py.Call(py.Attribute(from_phpast(node.node),
+                                    node.name,
+                                    py.Load(**pos(node)),
+                                    **pos(node)),
+                       args, kwargs, None, None, **pos(node))
+
+    if isinstance(node, php.StaticMethodCall):
+        class_ = node.class_
+        if class_ == 'self': class_ = 'cls' 
+        args, kwargs = build_args(node.params)
+        return py.Call(py.Attribute(py.Name(class_, py.Load(**pos(node)),
+                                            **pos(node)),
                                     node.name,
                                     py.Load(**pos(node)),
                                     **pos(node)),
