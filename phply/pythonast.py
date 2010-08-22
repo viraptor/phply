@@ -148,18 +148,16 @@ def from_phpast(node):
 
     if isinstance(node, php.BinaryOp):
         if node.op == '.':
-            pattern = '%s%s'
-            pieces = [node.left, node.right]
-            while (isinstance(pieces[0], php.BinaryOp)
-                   and pieces[0].op == '.'):
-                pattern += '%s'
-                pieces[0:1] = [pieces[0].left, pieces[0].right]
-            return py.BinOp(py.Str(pattern, **pos(node)),
-                            py.Mod(**pos(node)),
-                            py.Tuple(map(from_phpast, pieces),
-                                     py.Load(**pos(node)),
-                                     **pos(node)),
-                            **pos(node))
+            pattern, pieces = build_format(node.left, node.right)
+            if pieces:
+                return py.BinOp(py.Str(pattern, **pos(node)),
+                                py.Mod(**pos(node)),
+                                py.Tuple(map(from_phpast, pieces),
+                                         py.Load(**pos(node)),
+                                         **pos(node)),
+                                **pos(node))
+            else:
+                return py.Str(pattern % (), **pos(node))
         if node.op in bool_ops:
             op = bool_ops[node.op](**pos(node))
             return py.BoolOp(op, [from_phpast(node.left),
@@ -244,3 +242,17 @@ def build_args(params):
         else:
             args.append(node)
     return args, kwargs
+
+def build_format(left, right):
+    if isinstance(left, basestring):
+        pattern, pieces = left.replace('%', '%%'), []
+    elif isinstance(left, php.BinaryOp) and left.op == '.':
+        pattern, pieces = build_format(left.left, left.right)
+    else:
+        pattern, pieces = '%s', [left]
+    if isinstance(right, basestring):
+        pattern += right.replace('%', '%%')
+    else:
+        pattern += '%s'
+        pieces.append(right)
+    return pattern, pieces
