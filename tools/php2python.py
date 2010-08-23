@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# php2python.py - Converts PHP to Python using codegen.py
+# php2python.py - Converts PHP to Python using unparse.py
 # Usage: php2python.py < input.php > output.py
 
 import sys
