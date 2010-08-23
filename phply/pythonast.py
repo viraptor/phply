@@ -91,10 +91,12 @@ def from_phpast(node):
         return py.Print(None, [from_phpast(node.node)], True, **pos(node))
 
     if isinstance(node, php.Exit):
+        args = []
+        if node.expr is not None:
+            args.append(from_phpast(node.expr))
         return py.Raise(py.Call(py.Name('Exit', py.Load(**pos(node)),
                                         **pos(node)),
-                                [from_phpast(node.expr)], [], None, None,
-                                **pos(node)),
+                                args, [], None, None, **pos(node)),
                         None, None, **pos(node))
 
     if isinstance(node, php.Return):
