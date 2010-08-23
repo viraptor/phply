@@ -10,11 +10,10 @@ from phply.phpparse import parser
 from phply import pythonast
 
 from ast import Module
-import codegen
+from unparse import Unparser
 
 input = sys.stdin
 output = sys.stdout
 
 body = [pythonast.from_phpast(ast) for ast in parser.parse(input.read())]
-output.write(codegen.to_source(Module(body)))
-output.write('\n')
+Unparser(body, output)
