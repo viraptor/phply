@@ -129,6 +129,10 @@ def from_phpast(node):
                            [from_phpast(node.nodes[0].node),
                             from_phpast(node.nodes[0].name)],
                            [], None, None, **pos(node))
+        return py.Compare(from_phpast(node.nodes[0]),
+                          [py.IsNot(**pos(node))],
+                          [py.Name('None', py.Load(**pos(node)), **pos(node))],
+                          **pos(node))
 
     if isinstance(node, php.Empty):
         return from_phpast(php.UnaryOp('!',
