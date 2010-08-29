@@ -136,6 +136,13 @@ def from_phpast(node):
                            [from_phpast(node.nodes[0].node),
                             from_phpast(node.nodes[0].name)],
                            [], None, None, **pos(node))
+        if isinstance(node.nodes[0], php.Variable):
+            return py.Compare(py.Str(node.nodes[0].name[1:], **pos(node)),
+                              [py.In(**pos(node))],
+                              [py.Call(py.Name('vars', py.Load(**pos(node)),
+                                               **pos(node)),
+                                       [], [], None, None, **pos(node))],
+                              **pos(node))
         return py.Compare(from_phpast(node.nodes[0]),
                           [py.IsNot(**pos(node))],
                           [py.Name('None', py.Load(**pos(node)), **pos(node))],
