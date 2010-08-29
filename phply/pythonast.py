@@ -81,10 +81,12 @@ def from_phpast(node):
                        **pos(node))
 
     if isinstance(node, php.Echo):
-        args = map(from_phpast, node.nodes)
         return py.Call(py.Name('echo', py.Load(**pos(node)),
                                **pos(node)),
-                       args, [], None, None,
+                       [py.List(map(from_phpast, node.nodes),
+                                py.Load(**pos(node)),
+                                **pos(node))],
+                       [], None, None,
                        **pos(node))
 
     if isinstance(node, php.Print):
@@ -100,7 +102,10 @@ def from_phpast(node):
                         None, None, **pos(node))
 
     if isinstance(node, php.Return):
-        return py.Return(from_phpast(node.node), **pos(node))
+        if node.node is None:
+            return py.Return(None, **pos(node))
+        else:
+            return py.Return(from_phpast(node.node), **pos(node))
 
     if isinstance(node, php.Break):
         assert node.node is None, 'level on break not supported'
@@ -266,6 +271,11 @@ def from_phpast(node):
         return py.For(target, from_phpast(node.expr),
                       map(to_stmt, map(from_phpast, deblock(node.node))),
                       [], **pos(node))
+
+    if isinstance(node, php.While):
+        return py.While(from_phpast(node.expr),
+                        map(to_stmt, map(from_phpast, deblock(node.node))),
+                        [], **pos(node))
 
     if isinstance(node, php.Function):
         args = []

@@ -13,10 +13,12 @@ import traceback
 from phply import pythonast, phplex
 from phply.phpparse import parser
 
-def echo(obj):
-    sys.stdout.write(str(obj))
+def echo(objs):
+    for obj in objs:
+        sys.stdout.write(str(obj))
 
-inline_html = echo
+def inline_html(obj):
+    sys.stdout.write(obj)
 
 def XXX(obj):
     print 'Not implemented:\n ', obj
