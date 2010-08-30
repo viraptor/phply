@@ -13,7 +13,7 @@ import traceback
 from phply import pythonast, phplex
 from phply.phpparse import parser
 
-def echo(objs):
+def echo(*objs):
     for obj in objs:
         sys.stdout.write(str(obj))
 

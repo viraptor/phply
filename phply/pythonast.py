@@ -83,9 +83,7 @@ def from_phpast(node):
     if isinstance(node, php.Echo):
         return py.Call(py.Name('echo', py.Load(**pos(node)),
                                **pos(node)),
-                       [py.List(map(from_phpast, node.nodes),
-                                py.Load(**pos(node)),
-                                **pos(node))],
+                       map(from_phpast, node.nodes),
                        [], None, None,
                        **pos(node))
 
