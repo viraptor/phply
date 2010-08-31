@@ -203,10 +203,22 @@ def from_phpast(node):
     if isinstance(node, php.Global):
         return py.Global([var.name[1:] for var in node.nodes], **pos(node))
 
-    if isinstance(node, (php.Include, php.Require)):
-        return py.Call(py.Name('execfile', py.Load(**pos(node)),
+    if isinstance(node, php.Include):
+        once = py.Name('True' if node.once else 'False',
+                       py.Load(**pos(node)),
+                       **pos(node))
+        return py.Call(py.Name('include', py.Load(**pos(node)),
                                **pos(node)),
-                       [from_phpast(node.expr)],
+                       [from_phpast(node.expr), once],
+                       [], None, None, **pos(node))
+
+    if isinstance(node, php.Require):
+        once = py.Name('True' if node.once else 'False',
+                       py.Load(**pos(node)),
+                       **pos(node))
+        return py.Call(py.Name('require', py.Load(**pos(node)),
+                               **pos(node)),
+                       [from_phpast(node.expr), once],
                        [], None, None, **pos(node))
 
     if isinstance(node, php.UnaryOp):
