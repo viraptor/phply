@@ -39,6 +39,12 @@ binary_ops = {
     '^': py.BitXor,
 }
 
+casts = {
+    'double': 'float',
+    'string': 'str',
+    'array': 'list',
+}
+
 def to_stmt(pynode):
     if not isinstance(pynode, py.stmt):
         pynode = py.Expr(pynode,
@@ -270,6 +276,13 @@ def from_phpast(node):
                         from_phpast(node.iftrue),
                         from_phpast(node.iffalse),
                         **pos(node))
+
+    if isinstance(node, php.Cast):
+        return py.Call(py.Name(casts.get(node.type, node.type),
+                               py.Load(**pos(node)),
+                               **pos(node)),
+                       [from_phpast(node.expr)],
+                       [], None, None, **pos(node))
 
     if isinstance(node, php.If):
         orelse = []
