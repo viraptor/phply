@@ -365,10 +365,19 @@ def from_phpast(node):
         if not body: body = [py.Pass(**pos(node))]
         return py.ClassDef(name, bases, body, [], **pos(node))
 
-    # ClassConstants = node('ClassConstants', ['nodes'])
-    # ClassConstant = node('ClassConstant', ['name', 'initial'])
-    # ClassVariables = node('ClassVariables', ['modifiers', 'nodes'])
-    # ClassVariable = node('ClassVariable', ['name', 'initial'])
+    if isinstance(node, (php.ClassConstants, php.ClassVariables)):
+        assert len(node.nodes) == 1, \
+            'only one class-level assignment supported per line'
+        if isinstance(node.nodes[0], php.ClassConstant):
+            name = php.Constant(node.nodes[0].name, lineno=node.lineno)
+        else:
+            name = php.Variable(node.nodes[0].name, lineno=node.lineno)
+        initial = node.nodes[0].initial
+        if initial is None:
+            initial = php.Constant('None', lineno=node.lineno)
+        return py.Assign([store(from_phpast(name))],
+                         from_phpast(initial),
+                         **pos(node))
 
     if isinstance(node, (php.FunctionCall, php.New)):
         args, kwargs = build_args(node.params)
