@@ -176,6 +176,15 @@ def from_phpast(node):
                                           False,
                                           lineno=node.lineno))
 
+    if isinstance(node, (php.PreIncDecOp, php.PostIncDecOp)):
+        return from_phpast(php.Assignment(node.expr,
+                                          php.BinaryOp(node.op[0],
+                                                       node.expr,
+                                                       1,
+                                                       lineno=node.lineno),
+                                          False,
+                                          lineno=node.lineno))
+
     if isinstance(node, php.ArrayOffset):
         return py.Subscript(from_phpast(node.node),
                             py.Index(from_phpast(node.expr), **pos(node)),
@@ -274,6 +283,17 @@ def from_phpast(node):
         return py.If(from_phpast(node.expr),
                      map(to_stmt, map(from_phpast, deblock(node.node))),
                      orelse, **pos(node))
+
+    if isinstance(node, php.For):
+        assert node.test is None or len(node.test) == 1, \
+            'only a single test is supported in for-loops'
+        return from_phpast(php.Block((node.start or [])
+                                     + [php.While(node.test[0] if node.test else 1,
+                                                  php.Block([node.node]
+                                                            + (node.count or []),
+                                                            lineno=node.lineno),
+                                                  lineno=node.lineno)],
+                                     lineno=node.lineno))
 
     if isinstance(node, php.Foreach):
         if node.keyvar is None:
