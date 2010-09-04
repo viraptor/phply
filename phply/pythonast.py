@@ -302,7 +302,7 @@ def from_phpast(node):
             'only a single test is supported in for-loops'
         return from_phpast(php.Block((node.start or [])
                                      + [php.While(node.test[0] if node.test else 1,
-                                                  php.Block([node.node]
+                                                  php.Block(deblock(node.node)
                                                             + (node.count or []),
                                                             lineno=node.lineno),
                                                   lineno=node.lineno)],
