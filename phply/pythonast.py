@@ -327,6 +327,16 @@ def from_phpast(node):
                         map(to_stmt, map(from_phpast, deblock(node.node))),
                         [], **pos(node))
 
+    if isinstance(node, php.DoWhile):
+        condition = php.If(php.UnaryOp('!', node.expr, lineno=node.lineno),
+                           php.Break(None, lineno=node.lineno),
+                           [], None, lineno=node.lineno)
+        return from_phpast(php.While(1,
+                                     php.Block(deblock(node.node)
+                                               + [condition],
+                                               lineno=node.lineno),
+                                     lineno=node.lineno))
+
     if isinstance(node, php.Function):
         args = []
         defaults = []
