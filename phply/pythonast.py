@@ -426,6 +426,17 @@ def from_phpast(node):
                                     **pos(node)),
                        args, kwargs, None, None, **pos(node))
 
+    if isinstance(node, php.StaticProperty):
+        class_ = node.node
+        name = node.name
+        if isinstance(name, php.Variable):
+            name = name.name[1:]
+        return py.Attribute(py.Name(class_, py.Load(**pos(node)),
+                                    **pos(node)),
+                            name,
+                            py.Load(**pos(node)),
+                            **pos(node))        
+
     return py.Call(py.Name('XXX', py.Load(**pos(node)), **pos(node)),
                    [py.Str(str(node), **pos(node))],
                    [], None, None, **pos(node))
