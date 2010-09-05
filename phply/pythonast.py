@@ -18,6 +18,7 @@ bool_ops = {
 cmp_ops = {
     '!=': py.NotEq,
     '!==': py.NotEq,
+    '<>': py.NotEq,
     '<': py.Lt,
     '<=': py.LtE,
     '==': py.Eq,
