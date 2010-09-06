@@ -199,6 +199,12 @@ def from_phpast(node):
                             **pos(node))
 
     if isinstance(node, php.ObjectProperty):
+        if isinstance(node.name, php.Variable):
+            return py.Call(py.Name('getattr', py.Load(**pos(node)),
+                                   **pos(node)),
+                           [from_phpast(node.node),
+                            from_phpast(node.name)],
+                           [], None, None, **pos(node))            
         return py.Attribute(from_phpast(node.node),
                             node.name,
                             py.Load(**pos(node)),
