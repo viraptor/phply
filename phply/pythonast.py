@@ -417,9 +417,17 @@ def from_phpast(node):
                          **pos(node))
 
     if isinstance(node, (php.FunctionCall, php.New)):
+        if isinstance(node.name, basestring):
+            name = py.Name(node.name, py.Load(**pos(node)), **pos(node))
+        else:
+            name = py.Subscript(py.Call(py.Name('vars', py.Load(**pos(node)),
+                                                **pos(node)),
+                                        [], [], None, None, **pos(node)),
+                                py.Index(from_phpast(node.name), **pos(node)),
+                                py.Load(**pos(node)),
+                                **pos(node))
         args, kwargs = build_args(node.params)
-        return py.Call(py.Name(node.name, py.Load(**pos(node)), **pos(node)),
-                       args, kwargs, None, None, **pos(node))
+        return py.Call(name, args, kwargs, None, None, **pos(node))
 
     if isinstance(node, php.MethodCall):
         args, kwargs = build_args(node.params)
