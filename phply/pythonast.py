@@ -174,6 +174,13 @@ def from_phpast(node):
                          from_phpast(node.expr),
                          **pos(node))
 
+    if isinstance(node, php.ListAssignment):
+        return py.Assign([py.Tuple(map(store, map(from_phpast, node.nodes)),
+                                   py.Store(**pos(node)),
+                                   **pos(node))],
+                          from_phpast(node.expr),
+                          **pos(node))
+
     if isinstance(node, php.AssignOp):
         return from_phpast(php.Assignment(node.left,
                                           php.BinaryOp(node.op[:-1],
