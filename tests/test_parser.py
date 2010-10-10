@@ -524,7 +524,7 @@ def test_namespaces():
             foo();
             bar();
         }
-    """
+    ?>"""
     expected = [
         Namespace('my\\name', []),
         Namespace('my\\name', [FunctionCall('foo', []),
@@ -532,6 +532,7 @@ def test_namespaces():
         Namespace(None, [FunctionCall('foo', []),
                          FunctionCall('bar', [])]),
     ]
+    eq_ast(input, expected)
 
 def test_use_declarations():
     input = r"""<?
@@ -541,14 +542,15 @@ def test_use_declarations():
         use my\name as foo;
         use a, b;
         use a as b, \c\d\e as f;
-    """
+    ?>"""
     expected = [
-        Use([UseDeclaration('me', None)]),
-        Use([UseDeclaration('\\me', None)]),
-        Use([UseDeclaration('\\me\\please', None)]),
-        Use([UseDeclaration('my\\name', 'foo')]),
-        Use([UseDeclaration('a', None),
-             UseDeclaration('b', None)]),
-        Use([UseDeclaration('a', 'b'),
-             UseDeclaration('\\c\\d\\e', 'f')]),
+        UseDeclarations([UseDeclaration('me', None)]),
+        UseDeclarations([UseDeclaration('\\me', None)]),
+        UseDeclarations([UseDeclaration('\\me\\please', None)]),
+        UseDeclarations([UseDeclaration('my\\name', 'foo')]),
+        UseDeclarations([UseDeclaration('a', None),
+                         UseDeclaration('b', None)]),
+        UseDeclarations([UseDeclaration('a', 'b'),
+                         UseDeclaration('\\c\\d\\e', 'f')]),
     ]
+    eq_ast(input, expected)

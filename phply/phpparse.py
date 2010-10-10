@@ -78,7 +78,7 @@ def p_top_statement_namespace(p):
 
 def p_top_statement_use(p):
     'top_statement : USE use_declarations SEMI'
-    p[0] = ast.Use(p[2], lineno=p.lineno(1))
+    p[0] = ast.UseDeclarations(p[2], lineno=p.lineno(1))
 
 def p_use_declarations(p):
     '''use_declarations : use_declarations COMMA use_declaration
