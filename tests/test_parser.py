@@ -505,12 +505,18 @@ def test_static_members():
         Ztatic::$variable;
         Ztatic::method();
         Ztatic::$variable_method();
+        static::late_binding;
+        STATIC::$late_binding;
+        Static::late_binding();
     ?>"""
     expected = [
         StaticProperty('Ztatic', 'constant'),
         StaticProperty('Ztatic', Variable('$variable')),
         StaticMethodCall('Ztatic', 'method', []),
         StaticMethodCall('Ztatic', Variable('$variable_method'), []),
+        StaticProperty('static', 'late_binding'),
+        StaticProperty('static', Variable('$late_binding')),
+        StaticMethodCall('static', 'late_binding', []),
     ]
     eq_ast(input, expected)
 

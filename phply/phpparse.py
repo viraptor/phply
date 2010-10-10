@@ -639,6 +639,10 @@ def p_class_name(p):
     else:
         p[0] = p[1] + p[2] + p[3]
 
+def p_class_name_static(p):
+    'class_name : STATIC'
+    p[0] = p[1].lower()
+
 def p_dynamic_class_name_reference(p):
     '''dynamic_class_name_reference : base_variable OBJECT_OPERATOR object_property dynamic_class_name_variable_properties
                                     | base_variable'''
