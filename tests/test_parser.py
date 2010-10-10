@@ -50,6 +50,7 @@ def test_namespace_names():
         one\too\tree;
         \top;
         \top\level;
+        namespace\level;
     ?>"""
     expected = [
         Constant(r'foo'),
@@ -57,6 +58,7 @@ def test_namespace_names():
         Constant(r'one\too\tree'),
         Constant(r'\top'),
         Constant(r'\top\level'),
+        Constant(r'namespace\level'),
     ]
     eq_ast(input, expected)
 
@@ -585,10 +587,12 @@ def test_constant_declarations():
     input = r"""<?
         const foo = 42;
         const bar = 'baz', wat = \DOO;
+        const ant = namespace\level;
     ?>"""
     expected = [
         ConstantDeclarations([ConstantDeclaration('foo', 42)]),
         ConstantDeclarations([ConstantDeclaration('bar', 'baz'),
                               ConstantDeclaration('wat', Constant('\\DOO'))]),
+        ConstantDeclarations([ConstantDeclaration('ant', Constant('namespace\\level'))]),
     ]
     eq_ast(input, expected)
