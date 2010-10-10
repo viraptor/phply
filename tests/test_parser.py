@@ -532,3 +532,23 @@ def test_namespaces():
         Namespace(None, [FunctionCall('foo', []),
                          FunctionCall('bar', [])]),
     ]
+
+def test_use_declarations():
+    input = r"""<?
+        use me;
+        use \me;
+        use \me\please;
+        use my\name as foo;
+        use a, b;
+        use a as b, \c\d\e as f;
+    """
+    expected = [
+        Use([UseDeclaration('me', None)]),
+        Use([UseDeclaration('\\me', None)]),
+        Use([UseDeclaration('\\me\\please', None)]),
+        Use([UseDeclaration('my\\name', 'foo')]),
+        Use([UseDeclaration('a', None),
+             UseDeclaration('b', None)]),
+        Use([UseDeclaration('a', 'b'),
+             UseDeclaration('\\c\\d\\e', 'f')]),
+    ]

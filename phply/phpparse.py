@@ -76,6 +76,32 @@ def p_top_statement_namespace(p):
     else:
         p[0] = ast.Namespace(p[2], p[4], lineno=p.lineno(1))
 
+def p_top_statement_use(p):
+    'top_statement : USE use_declarations SEMI'
+    p[0] = ast.Use(p[2], lineno=p.lineno(1))
+
+def p_use_declarations(p):
+    '''use_declarations : use_declarations COMMA use_declaration
+                        | use_declaration'''
+    if len(p) == 4:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
+
+def p_use_declaration(p):
+    '''use_declaration : namespace_name
+                       | NS_SEPARATOR namespace_name
+                       | namespace_name AS STRING
+                       | NS_SEPARATOR namespace_name AS STRING'''
+    if len(p) == 2:
+        p[0] = ast.UseDeclaration(p[1], None, lineno=p.lineno(1))
+    elif len(p) == 3:
+        p[0] = ast.UseDeclaration(p[1] + p[2], None, lineno=p.lineno(1))
+    elif len(p) == 4:
+        p[0] = ast.UseDeclaration(p[1], p[3], lineno=p.lineno(2))
+    else:
+        p[0] = ast.UseDeclaration(p[1] + p[2], p[4], lineno=p.lineno(1))
+
 def p_inner_statement_list(p):
     '''inner_statement_list : inner_statement_list inner_statement
                             | empty'''
