@@ -1,0 +1,4 @@
+*.pyc
+parser.out
+parsetab.py
+phply.egg-info
