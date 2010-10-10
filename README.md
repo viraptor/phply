@@ -39,7 +39,6 @@ Some things can't be parsed yet. They are getting fewer by the day, but there
 is still a fair amount of work to do:
 
 * Nowdocs
-* Namespaces
 * Anonymous functions
 * Some other stuff, probably
 
