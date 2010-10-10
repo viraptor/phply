@@ -1056,8 +1056,12 @@ def p_scalar_string_varname(p):
     p[0] = ast.Variable('$' + p[1], lineno=p.lineno(1))
 
 def p_scalar_namespace_name(p):
-    'scalar : namespace_name'
-    p[0] = ast.Constant(p[1], lineno=p.lineno(1))
+    '''scalar : namespace_name
+              | NS_SEPARATOR namespace_name'''
+    if len(p) == 2:
+        p[0] = ast.Constant(p[1], lineno=p.lineno(1))
+    else:
+        p[0] = ast.Constant(p[1] + p[2], lineno=p.lineno(1))
 
 def p_class_constant(p):
     '''class_constant : class_name DOUBLE_COLON STRING
@@ -1118,8 +1122,12 @@ def p_static_scalar(p):
         p[0] = p[1]
 
 def p_static_scalar_namespace_name(p):
-    'static_scalar : namespace_name'
-    p[0] = ast.Constant(p[1], lineno=p.lineno(1))
+    '''static_scalar : namespace_name
+                     | NS_SEPARATOR namespace_name'''
+    if len(p) == 2:
+        p[0] = ast.Constant(p[1], lineno=p.lineno(1))
+    else:
+        p[0] = ast.Constant(p[1] + p[2], lineno=p.lineno(1))
 
 def p_static_scalar_unary_op(p):
     '''static_scalar : PLUS static_scalar

@@ -48,11 +48,15 @@ def test_namespace_names():
         foo;
         bar\baz;
         one\too\tree;
+        \top;
+        \top\level;
     ?>"""
     expected = [
         Constant(r'foo'),
         Constant(r'bar\baz'),
         Constant(r'one\too\tree'),
+        Constant(r'\top'),
+        Constant(r'\top\level'),
     ]
     eq_ast(input, expected)
 
@@ -558,11 +562,11 @@ def test_use_declarations():
 def test_constant_declarations():
     input = r"""<?
         const foo = 42;
-        const bar = 'baz', wat = DOO;
+        const bar = 'baz', wat = \DOO;
     ?>"""
     expected = [
         ConstantDeclarations([ConstantDeclaration('foo', 42)]),
         ConstantDeclarations([ConstantDeclaration('bar', 'baz'),
-                              ConstantDeclaration('wat', Constant('DOO'))]),
+                              ConstantDeclaration('wat', Constant('\\DOO'))]),
     ]
     eq_ast(input, expected)
