@@ -459,8 +459,15 @@ def p_extends_from(p):
         p[0] = p[2]
 
 def p_fully_qualified_class_name(p):
-    'fully_qualified_class_name : namespace_name'
-    p[0] = p[1]
+    '''fully_qualified_class_name : namespace_name
+                                  | NS_SEPARATOR namespace_name
+                                  | NAMESPACE NS_SEPARATOR namespace_name'''
+    if len(p) == 2:
+        p[0] = p[1]
+    elif len(p) == 3:
+        p[0] = p[1] + p[2]
+    else:
+        p[0] = p[1] + p[2] + p[3]
 
 def p_implements_list(p):
     '''implements_list : IMPLEMENTS interface_list
@@ -622,8 +629,15 @@ def p_class_name_reference(p):
     p[0] = p[1]
 
 def p_class_name(p):
-    'class_name : namespace_name'
-    p[0] = p[1]                  
+    '''class_name : namespace_name
+                  | NS_SEPARATOR namespace_name
+                  | NAMESPACE NS_SEPARATOR namespace_name'''
+    if len(p) == 2:
+        p[0] = p[1]
+    elif len(p) == 3:
+        p[0] = p[1] + p[2]
+    else:
+        p[0] = p[1] + p[2] + p[3]
 
 def p_dynamic_class_name_reference(p):
     '''dynamic_class_name_reference : base_variable OBJECT_OPERATOR object_property dynamic_class_name_variable_properties

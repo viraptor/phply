@@ -407,6 +407,9 @@ def test_new():
         new Foo();
         new Bar(1, 2, 3);
         $crusty =& new OldSyntax();
+        new name\Spaced();
+        new \name\Spaced();
+        new namespace\D();
     ?>"""
     expected = [
         New('Foo', []),
@@ -415,6 +418,9 @@ def test_new():
                     Parameter(2, False),
                     Parameter(3, False)]),
         Assignment(Variable('$crusty'), New('OldSyntax', []), True),
+        New('name\\Spaced', []),
+        New('\\name\\Spaced', []),
+        New('namespace\\D', []),
     ]
     eq_ast(input, expected)
 
@@ -425,6 +431,10 @@ def test_exceptions():
             throw new Food($a);
         } catch (Food $f) {
             echo "Received food: $f";
+        } catch (\Bar\Food $f) {
+            echo "Received bar food: $f";
+        } catch (namespace\Food $f) {
+            echo "Received namespace food: $f";
         } catch (Exception $e) {
             echo "Problem?";
         }
@@ -438,6 +448,12 @@ def test_exceptions():
         ], [
             Catch('Food', Variable('$f'), [
                 Echo([BinaryOp('.', 'Received food: ', Variable('$f'))])
+            ]),
+            Catch('\\Bar\\Food', Variable('$f'), [
+                Echo([BinaryOp('.', 'Received bar food: ', Variable('$f'))])
+            ]),
+            Catch('namespace\\Food', Variable('$f'), [
+                Echo([BinaryOp('.', 'Received namespace food: ', Variable('$f'))])
             ]),
             Catch('Exception', Variable('$e'), [
                 Echo(['Problem?']),
