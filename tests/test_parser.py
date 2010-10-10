@@ -217,6 +217,8 @@ def test_function_calls():
     input = r"""<?
         f();
         doit($arg1, &$arg2, 3 + 4);
+        name\spaced();
+        \name\spaced();
     ?>"""
     expected = [
         FunctionCall('f', []),
@@ -224,6 +226,8 @@ def test_function_calls():
                      [Parameter(Variable('$arg1'), False),
                       Parameter(Variable('$arg2'), True),
                       Parameter(BinaryOp('+', 3, 4), False)]),
+        FunctionCall('name\\spaced', []),
+        FunctionCall('\\name\\spaced', []),
     ]
     eq_ast(input, expected)                   
 

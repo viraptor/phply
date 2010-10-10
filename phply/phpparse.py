@@ -713,8 +713,12 @@ def p_base_variable_with_function_calls(p):
     p[0] = p[1]
 
 def p_function_call(p):
-    'function_call : namespace_name LPAREN function_call_parameter_list RPAREN'
-    p[0] = ast.FunctionCall(p[1], p[3], lineno=p.lineno(2))
+    '''function_call : namespace_name LPAREN function_call_parameter_list RPAREN
+                     | NS_SEPARATOR namespace_name LPAREN function_call_parameter_list RPAREN'''
+    if len(p) == 5:
+        p[0] = ast.FunctionCall(p[1], p[3], lineno=p.lineno(2))
+    else:
+        p[0] = ast.FunctionCall(p[1] + p[2], p[4], lineno=p.lineno(1))
 
 def p_function_call_static(p):
     '''function_call : class_name DOUBLE_COLON STRING LPAREN function_call_parameter_list RPAREN
