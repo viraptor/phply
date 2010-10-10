@@ -9,7 +9,6 @@ import re
 
 # todo: nowdocs
 # todo: backticks
-# todo: namespaces
 # todo: binary string literals and casts
 # todo: BAD_CHARACTER
 # todo: <script> syntax (does anyone use this?)
@@ -34,7 +33,7 @@ reserved = (
     'INCLUDE_ONCE', 'INSTANCEOF', 'ISSET', 'LIST', 'NEW', 'PRINT', 'REQUIRE',
     'REQUIRE_ONCE', 'RETURN', 'STATIC', 'SWITCH', 'UNSET', 'USE', 'VAR',
     'WHILE', 'FINAL', 'INTERFACE', 'IMPLEMENTS', 'PUBLIC', 'PRIVATE',
-    'PROTECTED', 'ABSTRACT', 'CLONE', 'TRY', 'CATCH', 'THROW',
+    'PROTECTED', 'ABSTRACT', 'CLONE', 'TRY', 'CATCH', 'THROW', 'NAMESPACE',
 )
 
 tokens = reserved + (

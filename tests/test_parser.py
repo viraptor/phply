@@ -512,3 +512,23 @@ def test_casts():
         Cast('unset', Variable('$x')),
     ]
     eq_ast(input, expected)
+
+def test_namespaces():
+    input = r"""<?
+        namespace my\name;
+        namespace my\name {
+            foo();
+            bar();
+        }
+        namespace {
+            foo();
+            bar();
+        }
+    """
+    expected = [
+        Namespace('my\\name', []),
+        Namespace('my\\name', [FunctionCall('foo', []),
+                               FunctionCall('bar', [])]),
+        Namespace(None, [FunctionCall('foo', []),
+                         FunctionCall('bar', [])]),
+    ]
