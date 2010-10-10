@@ -76,6 +76,10 @@ def p_top_statement_namespace(p):
     else:
         p[0] = ast.Namespace(p[2], p[4], lineno=p.lineno(1))
 
+def p_top_statement_constant(p):
+    'top_statement : CONST constant_declarations SEMI'
+    p[0] = ast.ConstantDeclarations(p[2], lineno=p.lineno(1))
+
 def p_top_statement_use(p):
     'top_statement : USE use_declarations SEMI'
     p[0] = ast.UseDeclarations(p[2], lineno=p.lineno(1))
@@ -101,6 +105,18 @@ def p_use_declaration(p):
         p[0] = ast.UseDeclaration(p[1], p[3], lineno=p.lineno(2))
     else:
         p[0] = ast.UseDeclaration(p[1] + p[2], p[4], lineno=p.lineno(1))
+
+def p_constant_declarations(p):
+    '''constant_declarations : constant_declarations COMMA constant_declaration
+                             | constant_declaration'''
+    if len(p) == 4:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
+
+def p_constant_declaration(p):
+    'constant_declaration : STRING EQUALS static_scalar'
+    p[0] = ast.ConstantDeclaration(p[1], p[3], lineno=p.lineno(1))
 
 def p_inner_statement_list(p):
     '''inner_statement_list : inner_statement_list inner_statement
