@@ -219,6 +219,7 @@ def test_function_calls():
         doit($arg1, &$arg2, 3 + 4);
         name\spaced();
         \name\spaced();
+        namespace\d();
     ?>"""
     expected = [
         FunctionCall('f', []),
@@ -228,6 +229,7 @@ def test_function_calls():
                       Parameter(BinaryOp('+', 3, 4), False)]),
         FunctionCall('name\\spaced', []),
         FunctionCall('\\name\\spaced', []),
+        FunctionCall('namespace\\d', []),
     ]
     eq_ast(input, expected)                   
 
