@@ -602,3 +602,32 @@ def test_constant_declarations():
         ConstantDeclarations([ConstantDeclaration('ant', Constant('namespace\\level'))]),
     ]
     eq_ast(input, expected)
+
+def test_closures():
+    input = r"""<?
+        $greet = function($name) {
+            printf("Hello %s\r\n", $name);
+        };
+        $greet('World');
+        $cb = function&($a, &$b) use ($c, &$d) {};
+    ?>"""
+    expected = [
+        Assignment(Variable('$greet'),
+                   Closure([FormalParameter('$name', None, False)],
+                           [],
+                           [FunctionCall('printf',
+                                         [Parameter('Hello %s\r\n', False),
+                                          Parameter(Variable('$name'), False)])],
+                           False),
+                   False),
+        FunctionCall(Variable('$greet'), [Parameter('World', False)]),
+        Assignment(Variable('$cb'),
+                   Closure([FormalParameter('$a', None, False),
+                            FormalParameter('$b', None, True)],
+                           [LexicalVariable('$c', False),
+                            LexicalVariable('$d', True)],
+                           [],
+                           True),
+                   False),
+    ]
+    eq_ast(input, expected)

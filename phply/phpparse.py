@@ -918,6 +918,32 @@ def p_function_call_parameter(p):
     else:
         p[0] = ast.Parameter(p[2], True, lineno=p.lineno(1))
 
+def p_expr_function(p):
+    'expr : FUNCTION is_reference LPAREN parameter_list RPAREN lexical_vars LBRACE inner_statement_list RBRACE'
+    p[0] = ast.Closure(p[4], p[6], p[8], p[2], lineno=p.lineno(1))
+
+def p_lexical_vars(p):
+    '''lexical_vars : USE LPAREN lexical_var_list RPAREN
+                    | empty'''
+    if len(p) == 5:
+        p[0] = p[3]
+    else:
+        p[0] = []
+
+def p_lexical_var_list(p):
+    '''lexical_var_list : lexical_var_list COMMA AND VARIABLE
+                        | lexical_var_list COMMA VARIABLE
+                        | AND VARIABLE
+                        | VARIABLE'''
+    if len(p) == 5:
+        p[0] = p[1] + [ast.LexicalVariable(p[4], True, lineno=p.lineno(2))]
+    elif len(p) == 4:
+        p[0] = p[1] + [ast.LexicalVariable(p[3], False, lineno=p.lineno(2))]
+    elif len(p) == 3:
+        p[0] = [ast.LexicalVariable(p[2], True, lineno=p.lineno(1))]
+    else:
+        p[0] = [ast.LexicalVariable(p[1], False, lineno=p.lineno(1))]
+
 def p_expr_assign_op(p):
     '''expr : variable PLUS_EQUAL expr
             | variable MINUS_EQUAL expr
