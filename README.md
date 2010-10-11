@@ -39,7 +39,8 @@ Some things can't be parsed yet. They are getting fewer by the day, but there
 is still a fair amount of work to do:
 
 * Nowdocs
-* Anonymous functions
+* Backticks
+* Binary string literals and casts
 * Some other stuff, probably
 
 ## Who's working on it?
