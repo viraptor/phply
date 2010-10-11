@@ -41,6 +41,7 @@ is still a fair amount of work to do:
 * Nowdocs
 * Backticks
 * Binary string literals and casts
+* Labels and goto
 * Some other stuff, probably
 
 ## Who's working on it?
