@@ -351,6 +351,21 @@ def from_phpast(node):
                                                lineno=node.lineno),
                                      lineno=node.lineno))
 
+    if isinstance(node, php.Try):
+        return py.TryExcept(map(to_stmt, map(from_phpast, node.nodes)),
+                            [py.ExceptHandler(py.Name(catch.class_,
+                                                      py.Load(**pos(node)),
+                                                      **pos(node)),
+                                              store(from_phpast(catch.var)),
+                                              map(to_stmt, map(from_phpast, catch.nodes)),
+                                              **pos(node))
+                             for catch in node.catches],
+                            [],
+                            **pos(node))
+
+    if isinstance(node, php.Throw):
+        return py.Raise(from_phpast(node.node), None, None, **pos(node))
+
     if isinstance(node, php.Function):
         args = []
         defaults = []
