@@ -594,12 +594,16 @@ def test_constant_declarations():
         const foo = 42;
         const bar = 'baz', wat = \DOO;
         const ant = namespace\level;
+        const dq1 = "";
+        const dq2 = "nothing fancy";
     ?>"""
     expected = [
         ConstantDeclarations([ConstantDeclaration('foo', 42)]),
         ConstantDeclarations([ConstantDeclaration('bar', 'baz'),
                               ConstantDeclaration('wat', Constant('\\DOO'))]),
         ConstantDeclarations([ConstantDeclaration('ant', Constant('namespace\\level'))]),
+        ConstantDeclarations([ConstantDeclaration('dq1', '')]),
+        ConstantDeclarations([ConstantDeclaration('dq2', 'nothing fancy')]),
     ]
     eq_ast(input, expected)
 
