@@ -1,20 +1,30 @@
 from phply import phplex
+
 import nose.tools
+import pprint
 
 def eq_tokens(input, expected, ignore=('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG')):
     output = []
     lexer = phplex.lexer.clone()
     lexer.input(input)
+
     while True:
         tok = lexer.token()
         if not tok: break
         if tok.type in ignore: continue
         output.append((tok.type, tok.value))
-    print output
-    assert len(output) == len(expected)
+
+    print 'Lexer output:'
+    pprint.pprint(output)
+    print
+
+    print 'Token by token:'
     for out, exp in zip(output, expected):
-        print out, exp
+        print '\tgot:', out, '\texpected:', exp
         nose.tools.eq_(out, exp)
+
+    assert len(output) == len(expected), \
+           'output length was %d, expected %s' % (len(output), len(expected))
 
 def test_whitespace():
     input = ' <?  \t\r\n ?>\t\t <?php  ?> <?php\n ?>'

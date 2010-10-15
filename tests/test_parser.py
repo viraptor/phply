@@ -1,16 +1,25 @@
 from phply import phplex
 from phply.phpparse import parser
 from phply.phpast import *
+
 import nose.tools
+import pprint
 
 def eq_ast(input, expected):
     lexer = phplex.lexer.clone()
     output = parser.parse(input, lexer=lexer)
-    print output
-    assert len(output) == len(expected)
+
+    print 'Parser output:'
+    pprint.pprint(output)
+    print
+
+    print 'Node by node:'
     for out, exp in zip(output, expected):
-        print out, exp
+        print '\tgot:', out, '\texpected:', exp
         nose.tools.eq_(out, exp)
+
+    assert len(output) == len(expected), \
+           'output length was %d, expected %s' % (len(output), len(expected))
 
 def test_inline_html():
     input = 'html <?php // php ?> more html'
