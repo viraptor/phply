@@ -140,7 +140,7 @@ def p_statement_block(p):
 
 def p_statement_if(p):
     '''statement : IF LPAREN expr RPAREN statement elseif_list else_single
-                 | IF LPAREN expr RPAREN COLON inner_statement_list new_elseif_list new_else_single ENDIF semi'''
+                 | IF LPAREN expr RPAREN COLON inner_statement_list new_elseif_list new_else_single ENDIF SEMI'''
     if len(p) == 8:
         p[0] = ast.If(p[3], p[5], p[6], p[7], lineno=p.lineno(1))
     else:
@@ -152,7 +152,7 @@ def p_statement_while(p):
     p[0] = ast.While(p[3], p[5], lineno=p.lineno(1))
 
 def p_statement_do_while(p):
-    'statement : DO statement WHILE LPAREN expr RPAREN semi'
+    'statement : DO statement WHILE LPAREN expr RPAREN SEMI'
     p[0] = ast.DoWhile(p[2], p[5], lineno=p.lineno(1))
 
 def p_statement_for(p):
@@ -171,43 +171,39 @@ def p_statement_switch(p):
     p[0] = ast.Switch(p[3], p[5], lineno=p.lineno(1))
 
 def p_statement_break(p):
-    '''statement : BREAK semi
-                 | BREAK expr semi'''
+    '''statement : BREAK SEMI
+                 | BREAK expr SEMI'''
     if len(p) == 3:
         p[0] = ast.Break(None, lineno=p.lineno(1))
     else:
         p[0] = ast.Break(p[2], lineno=p.lineno(1))
 
 def p_statement_continue(p):
-    '''statement : CONTINUE semi
-                 | CONTINUE expr semi'''
+    '''statement : CONTINUE SEMI
+                 | CONTINUE expr SEMI'''
     if len(p) == 3:
         p[0] = ast.Continue(None, lineno=p.lineno(1))
     else:
         p[0] = ast.Continue(p[2], lineno=p.lineno(1))
 
 def p_statement_return(p):
-    '''statement : RETURN semi
-                 | RETURN expr semi'''
+    '''statement : RETURN SEMI
+                 | RETURN expr SEMI'''
     if len(p) == 3:
         p[0] = ast.Return(None, lineno=p.lineno(1))
     else:
         p[0] = ast.Return(p[2], lineno=p.lineno(1))
 
 def p_statement_global(p):
-    'statement : GLOBAL global_var_list semi'
+    'statement : GLOBAL global_var_list SEMI'
     p[0] = ast.Global(p[2], lineno=p.lineno(1))
 
 def p_statement_static(p):
-    'statement : STATIC static_var_list semi'
+    'statement : STATIC static_var_list SEMI'
     p[0] = ast.Static(p[2], lineno=p.lineno(1))
 
-def p_statement_open_tag_with_echo(p):
-    'statement : OPEN_TAG_WITH_ECHO expr CLOSE_TAG'
-    p[0] = ast.Echo([p[2]], lineno=p.lineno(1))
-
 def p_statement_echo(p):
-    'statement : ECHO echo_expr_list semi'
+    'statement : ECHO echo_expr_list SEMI'
     p[0] = ast.Echo(p[2], lineno=p.lineno(1))
 
 def p_statement_inline_html(p):
@@ -215,11 +211,11 @@ def p_statement_inline_html(p):
     p[0] = ast.InlineHTML(p[1], lineno=p.lineno(1))
 
 def p_statement_expr(p):
-    'statement : expr semi'
+    'statement : expr SEMI'
     p[0] = p[1]
 
 def p_statement_unset(p):
-    'statement : UNSET LPAREN unset_variables RPAREN semi'
+    'statement : UNSET LPAREN unset_variables RPAREN SEMI'
     p[0] = ast.Unset(p[3], lineno=p.lineno(1))
 
 def p_statement_empty(p):
@@ -242,7 +238,7 @@ def p_additional_catches(p):
         p[0] = []
 
 def p_statement_throw(p):
-    'statement : THROW expr semi'
+    'statement : THROW expr SEMI'
     p[0] = ast.Throw(p[2], lineno=p.lineno(1))
 
 def p_statement_declare(p):
@@ -259,7 +255,7 @@ def p_declare_list(p):
 
 def p_declare_statement(p):
     '''declare_statement : statement
-                         | COLON inner_statement_list ENDDECLARE semi'''
+                         | COLON inner_statement_list ENDDECLARE SEMI'''
     if len(p) == 2:
         p[0] = p[1]
     else:
@@ -297,7 +293,7 @@ def p_new_else_single(p):
 
 def p_while_statement(p):
     '''while_statement : statement
-                       | COLON inner_statement_list ENDWHILE semi'''
+                       | COLON inner_statement_list ENDWHILE SEMI'''
     if len(p) == 2:
         p[0] = p[1]
     else:
@@ -318,7 +314,7 @@ def p_non_empty_for_expr(p):
 
 def p_for_statement(p):
     '''for_statement : statement
-                     | COLON inner_statement_list ENDFOR semi'''
+                     | COLON inner_statement_list ENDFOR SEMI'''
     if len(p) == 2:
         p[0] = p[1]
     else:
@@ -340,7 +336,7 @@ def p_foreach_optional_arg(p):
 
 def p_foreach_statement(p):
     '''foreach_statement : statement
-                         | COLON inner_statement_list ENDFOREACH semi'''
+                         | COLON inner_statement_list ENDFOREACH SEMI'''
     if len(p) == 2:
         p[0] = p[1]
     else:
@@ -355,8 +351,8 @@ def p_switch_case_list(p):
         p[0] = p[3]
 
 def p_switch_case_list_colon(p):
-    '''switch_case_list : COLON case_list ENDSWITCH semi
-                        | COLON SEMI case_list ENDSWITCH semi'''
+    '''switch_case_list : COLON case_list ENDSWITCH SEMI
+                        | COLON SEMI case_list ENDSWITCH SEMI'''
     if len(p) == 5:
         p[0] = p[2]
     else:
@@ -1288,11 +1284,6 @@ def p_encaps_var_offset_variable(p):
     'encaps_var_offset : VARIABLE'
     p[0] = ast.Variable(p[1], lineno=p.lineno(1))
 
-def p_semi(p):
-    '''semi : SEMI
-            | CLOSE_TAG'''
-    pass
-
 def p_empty(p):
     'empty : '
     pass
@@ -1300,10 +1291,7 @@ def p_empty(p):
 # Error rule for syntax errors
 def p_error(t):
     if t:
-        if t.type in ('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG', 'COMMENT', 'DOC_COMMENT'):
-            yacc.errok()
-        else:
-            raise SyntaxError('invalid syntax', (None, t.lineno, None, t.value))
+        raise SyntaxError('invalid syntax', (None, t.lineno, None, t.value))
     else:
         raise SyntaxError('unexpected EOF while parsing', (None, None, None, None))
 

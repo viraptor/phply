@@ -31,6 +31,15 @@ def test_echo():
     expected = [Echo(["hello, world!"])]
     eq_ast(input, expected)
 
+def test_open_tag_with_echo():
+    input = '<?= "hello, world!" ?><?= "test"; EXTRA; ?>'
+    expected = [
+        Echo(["hello, world!"]),
+        Echo(["test"]),
+        Constant('EXTRA'),
+    ]
+    eq_ast(input, expected)
+
 def test_exit():
     input = '<?php exit; exit(); exit(123); die; die(); die(456); ?>'
     expected = [

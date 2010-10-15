@@ -5,7 +5,7 @@ import pprint
 
 def eq_tokens(input, expected, ignore=('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG')):
     output = []
-    lexer = phplex.lexer.clone()
+    lexer = phplex.full_lexer.clone()
     lexer.input(input)
 
     while True:

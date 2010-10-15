@@ -36,9 +36,19 @@ reserved = (
     'PROTECTED', 'ABSTRACT', 'CLONE', 'TRY', 'CATCH', 'THROW', 'NAMESPACE',
 )
 
-tokens = reserved + (
+# Not used by parser
+unparsed = (
+    # Invisible characters
     'WHITESPACE',
 
+    # Open and close tags
+    'OPEN_TAG', 'OPEN_TAG_WITH_ECHO', 'CLOSE_TAG',
+
+    # Comments
+    'COMMENT', 'DOC_COMMENT',
+)
+
+tokens = reserved + unparsed + (
     # Operators
     'PLUS', 'MINUS', 'MUL', 'DIV', 'MOD', 'AND', 'OR', 'NOT', 'XOR', 'SL',
     'SR', 'BOOLEAN_AND', 'BOOLEAN_OR', 'BOOLEAN_NOT', 'IS_SMALLER',
@@ -64,11 +74,8 @@ tokens = reserved + (
     'ARRAY_CAST', 'BOOL_CAST', 'DOUBLE_CAST', 'INT_CAST', 'OBJECT_CAST',
     'STRING_CAST', 'UNSET_CAST',
 
-    # Comments
-    'COMMENT', 'DOC_COMMENT',
-
     # Escaping from HTML
-    'OPEN_TAG', 'OPEN_TAG_WITH_ECHO', 'CLOSE_TAG', 'INLINE_HTML',
+    'INLINE_HTML',
 
     # Identifiers and reserved words
     'DIR', 'FILE', 'LINE', 'FUNC_C', 'CLASS_C', 'METHOD_C', 'NS_C',
@@ -408,7 +415,51 @@ def peek(lexer):
     except IndexError:
         return ''
 
-lexer = lex.lex()
+class FilteredLexer(object):
+    def __init__(self, lexer):
+        self.lexer = lexer
+        self.last_token = None
+
+    def clone(self):
+        return FilteredLexer(self.lexer.clone())
+
+    def current_state(self):
+        return self.lexer.current_state()
+
+    def input(self, input):
+        self.lexer.input(input)
+
+    def token(self):
+        t = self.lexer.token()
+        while t and t.type in unparsed:
+            if t.type == 'OPEN_TAG_WITH_ECHO':
+                t.type = 'ECHO'
+            elif (t.type == 'CLOSE_TAG'
+                  and not (self.last_token
+                           and self.last_token.type in ('SEMI', 'RBRACE'))):
+                t.type = 'SEMI'
+            else:
+                t = self.lexer.token()
+        self.last_token = t
+        return t
+
+    # Iterator interface
+    def __iter__(self):
+        return self
+
+    def next(self):
+        t = self.token()
+        if t is None:
+            raise StopIteration
+        return t
+
+    __next__ = next
+
+full_lexer = lex.lex()
+lexer = FilteredLexer(full_lexer)
+
+full_tokens = tokens
+tokens = filter(lambda token: token not in unparsed, tokens)
 
 if __name__ == "__main__":
-    lex.runmain(lexer)
+    lex.runmain(full_lexer)
