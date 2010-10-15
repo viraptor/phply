@@ -1,9 +1,11 @@
+from phply import phplex
 from phply.phpparse import parser
 from phply.phpast import *
 import nose.tools
 
 def eq_ast(input, expected):
-    output = parser.parse(input)
+    lexer = phplex.lexer.clone()
+    output = parser.parse(input, lexer=lexer)
     print output
     assert len(output) == len(expected)
     for out, exp in zip(output, expected):

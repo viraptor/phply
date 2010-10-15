@@ -1,8 +1,9 @@
-from phply.phplex import lexer
+from phply import phplex
 import nose.tools
 
 def eq_tokens(input, expected, ignore=('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG')):
     output = []
+    lexer = phplex.lexer.clone()
     lexer.input(input)
     while True:
         tok = lexer.token()
