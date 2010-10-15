@@ -420,6 +420,22 @@ class FilteredLexer(object):
         self.lexer = lexer
         self.last_token = None
 
+    @property
+    def lineno(self):
+        return self.lexer.lineno
+
+    @lineno.setter
+    def lineno(self, value):
+        self.lexer.lineno = value
+
+    @property
+    def lexpos(self):
+        return self.lexer.lexpos
+
+    @lexpos.setter
+    def lexpos(self, value):
+        self.lexer.lexpos = value
+
     def clone(self):
         return FilteredLexer(self.lexer.clone())
 
