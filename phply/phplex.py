@@ -447,15 +447,34 @@ class FilteredLexer(object):
 
     def token(self):
         t = self.lexer.token()
+
+        # Filter out tokens that the parser is not expecting.
         while t and t.type in unparsed:
+
+            # Skip over open tags, but keep track of when we see them.
+            if t.type == 'OPEN_TAG':
+                self.last_token = t
+                t = self.lexer.token()
+                continue
+
+            # Rewrite <?= to yield an "echo" statement.
             if t.type == 'OPEN_TAG_WITH_ECHO':
                 t.type = 'ECHO'
-            elif (t.type == 'CLOSE_TAG'
-                  and not (self.last_token
-                           and self.last_token.type in ('SEMI', 'RBRACE'))):
-                t.type = 'SEMI'
-            else:
-                t = self.lexer.token()
+                break
+
+            # Insert semicolons in place of close tags where necessary.
+            if t.type == 'CLOSE_TAG':
+                if self.last_token and \
+                       self.last_token.type in ('OPEN_TAG', 'SEMI', 'RBRACE'):
+                    # Dont insert semicolons after these tags.
+                    pass
+                else:
+                    # Rewrite close tag as a semicolon.
+                    t.type = 'SEMI'
+                    break
+
+            t = self.lexer.token()
+
         self.last_token = t
         return t
 
