@@ -465,7 +465,8 @@ class FilteredLexer(object):
             # Insert semicolons in place of close tags where necessary.
             if t.type == 'CLOSE_TAG':
                 if self.last_token and \
-                       self.last_token.type in ('OPEN_TAG', 'SEMI', 'COLON', 'RBRACE'):
+                       self.last_token.type in ('OPEN_TAG', 'SEMI', 'COLON',
+                                                'LBRACE', 'RBRACE'):
                     # Dont insert semicolons after these tokens.
                     pass
                 else:
