@@ -31,6 +31,17 @@ class Node(object):
                 return False
         return True
 
+    def accept(self, visitor):
+        visitor(self)
+        for field in self.fields:
+            value = getattr(self, field)
+            if isinstance(value, Node):
+                value.accept(visitor)
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, Node):
+                        item.accept(visitor)
+
     def generic(self, with_lineno=False):
         values = {}
         if with_lineno:
@@ -127,3 +138,39 @@ UseDeclarations = node('UseDeclarations', ['nodes'])
 UseDeclaration = node('UseDeclaration', ['name', 'alias'])
 ConstantDeclarations = node('ConstantDeclarations', ['nodes'])
 ConstantDeclaration = node('ConstantDeclaration', ['name', 'initial'])
+
+def resolve_magic_constants(nodes):
+    current = {}
+    def visitor(node):
+        if isinstance(node, Namespace):
+            current['namespace'] = node.name
+        elif isinstance(node, Class):
+            current['class'] = node.name
+        elif isinstance(node, Function):
+            current['function'] = node.name
+        elif isinstance(node, Method):
+            current['method'] = node.name
+        elif isinstance(node, MagicConstant):
+            if node.name == '__NAMESPACE__':
+                node.value = current.get('namespace')
+            elif node.name == '__CLASS__':
+                node.value = current.get('class')
+                if current.get('namespace'):
+                    node.value = '%s\\%s' % (current.get('namespace'),
+                                             node.value)
+            elif node.name == '__FUNCTION__':
+                node.value = current.get('function')
+                if current.get('namespace'):
+                    node.value = '%s\\%s' % (current.get('namespace'),
+                                             node.value)
+            elif node.name == '__METHOD__':
+                node.value = current.get('method')
+                if current.get('class'):
+                    node.value = '%s::%s' % (current.get('class'),
+                                             node.value)
+                if current.get('namespace'):
+                    node.value = '%s\\%s' % (current.get('namespace'),
+                                             node.value)
+    for node in nodes:
+        if isinstance(node, Node):
+            node.accept(visitor)

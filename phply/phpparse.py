@@ -4,6 +4,7 @@
 # A parser for PHP.
 # -----------------------------------------------------------------------------
 
+import os
 import sys
 import phplex
 import phpast as ast
@@ -1137,31 +1138,35 @@ def p_common_scalar_string(p):
 
 def p_common_scalar_magic_line(p):
     'common_scalar : LINE'
-    p[0] = ast.MagicConstant(p[1], 'TODO', lineno=p.lineno(1))
+    p[0] = ast.MagicConstant(p[1].upper(), p.lineno(1), lineno=p.lineno(1))
 
 def p_common_scalar_magic_file(p):
     'common_scalar : FILE'
-    p[0] = ast.MagicConstant(p[1], 'TODO', lineno=p.lineno(1))
+    value = getattr(p.lexer, 'filename', None)
+    p[0] = ast.MagicConstant(p[1].upper(), value, lineno=p.lineno(1))
 
 def p_common_scalar_magic_dir(p):
     'common_scalar : DIR'
-    p[0] = ast.MagicConstant(p[1], 'TODO', lineno=p.lineno(1))
+    value = getattr(p.lexer, 'filename', None)
+    if value is not None:
+        value = os.path.dirname(value)
+    p[0] = ast.MagicConstant(p[1].upper(), value, lineno=p.lineno(1))
 
 def p_common_scalar_magic_class(p):
     'common_scalar : CLASS_C'
-    p[0] = ast.MagicConstant(p[1], 'TODO', lineno=p.lineno(1))
+    p[0] = ast.MagicConstant(p[1].upper(), None, lineno=p.lineno(1))
 
 def p_common_scalar_magic_method(p):
     'common_scalar : METHOD_C'
-    p[0] = ast.MagicConstant(p[1], 'TODO', lineno=p.lineno(1))
+    p[0] = ast.MagicConstant(p[1].upper(), None, lineno=p.lineno(1))
 
 def p_common_scalar_magic_func(p):
     'common_scalar : FUNC_C'
-    p[0] = ast.MagicConstant(p[1], 'TODO', lineno=p.lineno(1))
+    p[0] = ast.MagicConstant(p[1].upper(), None, lineno=p.lineno(1))
 
 def p_common_scalar_magic_ns(p):
     'common_scalar : NS_C'
-    p[0] = ast.MagicConstant(p[1], 'TODO', lineno=p.lineno(1))
+    p[0] = ast.MagicConstant(p[1].upper(), None, lineno=p.lineno(1))
 
 def p_static_scalar(p):
     '''static_scalar : common_scalar

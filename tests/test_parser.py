@@ -5,9 +5,11 @@ from phply.phpast import *
 import nose.tools
 import pprint
 
-def eq_ast(input, expected):
+def eq_ast(input, expected, filename=None):
     lexer = phplex.lexer.clone()
+    lexer.filename = filename
     output = parser.parse(input, lexer=lexer)
+    resolve_magic_constants(output)
 
     print 'Parser output:'
     pprint.pprint(output)
@@ -655,3 +657,43 @@ def test_closures():
                    False),
     ]
     eq_ast(input, expected)
+
+def test_magic_constants():
+    input = r"""<?
+        namespace Shmamespace;
+
+        function p($x) {
+            echo __FUNCTION__ . ': ' . $x . "\n";
+        }
+
+        class Bar {
+            function __construct() {
+                p(__LINE__);
+                p(__DIR__);
+                p(__FILE__);
+                p(__NAMESPACE__);
+                p(__CLASS__);
+                p(__METHOD__);
+            }
+        }
+
+        new Bar();
+    ?>"""
+    expected = [
+        Namespace('Shmamespace', []),
+        Function('p', [FormalParameter('$x', None, False)], [
+            Echo([BinaryOp('.', BinaryOp('.', BinaryOp('.',
+                MagicConstant('__FUNCTION__', 'Shmamespace\\p'), ': '),
+                Variable('$x')), '\n')])
+        ], False),
+        Class('Bar', None, None, [],
+              [Method('__construct', [], [],
+                      [FunctionCall('p', [Parameter(MagicConstant('__LINE__', 10), False)]),
+                       FunctionCall('p', [Parameter(MagicConstant('__DIR__', '/my/dir'), False)]),
+                       FunctionCall('p', [Parameter(MagicConstant('__FILE__', '/my/dir/file.php'), False)]),
+                       FunctionCall('p', [Parameter(MagicConstant('__NAMESPACE__', 'Shmamespace'), False)]),
+                       FunctionCall('p', [Parameter(MagicConstant('__CLASS__', 'Shmamespace\\Bar'), False)]),
+                       FunctionCall('p', [Parameter(MagicConstant('__METHOD__', 'Shmamespace\\Bar::__construct'), False)])], False)]),
+        New('Bar', []),
+    ]
+    eq_ast(input, expected, filename='/my/dir/file.php')
