@@ -416,8 +416,8 @@ def test_classes():
                            [ClassVariable('$x', None)]),
             Method('conjunction_junction',
                    ['public'], 
-                   [FormalParameter('$arg1', None, False),
-                    FormalParameter('$arg2', None, False)],
+                   [FormalParameter('$arg1', None, False, None),
+                    FormalParameter('$arg2', None, False, None)],
                    [Return(BinaryOp('.', Variable('$arg1'), Variable('$arg2')))],
                    False),
         ]),
@@ -639,7 +639,7 @@ def test_closures():
     ?>"""
     expected = [
         Assignment(Variable('$greet'),
-                   Closure([FormalParameter('$name', None, False)],
+                   Closure([FormalParameter('$name', None, False, None)],
                            [],
                            [FunctionCall('printf',
                                          [Parameter('Hello %s\r\n', False),
@@ -648,8 +648,8 @@ def test_closures():
                    False),
         FunctionCall(Variable('$greet'), [Parameter('World', False)]),
         Assignment(Variable('$cb'),
-                   Closure([FormalParameter('$a', None, False),
-                            FormalParameter('$b', None, True)],
+                   Closure([FormalParameter('$a', None, False, None),
+                            FormalParameter('$b', None, True, None)],
                            [LexicalVariable('$c', False),
                             LexicalVariable('$d', True)],
                            [],
@@ -681,7 +681,7 @@ def test_magic_constants():
     ?>"""
     expected = [
         Namespace('Shmamespace', []),
-        Function('p', [FormalParameter('$x', None, False)], [
+        Function('p', [FormalParameter('$x', None, False, None)], [
             Echo([BinaryOp('.', BinaryOp('.', BinaryOp('.',
                 MagicConstant('__FUNCTION__', 'Shmamespace\\p'), ': '),
                 Variable('$x')), '\n')])
@@ -697,3 +697,17 @@ def test_magic_constants():
         New('Bar', []),
     ]
     eq_ast(input, expected, filename='/my/dir/file.php')
+
+def test_type_hinting():
+    input = r"""<?
+    function foo(Foo $var1, $var2) {
+    }
+    ?>""";
+    expected = [
+        Function('foo', 
+            [FormalParameter('$var1', None, False, 'Foo'),
+             FormalParameter('$var2', None, False, None)],
+            [],
+            False)]
+    eq_ast(input, expected)
+
