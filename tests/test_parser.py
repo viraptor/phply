@@ -700,13 +700,15 @@ def test_magic_constants():
 
 def test_type_hinting():
     input = r"""<?
-    function foo(Foo $var1, $var2) {
+    function foo(Foo $var1, Bar $var2=1, Quux &$var3, Corge &$var4=1) {
     }
     ?>""";
     expected = [
         Function('foo', 
             [FormalParameter('$var1', None, False, 'Foo'),
-             FormalParameter('$var2', None, False, None)],
+             FormalParameter('$var2', 1, False, 'Bar'),
+             FormalParameter('$var3', None, True, 'Quux'),
+             FormalParameter('$var4', 1, True, 'Corge')],
             [],
             False)]
     eq_ast(input, expected)
