@@ -46,8 +46,7 @@ is still a fair amount of work to do:
 
 ## Who's working on it?
 
-* Dave Benjamin (ramen)
-* Dan Colish (dcolish)
+See the [AUTHORS](https://github.com/ramen/phply/blob/master/AUTHORS) file.
 
 ## How do I use it?
 
