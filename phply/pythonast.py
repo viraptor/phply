@@ -206,7 +206,7 @@ def from_phpast(node):
                             **pos(node))
 
     if isinstance(node, php.ObjectProperty):
-        if isinstance(node.name, php.Variable):
+        if isinstance(node.name, (php.Variable, php.BinaryOp)):
             return py.Call(py.Name('getattr', py.Load(**pos(node)),
                                    **pos(node)),
                            [from_phpast(node.node),
