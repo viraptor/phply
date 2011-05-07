@@ -170,6 +170,14 @@ def from_phpast(node):
                                         **pos(node)),
                            [from_phpast(node.expr)],
                            [], None, None, **pos(node))
+        if (isinstance(node.node, php.ObjectProperty)
+            and isinstance(node.node.name, php.BinaryOp)):
+            return to_stmt(py.Call(py.Name('setattr', py.Load(**pos(node)),
+                                   **pos(node)),
+                           [from_phpast(node.node.node),
+                            from_phpast(node.node.name),
+                            from_phpast(node.expr)],
+                           [], None, None, **pos(node)))
         return py.Assign([store(from_phpast(node.node))],
                          from_phpast(node.expr),
                          **pos(node))
