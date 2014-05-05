@@ -1313,7 +1313,7 @@ def p_error(t):
         raise SyntaxError('unexpected EOF while parsing', (None, None, None, None))
 
 # Build the grammar
-parser = yacc.yacc()
+parser = yacc.yacc(debug=False)
 
 if __name__ == '__main__':
     import readline
