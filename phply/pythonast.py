@@ -219,7 +219,7 @@ def from_phpast(node):
                                    **pos(node)),
                            [from_phpast(node.node),
                             from_phpast(node.name)],
-                           [], None, None, **pos(node))            
+                           [], None, None, **pos(node))
         return py.Attribute(from_phpast(node.node),
                             node.name,
                             py.Load(**pos(node)),
@@ -286,6 +286,8 @@ def from_phpast(node):
                               [from_phpast(node.right)],
                               **pos(node))
         op = binary_ops.get(node.op)
+        if node.op == 'instanceof':
+            return py.Call(func=py.Name(id='isinstance', ctx=py.Load(**pos(node))), args=[from_phpast(node.left), from_phpast(node.right)], keywords=[], starargs=None, kwargs=None )
         assert op is not None, "unknown binary operator: '%s'" % node.op
         op = op(**pos(node))
         return py.BinOp(from_phpast(node.left),
@@ -462,7 +464,7 @@ def from_phpast(node):
 
     if isinstance(node, php.StaticMethodCall):
         class_ = node.class_
-        if class_ == 'self': class_ = 'cls' 
+        if class_ == 'self': class_ = 'cls'
         args, kwargs = build_args(node.params)
         return py.Call(py.Attribute(py.Name(class_, py.Load(**pos(node)),
                                             **pos(node)),
@@ -480,7 +482,7 @@ def from_phpast(node):
                                     **pos(node)),
                             name,
                             py.Load(**pos(node)),
-                            **pos(node))        
+                            **pos(node))
 
     return py.Call(py.Name('XXX', py.Load(**pos(node)), **pos(node)),
                    [py.Str(str(node), **pos(node))],
