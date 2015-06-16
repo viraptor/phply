@@ -1,4 +1,4 @@
-import phpast as php
+from phply import phpast as php
 import ast as py
 
 unary_ops = {

@@ -21,11 +21,11 @@ def inline_html(obj):
     sys.stdout.write(obj)
 
 def XXX(obj):
-    print 'Not implemented:\n ', obj
+    print ('Not implemented:\n ', obj)
 
 def ast_dump(code):
-    print 'AST dump:'
-    print ' ', ast.dump(code, include_attributes=True)
+    print ('AST dump:')
+    print (' ', ast.dump(code, include_attributes=True))
 
 def php_eval(nodes):
     body = []
@@ -63,7 +63,7 @@ while True:
            lexer.lineno = 1
            result = parser.parse(s, lexer=lexer)
            php_eval(result)
-       except SyntaxError, e:
+       except SyntaxError as e:
            # Parsing failed. See if it can be parsed as an expression.
            try:
                lexer.lineno = 1
@@ -81,7 +81,7 @@ while True:
                    if e.lineno is None:
                        continue
                    else:
-                       print e, 'near', repr(e.text)
+                       print (e, 'near', repr(e.text))
                        s = ''
    except:
        traceback.print_exc()
