@@ -1,5 +1,6 @@
 import phpast as php
 import ast as py
+from re import finditer
 
 unary_ops = {
     '~': py.Invert,
@@ -441,7 +442,37 @@ def from_phpast(node):
 
     if isinstance(node, (php.FunctionCall, php.New)):
         if isinstance(node.name, basestring):
-            name = py.Name(node.name, py.Load(**pos(node)), **pos(node))
+            if node.name == 'explode':
+                args, _ = build_args(node.params)
+                all_args = [args[0]]
+                if len(args) > 2:
+                    all_args.append(args[2])
+                return py.Call(func=py.Attribute(value=args[1],
+                                                 attr='split', ctx=py.Load()),
+                               args=all_args, keywords=[],
+                               starargs=None,
+                               kwargs=None)
+            elif node.name == 'implode':
+                args, kwargs = build_args(node.params)
+                return py.Call(func=py.Attribute(value=args[0],
+                                                 attr='join', ctx=py.Load()),
+                               args=[args[1]], keywords=[],
+                               starargs=None,
+                               kwargs=None)
+            elif node.name == 'trim':
+                args, kwargs = build_args(node.params)
+                call_args = []
+                if len(args) > 1:
+                    call_args.append(args[1])
+                return py.Call(func=py.Attribute(value=args[0],
+                                                 attr='strip', ctx=py.Load()),
+                               args=call_args, keywords=kwargs,
+                               starargs=None,
+                               kwargs=None)
+            else:
+                if node.name == 'count':
+                    node.name = 'len'
+                name = py.Name(node.name, py.Load(**pos(node)), **pos(node))
         else:
             name = py.Subscript(py.Call(py.Name('vars', py.Load(**pos(node)),
                                                 **pos(node)),
