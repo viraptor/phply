@@ -1,6 +1,154 @@
 import phpast as php
 import ast as py
-from re import finditer
+
+needs_strtok = False
+needs_re_import = False
+
+python_re_import_ast = py.Import(names=[py.alias(name='re', asname=None)])
+
+python_strtok_ast = py.Module(body=[
+    py.FunctionDef(name='strtok', args=py.arguments(args=[py.Name(id='the_string', ctx=py.Param()),
+                                                          py.Name(id='the_separator', ctx=py.Param())],
+                                                    vararg=None, kwarg=None, defaults=[]), body=[
+        py.Expr(value=py.Str(
+            s='\\n    Return the first token in the string defined by the separator.\\n    ')),
+        py.Assign(targets=[py.Name(id='the_token', ctx=py.Store())],
+                  value=py.Name(id='False', ctx=py.Load())),
+        py.Assign(targets=[py.Name(id='next_idx', ctx=py.Store())], value=py.Num(n=0)),
+        py.While(test=py.BoolOp(op=py.And(),
+                                values=[
+                                    py.UnaryOp(
+                                        op=py.Not(),
+                                        operand=py.Name(
+                                            id='the_token',
+                                            ctx=py.Load())),
+                                    py.Name(
+                                        id='the_string',
+                                        ctx=py.Load())]),
+                 body=[py.Assign(targets=[
+                     py.Name(id='next_idx',
+                             ctx=py.Store())],
+                     value=py.Call(
+                         func=py.Attribute(
+                             value=py.Subscript(
+                                 value=py.Name(
+                                     id='the_string',
+                                     ctx=py.Load()),
+                                 slice=py.Slice(
+                                     lower=py.Name(
+                                         id='next_idx',
+                                         ctx=py.Load()),
+                                     upper=None,
+                                     step=None),
+                                 ctx=py.Load()),
+                             attr='find',
+                             ctx=py.Load()),
+                         args=[
+                             py.Name(
+                                 id='the_separator',
+                                 ctx=py.Load())],
+                         keywords=[],
+                         starargs=None,
+                         kwargs=None)),
+                     py.If(test=py.Compare(
+                         left=py.BinOp(
+                             left=py.Name(
+                                 id='next_idx',
+                                 ctx=py.Load()),
+                             op=py.Add(),
+                             right=py.Num(
+                                 n=1)),
+                         ops=[py.Lt()],
+                         comparators=[
+                             py.Call(
+                                 func=py.Name(
+                                     id='len',
+                                     ctx=py.Load()),
+                                 args=[
+                                     py.Name(
+                                         id='the_string',
+                                         ctx=py.Load())],
+                                 keywords=[],
+                                 starargs=None,
+                                 kwargs=None)]), body=[py.If(test=py.Compare(left=py.Name(
+                         id='next_idx',
+                         ctx=py.Load()), ops=[
+                         py.Lt()], comparators=[
+                         py.Num(
+                             n=0)]), body=[py.Assign(
+                         targets=[
+                             py.Name(
+                                 id='next_idx',
+                                 ctx=py.Store())],
+                         value=py.Call(
+                             func=py.Name(
+                                 id='len',
+                                 ctx=py.Load()),
+                             args=[
+                                 py.Name(
+                                     id='the_string',
+                                     ctx=py.Load())],
+                             keywords=[],
+                             starargs=None,
+                             kwargs=None))], orelse=[]), py.Assign(targets=[py.Name(
+                         id='the_token',
+                         ctx=py.Store())], value=py.Subscript(value=py.Name(
+                         id='the_string',
+                         ctx=py.Load()),
+                         slice=py.Slice(
+                             lower=py.Num(
+                                 n=0),
+                             upper=py.Name(
+                                 id='next_idx',
+                                 ctx=py.Load()),
+                             step=None),
+                         ctx=py.Load())),
+                         py.Assign(
+                             targets=[
+                                 py.Name(
+                                     id='the_string',
+                                     ctx=py.Store())],
+                             value=py.Subscript(
+                                 value=py.Name(
+                                     id='the_string',
+                                     ctx=py.Load()),
+                                 slice=py.Slice(
+                                     lower=py.BinOp(
+                                         left=py.Name(
+                                             id='next_idx',
+                                             ctx=py.Load()),
+                                         op=py.Add(),
+                                         right=py.Num(
+                                             n=1)),
+                                     upper=None,
+                                     step=None),
+                                 ctx=py.Load())),
+                         py.If(
+                             test=py.Name(
+                                 id='the_token',
+                                 ctx=py.Load()),
+                             body=[
+                                 py.Break()],
+                             orelse=[])],
+                         orelse=[py.Assign(
+                             targets=[
+                                 py.Name(
+                                     id='the_token',
+                                     ctx=py.Store())],
+                             value=py.Name(
+                                 id='False',
+                                 ctx=py.Load())),
+                             py.Assign(
+                                 targets=[
+                                     py.Name(
+                                         id='the_string',
+                                         ctx=py.Store())],
+                                 value=py.Str(
+                                     s=''))])],
+                 orelse=[]),
+        py.Return(value=py.Tuple(
+            elts=[py.Name(id='the_string', ctx=py.Load()), py.Name(id='the_token', ctx=py.Load())],
+            ctx=py.Load()))], decorator_list=[])])
 
 unary_ops = {
     '~': py.Invert,
@@ -47,12 +195,14 @@ casts = {
     'array': 'list',
 }
 
+
 def to_stmt(pynode):
     if not isinstance(pynode, py.stmt):
         pynode = py.Expr(pynode,
                          lineno=pynode.lineno,
                          col_offset=pynode.col_offset)
     return pynode
+
 
 def from_phpast(node):
     if node is None:
@@ -174,11 +324,11 @@ def from_phpast(node):
         if (isinstance(node.node, php.ObjectProperty)
             and isinstance(node.node.name, php.BinaryOp)):
             return to_stmt(py.Call(py.Name('setattr', py.Load(**pos(node)),
-                                   **pos(node)),
-                           [from_phpast(node.node.node),
-                            from_phpast(node.node.name),
-                            from_phpast(node.expr)],
-                           [], None, None, **pos(node)))
+                                           **pos(node)),
+                                   [from_phpast(node.node.node),
+                                    from_phpast(node.node.name),
+                                    from_phpast(node.expr)],
+                                   [], None, None, **pos(node)))
         return py.Assign([store(from_phpast(node.node))],
                          from_phpast(node.expr),
                          **pos(node))
@@ -187,8 +337,8 @@ def from_phpast(node):
         return py.Assign([py.Tuple(map(store, map(from_phpast, node.nodes)),
                                    py.Store(**pos(node)),
                                    **pos(node))],
-                          from_phpast(node.expr),
-                          **pos(node))
+                         from_phpast(node.expr),
+                         **pos(node))
 
     if isinstance(node, php.AssignOp):
         return from_phpast(php.Assignment(node.left,
@@ -220,7 +370,7 @@ def from_phpast(node):
                                    **pos(node)),
                            [from_phpast(node.node),
                             from_phpast(node.name)],
-                           [], None, None, **pos(node))            
+                           [], None, None, **pos(node))
         return py.Attribute(from_phpast(node.node),
                             node.name,
                             py.Load(**pos(node)),
@@ -308,17 +458,20 @@ def from_phpast(node):
                        [], None, None, **pos(node))
 
     if isinstance(node, php.If):
-        orelse = []
+        or_else = []
+        # We handle else first, and then elseifs in revers, then If because each preceding if/elif we create
+        # will hold an internal cascaded nested if/else tree down the line. We really *should* support elif, but
+        # this works for now -- just looks ugly and isn't amazingly maintainable/readable.
         if node.else_:
             for else_ in map(from_phpast, deblock(node.else_.node)):
-                orelse.append(to_stmt(else_))
+                or_else.append(to_stmt(else_))
         for elseif in reversed(node.elseifs):
-            orelse = [py.If(from_phpast(elseif.expr),
+            or_else = [py.If(from_phpast(elseif.expr),
                             map(to_stmt, map(from_phpast, deblock(elseif.node))),
-                            orelse, **pos(node))]
+                            or_else, **pos(node))]
         return py.If(from_phpast(node.expr),
                      map(to_stmt, map(from_phpast, deblock(node.node))),
-                     orelse, **pos(node))
+                     or_else, **pos(node))
 
     if isinstance(node, php.For):
         assert node.test is None or len(node.test) == 1, \
@@ -442,6 +595,7 @@ def from_phpast(node):
 
     if isinstance(node, (php.FunctionCall, php.New)):
         if isinstance(node.name, basestring):
+            global needs_re_import
             if node.name == 'explode':
                 args, _ = build_args(node.params)
                 all_args = [args[0]]
@@ -469,6 +623,59 @@ def from_phpast(node):
                                args=call_args, keywords=kwargs,
                                starargs=None,
                                kwargs=None)
+            elif node.name == 'strtok':
+                global needs_strtok
+                needs_strtok = True
+                args, kwargs = build_args(node.params)
+                return py.Call(func=py.Name(id='strtok', ctx=py.Load()),
+                               args=args, keywords=kwargs, starargs=None,
+                               kwargs=None)
+            elif node.name == 'strtolower':
+                args, _ = build_args(node.params)
+                return py.Call(func=py.Attribute(value=args[0],
+                                                 attr='lower', ctx=py.Load()),
+                               args=[], keywords=[],
+                               starargs=None,
+                               kwargs=None)
+            elif node.name == 'strtoupper':
+                args, _ = build_args(node.params)
+                return py.Call(func=py.Attribute(value=args[0],
+                                                 attr='upper', ctx=py.Load()),
+                               args=[], keywords=[],
+                               starargs=None,
+                               kwargs=None)
+            elif node.name == 'preg_replace' or node.name == 'preg_replace_callback':
+                needs_re_import = True
+                args, kwargs = build_args(node.params)
+                return py.Call(func=py.Attribute(value=py.Name(id='re', ctx=py.Load()),
+                                                 attr='sub', ctx=py.Load()),
+                               args=args, keywords=kwargs,
+                               starargs=None,
+                               kwargs=None)
+            elif node.name == 'preg_split':
+                needs_re_import = True
+                args, kwargs = build_args(node.params)
+                return py.Call(func=py.Attribute(value=py.Name(id='re', ctx=py.Load()),
+                                                 attr='split', ctx=py.Load()),
+                               args=args, keywords=kwargs,
+                               starargs=None,
+                               kwargs=None)
+            elif node.name == 'preg_match':
+                needs_re_import = True
+                args, kwargs = build_args(node.params)
+                return py.Call(func=py.Attribute(value=py.Name(id='re', ctx=py.Load()),
+                                                 attr='search', ctx=py.Load()),
+                               args=args, keywords=kwargs,
+                               starargs=None,
+                               kwargs=None)
+            elif node.name == 'preg_quote':
+                needs_re_import = True
+                args, kwargs = build_args(node.params)
+                return py.Call(func=py.Attribute(value=py.Name(id='re', ctx=py.Load()),
+                                                 attr='escape', ctx=py.Load()),
+                               args=args, keywords=kwargs,
+                               starargs=None,
+                               kwargs=None)
             else:
                 if node.name == 'count':
                     node.name = 'len'
@@ -493,7 +700,7 @@ def from_phpast(node):
 
     if isinstance(node, php.StaticMethodCall):
         class_ = node.class_
-        if class_ == 'self': class_ = 'cls' 
+        if class_ == 'self': class_ = 'cls'
         args, kwargs = build_args(node.params)
         return py.Call(py.Attribute(py.Name(class_, py.Load(**pos(node)),
                                             **pos(node)),
@@ -511,24 +718,69 @@ def from_phpast(node):
                                     **pos(node)),
                             name,
                             py.Load(**pos(node)),
-                            **pos(node))        
+                            **pos(node))
+    if isinstance(node, php.Default):
+        return None
 
+    if isinstance(node, php.Switch):
+        # does not handle no break at the end of the case, and assumes default is last in the order.
+        # And like the php.If in this function, we do not optimize up for elif, just cascading nested if/else
+        or_else = []
+        if len(node.nodes) > 1:
+            for case_node in node.nodes[::-1][:-1]:
+                node_expr_for_ast = case_node.expr if hasattr(case_node, 'expr') else case_node
+                case_ast = from_phpast(node_expr_for_ast)
+                if case_ast:
+                    case_body_nodes = []
+                    for case_body_node in case_node.nodes:
+                        if isinstance(case_body_node, (py.Break, php.Break)):
+                            if not len(case_body_nodes):  # do not want an empty case/if
+                                case_body_nodes.append(py.Pass(**pos(case_body_node)))
+                            break
+                        case_body_nodes.append(case_body_node)
+                    or_else = [
+                        py.If(test=py.Compare(left=case_ast, ops=[py.Eq()], comparators=[from_phpast(node.expr)]),
+                              body=map(to_stmt, map(from_phpast, case_body_nodes)),
+                              orelse=or_else, **pos(node))]
+                else:
+                    for the_else_node in map(from_phpast, case_node.nodes):
+                        if isinstance(the_else_node, (py.Break, php.Break)):
+                            if not len(case_node.nodes) > 1:
+                                the_else_node = py.Pass(**pos(the_else_node))
+                                or_else.append(to_stmt(the_else_node))
+                            break
+                        or_else.append(to_stmt(the_else_node))
+        top_case_ast = from_phpast(node.nodes[0].expr)
+        top_body_nodes = []
+        for top_body_node in node.nodes[0].nodes:
+            if isinstance(top_body_node, (py.Break, php.Break)):
+                if not len(top_body_nodes):  # do not want an empty case/if
+                    top_body_nodes.append(py.Pass(**pos(top_body_node)))
+                break
+            top_body_nodes.append(top_body_node)
+        return py.If(test=py.Compare(left=top_case_ast, ops=[py.Eq()], comparators=[from_phpast(node.expr)]),
+                     body=map(to_stmt, map(from_phpast, top_body_nodes)) or [py.Pass(**pos(node.nodes[0]))],
+                     orelse=or_else)
     return py.Call(py.Name('XXX', py.Load(**pos(node)), **pos(node)),
                    [py.Str(str(node), **pos(node))],
                    [], None, None, **pos(node))
 
+
 def pos(node):
     return {'lineno': getattr(node, 'lineno', 0), 'col_offset': 0}
+
 
 def store(name):
     name.ctx = py.Store(**pos(name))
     return name
+
 
 def deblock(node):
     if isinstance(node, php.Block):
         return node.nodes
     else:
         return [node]
+
 
 def build_args(params):
     args = []
@@ -540,6 +792,7 @@ def build_args(params):
         else:
             args.append(node)
     return args, kwargs
+
 
 def build_format(left, right):
     if isinstance(left, basestring):
