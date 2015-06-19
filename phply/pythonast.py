@@ -478,10 +478,10 @@ def from_phpast(node):
                 or_else.append(to_stmt(else_))
         for elseif in reversed(node.elseifs):
             or_else = [py.If(from_phpast(elseif.expr),
-                            map(to_stmt, map(from_phpast, deblock(elseif.node))),
-                            or_else, **pos(node))]
+                             map(to_stmt, map(from_phpast, deblock(elseif.node))) or [py.Pass(**pos(elseif))],
+                             or_else, **pos(node))]
         return py.If(from_phpast(node.expr),
-                     map(to_stmt, map(from_phpast, deblock(node.node))),
+                     map(to_stmt, map(from_phpast, deblock(node.node))) or [py.Pass(**pos(node))],
                      or_else, **pos(node))
 
     if isinstance(node, php.For):
