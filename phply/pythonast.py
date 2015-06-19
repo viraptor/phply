@@ -413,7 +413,18 @@ def from_phpast(node):
         op = unary_ops.get(node.op)
         assert op is not None, "unknown unary operator: '%s'" % node.op
         op = op(**pos(node))
-        return py.UnaryOp(op, from_phpast(node.expr), **pos(node))
+        unary_operand = from_phpast(node.expr)
+        # more pythonic, syntactically -- only handling one ops...I do not intend for this to be a full pythonic surgery
+        if isinstance(op, py.Not) and isinstance(unary_operand, py.Compare) and len(unary_operand.ops) == 1:
+            # Not and In make a NotIn
+            if isinstance(unary_operand.ops[0], py.In):
+                unary_operand.ops[0] = py.NotIn()
+                return unary_operand
+            # Not and NotIn make an In
+            elif isinstance(unary_operand.ops[0], py.NotIn):
+                unary_operand.ops[0] = py.In()
+                return unary_operand
+        return py.UnaryOp(op, unary_operand, **pos(node))
 
     if isinstance(node, php.BinaryOp):
         if node.op == '.':
@@ -596,7 +607,11 @@ def from_phpast(node):
     if isinstance(node, (php.FunctionCall, php.New)):
         if isinstance(node.name, basestring):
             global needs_re_import
-            if node.name == 'explode':
+            if node.name == 'in_array':
+                args, _ = build_args(node.params)
+                return py.Compare(left=args[0], ops=[py.In()],
+                                  comparators=[args[1]], ctx=py.Load())
+            elif node.name == 'explode':
                 args, _ = build_args(node.params)
                 all_args = [args[0]]
                 if len(args) > 2:
