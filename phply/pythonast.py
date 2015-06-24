@@ -195,6 +195,130 @@ casts = {
     'array': 'list',
 }
 
+class PySwitch(object):
+    def process(self, node):
+        # does not handle no break at the end of the case, and assumes default is last in the order.
+        # And like the php.If in this function, we do not optimize up for elif, just cascading nested if/else
+        skip_true = py.Assign(targets=[py.Name(id='skip', ctx=py.Store())], value=py.Name(id='True', ctx=py.Load()))
+        skip_false = py.Assign(targets=[py.Name(id='skip', ctx=py.Store())], value=py.Name(id='False', ctx=py.Load()))
+        body = []
+        or_else = []
+        if len(node.nodes) > 1:
+            node_groups = []
+            for case_idx in xrange(len(node.nodes) - 1):
+                cur_case = node.nodes[len(node.nodes) - 1 - case_idx]
+                if len(node_groups):
+                    cur_node_groups_len = len(node_groups)
+                    for stmt_in_case in cur_case.nodes[::-1]:
+                        # there is a top-level break statement here, so we will build a new group
+                        if isinstance(stmt_in_case, (php.Break, py.Break)):
+                            node_groups.insert(0, [cur_case])
+                            break
+                    # we did not find any top-level break statements, so we will add this case to the current head list
+                    if cur_node_groups_len == len(node_groups):
+                        node_groups[0].insert(0, cur_case)
+                else:
+                    # this is the special beginning case
+                    node_groups.append([cur_case])
+            # if the lengths are the same, treat each case as a single elif (essentially)
+            if len(node_groups) == (len(node.nodes) - 1):
+                for case_node in node.nodes[::-1][:-1]:
+                    node_expr_for_ast = case_node.expr if hasattr(case_node, 'expr') else case_node
+                    case_ast = from_phpast(node_expr_for_ast)
+                    case_body_nodes = []
+                    for case_body_node in case_node.nodes:
+                        if isinstance(case_body_node, (py.Break, php.Break)):
+                            if not case_body_nodes:  # do not want an empty case/if
+                                case_body_nodes.append(py.Pass(**pos(case_body_node)))
+                            break
+                        case_body_nodes.append(case_body_node)
+                    if_test = py.Name(id='True', ctx=py.Load())
+                    if case_ast:
+                        if_test = py.Compare(left=case_ast, ops=[py.Eq()], comparators=[from_phpast(node.expr)])
+                    or_else = [
+                        py.If(test=if_test,
+                              body=map(to_stmt, map(from_phpast, case_body_nodes)),
+                              orelse=or_else, **pos(node))]
+            else:
+                body.append(skip_false)
+                # fold-in each node group to be one massive If BoolOp Or
+                for node_group_idx, node_group in enumerate(node_groups):
+                    for node_element in node_group:
+                        new_if = py.If(test=py.BoolOp(op=py.Or(), values=[py.Name(id='skip', ctx=py.Load())]), orelse=[], body=[])
+                        body.append(new_if)
+                        # Look for a break
+                        if not self.drill(node_element, php.Break, ignore=[php.Switch]):
+                            new_if.body.insert(0, skip_false)
+                        else:
+                            new_if.body.insert(0, skip_true)
+
+                        element_to_ast = node_element.expr if hasattr(node_element, 'expr') else node_element
+                        element_as_ast = from_phpast(element_to_ast)
+                        if element_as_ast:
+                            next_compare = py.Compare(left=from_phpast(node.expr), ops=[py.Eq()],
+                                                      comparators=[element_as_ast])
+                            new_if.test.values.append(next_compare)
+                        elif len(node_group) == 1:
+                            # this is the default, and the sole "case" in the group.
+                            new_if.test = py.Name(id='True', ctx=py.Load())
+                        for idx, stmt_in_case in enumerate(node_element.nodes):
+                            if isinstance(stmt_in_case, php.Break):
+                                if not idx:
+                                    new_if.body.append(py.Pass(**pos(from_phpast(stmt_in_case))))
+                                break
+                            else:
+                                new_if.body.append(to_stmt(from_phpast(stmt_in_case)))
+                    # or_else.append(new_if)
+                for if_idx, the_if in enumerate(or_else):
+                    if if_idx + 1 < len(or_else):
+                        the_if.orelse = [or_else[if_idx + 1]]
+        top_case_ast = from_phpast(node.nodes[0].expr)
+        top_body_nodes = []
+        top_case_has_break = False
+        for top_body_node in node.nodes[0].nodes:
+            if isinstance(top_body_node, (py.Break, php.Break)):
+                top_case_has_break = True
+                if not len(top_body_nodes):  # do not want an empty case/if
+                    top_body_nodes.append(py.Pass(**pos(top_body_node)))
+                break
+            top_body_nodes.append(top_body_node)
+        if top_case_has_break:
+            temp = py.If(test=py.Compare(left=from_phpast(node.expr), ops=[py.Eq()], comparators=[top_case_ast]),
+                         body=map(to_stmt, map(from_phpast, top_body_nodes)) or [py.Pass(**pos(node.nodes[0]))],
+                         orelse=or_else)
+            if not self.drill(top_body_nodes[0], php.Break, ignore=[php.Switch]):
+                temp.body.insert(0, skip_false)
+            else:
+                temp.body.insert(0, skip_true)
+            body.insert(1, temp)
+        else:
+            # if there are any other nodes, fold this one into the top node's logic as a BoolOpOr
+            first_if = py.If(test=py.Compare(left=from_phpast(node.expr), ops=[py.Eq()], comparators=[top_case_ast]),
+                         body=map(to_stmt, map(from_phpast, top_body_nodes)) or [py.Pass(**pos(node.nodes[0]))],
+                         orelse=or_else)
+
+            if not self.drill(top_body_nodes[0], php.Break, ignore=[php.Switch]):
+                first_if.body.insert(0, skip_false)
+            else:
+                first_if.body.insert(0, skip_true)
+            body.insert(1, first_if)
+        return body
+
+    def drill(self, node, target, ignore):
+        if not isinstance(node, target) and hasattr(node, 'nodes'):
+            for thing in node.nodes:
+                if type(thing) in ignore:
+                    continue
+                rtn = self.drill(thing, target, ignore)
+                if rtn:
+                    return rtn
+            return False
+        elif isinstance(node, target):
+            return True
+        else:
+            return False
+
+
 
 def to_stmt(pynode):
     if not isinstance(pynode, py.stmt):
@@ -738,99 +862,8 @@ def from_phpast(node):
         return None
 
     if isinstance(node, php.Switch):
-        # does not handle no break at the end of the case, and assumes default is last in the order.
-        # And like the php.If in this function, we do not optimize up for elif, just cascading nested if/else
-        or_else = []
-        if len(node.nodes) > 1:
-            node_groups = []
-            for case_idx in xrange(len(node.nodes) - 1):
-                cur_case = node.nodes[len(node.nodes) - 1 - case_idx]
-                if len(node_groups):
-                    cur_node_groups_len = len(node_groups)
-                    for stmt_in_case in cur_case.nodes[::-1]:
-                        # there is a top-level break statement here, so we will build a new group
-                        if isinstance(stmt_in_case, (php.Break, py.Break)):
-                            node_groups.insert(0, [cur_case])
-                            break
-                    # we did not find any top-level break statements, so we will add this case to the current head list
-                    if cur_node_groups_len == len(node_groups):
-                        node_groups[0].insert(0, cur_case)
-                else:
-                    # this is the special beginning case
-                    node_groups.append([cur_case])
-            # if the lengths are the same, treat each case as a single elif (essentially)
-            if len(node_groups) == (len(node.nodes) - 1):
-                for case_node in node.nodes[::-1][:-1]:
-                    node_expr_for_ast = case_node.expr if hasattr(case_node, 'expr') else case_node
-                    case_ast = from_phpast(node_expr_for_ast)
-                    if case_ast:
-                        case_body_nodes = []
-                        for case_body_node in case_node.nodes:
-                            if isinstance(case_body_node, (py.Break, php.Break)):
-                                if not len(case_body_nodes):  # do not want an empty case/if
-                                    case_body_nodes.append(py.Pass(**pos(case_body_node)))
-                                break
-                            case_body_nodes.append(case_body_node)
-                        or_else = [
-                            py.If(test=py.Compare(left=case_ast, ops=[py.Eq()], comparators=[from_phpast(node.expr)]),
-                                  body=map(to_stmt, map(from_phpast, case_body_nodes)),
-                                  orelse=or_else, **pos(node))]
-                    else:
-                        for the_else_node in map(from_phpast, case_node.nodes):
-                            if isinstance(the_else_node, (py.Break, php.Break)):
-                                if not len(case_node.nodes) > 1:
-                                    the_else_node = py.Pass(**pos(the_else_node))
-                                    or_else.append(to_stmt(the_else_node))
-                                break
-                            or_else.append(to_stmt(the_else_node))
-            else:
-                # fold-in each node group to be one massive If BoolOp Or
-                for node_group_idx, node_group in enumerate(node_groups):
-                    new_if = py.If(test=py.BoolOp(op=py.Or(), values=[]), orelse=[], body=[])
-                    for node_element in node_group:
-                        element_to_ast = node_element.expr if hasattr(node_element, 'expr') else node_element
-                        element_as_ast = from_phpast(element_to_ast)
-                        if element_as_ast:
-                            next_compare = py.Compare(left=from_phpast(node.expr), ops=[py.Eq()],
-                                                      comparators=[element_as_ast])
-                            new_if.test.values.append(next_compare)
-                        elif len(node_group) == 1:
-                            # this is the default, and the sole "case" in the group.
-                            new_if.test = py.Name(id='True', ctx=py.Load())
-                        for idx, stmt_in_case in enumerate(node_element.nodes):
-                            if isinstance(stmt_in_case, php.Break):
-                                if not idx:
-                                    new_if.body.append(py.Pass(**pos(from_phpast(stmt_in_case))))
-                                break
-                            else:
-                                new_if.body.append(to_stmt(from_phpast(stmt_in_case)))
-                    or_else.append(new_if)
-                for if_idx, the_if in enumerate(or_else):
-                    if if_idx + 1 < len(or_else):
-                        the_if.orelse = [or_else[if_idx + 1]]
-        top_case_ast = from_phpast(node.nodes[0].expr)
-        top_body_nodes = []
-        top_case_has_break = False
-        for top_body_node in node.nodes[0].nodes[::-1]:
-            if isinstance(top_body_node, (py.Break, php.Break)):
-                top_case_has_break = True
-                if not len(top_body_nodes):  # do not want an empty case/if
-                    top_body_nodes.append(py.Pass(**pos(top_body_node)))
-                break
-            top_body_nodes.append(top_body_node)
-        if top_case_has_break:
-            return py.If(test=py.Compare(left=from_phpast(node.expr), ops=[py.Eq()], comparators=[top_case_ast]),
-                         body=map(to_stmt, map(from_phpast, top_body_nodes)) or [py.Pass(**pos(node.nodes[0]))],
-                         orelse=or_else)
-        else:
-            # if there are any other nodes, fold this one into the top node's logic as a BoolOpOr
-            first_if = or_else.pop(0)
-            first_if.test.values = [py.Compare(left=from_phpast(node.expr), ops=[py.Eq()],
-                                               comparators=[top_case_ast])] + first_if.test.values
-            for idx, top_body_stmt in enumerate(top_body_nodes):
-                first_if.body.insert(idx, to_stmt(from_phpast(top_body_stmt)) or py.Pass(**pos(node.nodes[0])))
-            first_if.orelse = or_else
-            return first_if
+       pass
+
     return py.Call(py.Name('XXX', py.Load(**pos(node)), **pos(node)),
                    [py.Str(str(node), **pos(node))],
                    [], None, None, **pos(node))
