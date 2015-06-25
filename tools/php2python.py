@@ -27,10 +27,12 @@ output = open(args.the_output, 'wb')
 
 body = []
 for ast in parser.parse(input.read(), lexer=lexer):
-    if isinstance(ast, php.Switch):
-        switch = pythonast.PySwitch()
-        body.extend(switch.process(ast))
+    ast_return = pythonast.from_phpast(ast)
+    if isinstance(ast_return, list):
+        body.extend(ast_return)
     else:
-        body.append(pythonast.from_phpast(ast))
+        body.append(ast_return)
 
+if pythonast.needs_strpos:
+    body.append(pythonast.py_strpos_ast)
 Unparser(body, output)
