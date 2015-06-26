@@ -141,36 +141,37 @@ ConstantDeclaration = node('ConstantDeclaration', ['name', 'initial'])
 
 def resolve_magic_constants(nodes):
     current = {}
-    def visitor(node):
-        if isinstance(node, Namespace):
-            current['namespace'] = node.name
-        elif isinstance(node, Class):
-            current['class'] = node.name
-        elif isinstance(node, Function):
-            current['function'] = node.name
-        elif isinstance(node, Method):
-            current['method'] = node.name
-        elif isinstance(node, MagicConstant):
-            if node.name == '__NAMESPACE__':
-                node.value = current.get('namespace')
-            elif node.name == '__CLASS__':
-                node.value = current.get('class')
+
+    def visitor(node_to_visit):
+        if isinstance(node_to_visit, Namespace):
+            current['namespace'] = node_to_visit.name
+        elif isinstance(node_to_visit, Class):
+            current['class'] = node_to_visit.name
+        elif isinstance(node_to_visit, Function):
+            current['function'] = node_to_visit.name
+        elif isinstance(node_to_visit, Method):
+            current['method'] = node_to_visit.name
+        elif isinstance(node_to_visit, MagicConstant):
+            if node_to_visit.name == '__NAMESPACE__':
+                node_to_visit.value = current.get('namespace')
+            elif node_to_visit.name == '__CLASS__':
+                node_to_visit.value = current.get('class')
                 if current.get('namespace'):
-                    node.value = '%s\\%s' % (current.get('namespace'),
-                                             node.value)
-            elif node.name == '__FUNCTION__':
-                node.value = current.get('function')
+                    node_to_visit.value = '%s\\%s' % (current.get('namespace'),
+                                             node_to_visit.value)
+            elif node_to_visit.name == '__FUNCTION__':
+                node_to_visit.value = current.get('function')
                 if current.get('namespace'):
-                    node.value = '%s\\%s' % (current.get('namespace'),
-                                             node.value)
-            elif node.name == '__METHOD__':
-                node.value = current.get('method')
+                    node_to_visit.value = '%s\\%s' % (current.get('namespace'),
+                                             node_to_visit.value)
+            elif node_to_visit.name == '__METHOD__':
+                node_to_visit.value = current.get('method')
                 if current.get('class'):
-                    node.value = '%s::%s' % (current.get('class'),
-                                             node.value)
+                    node_to_visit.value = '%s::%s' % (current.get('class'),
+                                             node_to_visit.value)
                 if current.get('namespace'):
-                    node.value = '%s\\%s' % (current.get('namespace'),
-                                             node.value)
-    for node in nodes:
-        if isinstance(node, Node):
-            node.accept(visitor)
+                    node_to_visit.value = '%s\\%s' % (current.get('namespace'),
+                                             node_to_visit.value)
+    for a_node in nodes:
+        if isinstance(a_node, Node):
+            a_node.accept(visitor)
