@@ -1016,7 +1016,8 @@ py_strpos_ast = py.FunctionDef(name='strpos', args=py.arguments(args=[py.Name(id
                                                                       py.Name(id='offset', ctx=py.Param())],
                                                                 vararg=None, kwarg=None, defaults=[py.Num(n=0)]),
                                body=[py.Expr(value=py.Str
-                               (s='\\n    Return index of needle in haystack, or False if not found.\\n    ')),
+                               (s='Return index of needle in haystack, or False if not found.\\n\\n    '
+                                  'Note: This is intended to emulate the logic of the PHP version.\\n    ')),
                                      py.Assign(targets=[py.Name(id='the_position', ctx=py.Store())],
                                                value=py.Call(func=py.Attribute(value=py.Name(id='haystack',
                                                                                              ctx=py.Load()),
@@ -1030,4 +1031,3 @@ py_strpos_ast = py.FunctionDef(name='strpos', args=py.arguments(args=[py.Name(id
                                                            value=py.Name(id='False', ctx=py.Load()))], orelse=[]),
                                      py.Return(value=py.Name(id='the_position', ctx=py.Load()))],
                                decorator_list=[])
-
