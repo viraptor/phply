@@ -6,12 +6,12 @@
 
 import os
 import sys
-import phplex
-import phpast as ast
+from phply import phplex
+from phply import phpast as ast
 import ply.yacc as yacc
 
 # Get the token map
-tokens = phplex.tokens
+tokens = tuple(phplex.tokens)
 
 precedence = (
     ('left', 'INCLUDE', 'INCLUDE_ONCE', 'EVAL', 'REQUIRE', 'REQUIRE_ONCE'),
@@ -1189,7 +1189,10 @@ def p_static_scalar(p):
     elif len(p) == 3:
         p[0] = ''
     else:
-        p[0] = p[2].decode('string_escape')
+        if (sys.version_info > (3, 0)):
+           p[0] = bytes(p[2], "utf-8").decode('unicode_escape')
+        else:
+           p[0] = p[2].decode('string_escape')
 
 def p_static_scalar_namespace_name(p):
     '''static_scalar : namespace_name
@@ -1257,10 +1260,17 @@ def p_encaps_list(p):
 def p_encaps_list_string(p):
     'encaps_list : encaps_list ENCAPSED_AND_WHITESPACE'
     if p[1] == '':
-        p[0] = p[2].decode('string_escape')
+        if (sys.version_info > (3, 0)):
+           p[0] = bytes(p[2], "utf-8").decode('unicode_escape')
+        else:
+           p[0] = p[2].decode('string_escape')
     else:
-        p[0] = ast.BinaryOp('.', p[1], p[2].decode('string_escape'),
-                            lineno=p.lineno(2))
+        if (sys.version_info > (3, 0)):
+           p[0] = ast.BinaryOp('.', p[1], bytes(p[2], "utf-8").decode('unicode_escape'),
+                               lineno=p.lineno(2))
+        else:
+           p[0] = ast.BinaryOp('.', p[1], p[2].decode('string_escape'),
+                               lineno=p.lineno(2))
 
 def p_encaps_var(p):
     'encaps_var : VARIABLE'
@@ -1336,9 +1346,9 @@ if __name__ == '__main__':
        try:
            lexer.lineno = 1
            result = parser.parse(s, lexer=lexer)
-       except SyntaxError, e:
+       except SyntaxError as e:
            if e.lineno is not None:
-               print e, 'near', repr(e.text)
+               print (e, 'near', repr(e.text))
                s = ''
            continue
        if result:
