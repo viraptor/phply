@@ -5,3 +5,4 @@ phply.egg-info
 Lib/
 Scripts/
 pyvenv.cfg
+pip-selfcheck.json
