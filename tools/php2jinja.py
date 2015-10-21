@@ -29,7 +29,7 @@ def unparse(nodes):
     return ''.join(result)
 
 def unparse_node(node, is_expr=False):
-    if isinstance(node, (basestring, int, float)):
+    if isinstance(node, (str, int, float)):
         return repr(node)
 
     if isinstance(node, InlineHTML):

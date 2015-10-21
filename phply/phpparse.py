@@ -6,8 +6,8 @@
 
 import os
 import sys
-import phplex
-import phpast as ast
+from . import phplex
+from . import phpast as ast
 import ply.yacc as yacc
 
 # Get the token map
@@ -1328,7 +1328,7 @@ if __name__ == '__main__':
                prompt = lexer.current_state()
                if prompt == 'INITIAL': prompt = 'html'
                prompt += '> '
-           s += raw_input(prompt)
+           s += input(prompt)
        except EOFError:
            break
        if not s: continue
@@ -1336,9 +1336,9 @@ if __name__ == '__main__':
        try:
            lexer.lineno = 1
            result = parser.parse(s, lexer=lexer)
-       except SyntaxError, e:
+       except SyntaxError as e:
            if e.lineno is not None:
-               print e, 'near', repr(e.text)
+               print(e, 'near', repr(e.text))
                s = ''
            continue
        if result:
