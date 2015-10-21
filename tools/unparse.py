@@ -1,4 +1,7 @@
 "Usage: unparse.py <path to source file>"
+
+from __future__ import print_function
+
 import sys
 import _ast
 import io
