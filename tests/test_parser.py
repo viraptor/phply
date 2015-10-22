@@ -11,13 +11,13 @@ def eq_ast(input, expected, filename=None):
     output = parser.parse(input, lexer=lexer)
     resolve_magic_constants(output)
 
-    print 'Parser output:'
+    print('Parser output:')
     pprint.pprint(output)
-    print
+    print()
 
-    print 'Node by node:'
+    print('Node by node:')
     for out, exp in zip(output, expected):
-        print '\tgot:', out, '\texpected:', exp
+        print('\tgot:', out, '\texpected:', exp)
         nose.tools.eq_(out, exp)
 
     assert len(output) == len(expected), \

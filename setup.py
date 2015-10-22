@@ -17,14 +17,15 @@ setup(name="phply",
       zip_safe=False,
       platforms='any',
       license='BSD',
-      url='http://www.github.com/ramen/phply',
+      url='https://github.com/dgasson/phply',
 
       classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Environment :: Console',
         'Intended Audience :: Education',
         'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
         'Programming Language :: PHP',
         'Operating System :: Unix',
         ],
@@ -36,6 +37,11 @@ setup(name="phply",
 
       install_requires=[
         'ply',
+        'six',
+        'wheel',
+        'future',
+        'simplejson',
+        'anyreadline'
         ],
 
       test_suite='nose.collector',

@@ -483,7 +483,7 @@ class FilteredLexer(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         t = self.token()
         if t is None:
             raise StopIteration
@@ -495,7 +495,7 @@ full_lexer = lex.lex()
 lexer = FilteredLexer(full_lexer)
 
 full_tokens = tokens
-tokens = filter(lambda token: token not in unparsed, tokens)
+tokens = [token for token in tokens if token not in unparsed]
 
 if __name__ == "__main__":
     lex.runmain(full_lexer)
