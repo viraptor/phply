@@ -713,3 +713,13 @@ def test_type_hinting():
             False)]
     eq_ast(input, expected)
 
+def test_static_scalar_class_constants():
+    input = r"""<?
+    class A { public $b = self::C; function d($var1=self::C) {} }
+    ?>"""
+    expected = [
+		Class('A', None, None, [],
+			[ClassVariables(['public'], [ClassVariable('$b', StaticProperty('self', 'C'))]),
+			 Method('d', [], [FormalParameter('$var1', StaticProperty('self', 'C'), False, None)], [], False)
+			])]
+    eq_ast(input, expected)
