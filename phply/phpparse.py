@@ -1256,11 +1256,14 @@ def p_encaps_list(p):
 
 def p_encaps_list_string(p):
     'encaps_list : encaps_list ENCAPSED_AND_WHITESPACE'
+    try:
+        p2 = p[2].decode('string_escape')
+    except ValueError:
+        p2 = p[2]
     if p[1] == '':
-        p[0] = p[2].decode('string_escape')
+        p[0] = p2
     else:
-        p[0] = ast.BinaryOp('.', p[1], p[2].decode('string_escape'),
-                            lineno=p.lineno(2))
+        p[0] = ast.BinaryOp('.', p[1], p2, lineno=p.lineno(2))
 
 def p_encaps_var(p):
     'encaps_var : VARIABLE'
