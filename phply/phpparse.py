@@ -1237,7 +1237,8 @@ def p_static_non_empty_array_pair_list_pair(p):
 
 def p_namespace_name(p):
     '''namespace_name : namespace_name NS_SEPARATOR STRING
-                      | STRING'''
+                      | STRING
+                      | ARRAY'''
     if len(p) == 4:
         p[0] = p[1] + p[2] + p[3]
     else:
