@@ -346,3 +346,20 @@ def test_punctuation():
         ('AT', '@'),
     ]
     eq_tokens(input, expected)
+
+def test_backticks():
+    input = '<? `ls $one`; "`o``ne`"; \'`one`\'; ?>'
+    expected = [
+        ('BACKTICK', '`'),
+        ('ENCAPSED_AND_WHITESPACE', 'ls '),
+        ('VARIABLE', '$one'),
+        ('BACKTICK', '`'),
+        ('SEMI', ';'),
+        ('QUOTE', '"'),
+        ('ENCAPSED_AND_WHITESPACE', '`o``ne`'),
+        ('QUOTE', '"'),
+        ('SEMI', ';'),
+        ('CONSTANT_ENCAPSED_STRING', "'`one`'"),
+        ('SEMI', ';'),
+    ]
+    eq_tokens(input, expected)

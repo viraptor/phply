@@ -713,3 +713,13 @@ def test_type_hinting():
             False)]
     eq_ast(input, expected)
 
+def test_backtick_shell_exec():
+    input = '<? `$cmd` . `date`; `echo $line`; ?>'
+    expected = [
+        BinaryOp('.',
+            FunctionCall('shell_exec', [Parameter(Variable('$cmd'), False)]),
+            FunctionCall('shell_exec', [Parameter('date', False)])
+        ),
+        FunctionCall('shell_exec', [Parameter(BinaryOp('.', 'echo ', Variable('$line')), False)])
+    ]
+    eq_ast(input, expected)

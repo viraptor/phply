@@ -22,6 +22,8 @@ states = (
     ('property', 'exclusive'),
     ('heredoc', 'exclusive'),
     ('heredocvar', 'exclusive'),
+    ('backticked', 'exclusive'),
+    ('backtickedvar', 'exclusive'),
 )
 
 # Reserved words
@@ -88,6 +90,9 @@ tokens = reserved + unparsed + (
 
     # Heredocs
     'START_HEREDOC', 'END_HEREDOC',
+
+    # Backtick
+    'BACKTICK',
 )
 
 # Newlines
@@ -405,6 +410,48 @@ t_heredocvar_OBJECT_OPERATOR = t_quotedvar_OBJECT_OPERATOR
 t_heredocvar_VARIABLE = t_quotedvar_VARIABLE
 t_heredocvar_CURLY_OPEN = t_quotedvar_CURLY_OPEN
 t_heredocvar_DOLLAR_OPEN_CURLY_BRACES = t_quotedvar_DOLLAR_OPEN_CURLY_BRACES
+
+# Backticks
+def t_php_BACKTICK(t):
+    r"`"
+    t.lexer.push_state('backticked')
+    return t
+
+def t_backticked_ENCAPSED_AND_WHITESPACE(t):
+    r'( [^`\\${] | \\(.|\n) | \$(?![A-Za-z_{]) | \{(?!\$) )+'
+    t.lexer.lineno += t.value.count("\n")
+    return t
+
+def t_backticked_VARIABLE(t):
+    r'\$[A-Za-z_][\w_]*'
+    t.lexer.push_state('backtickedvar')
+    return t
+
+t_backticked_CURLY_OPEN = t_quoted_CURLY_OPEN
+t_backticked_DOLLAR_OPEN_CURLY_BRACES = t_quoted_DOLLAR_OPEN_CURLY_BRACES
+
+def t_backticked_BACKTICK(t):
+    r"`"
+    t.lexer.pop_state()
+    return t
+
+def t_backtickedvar_BACKTICK(t):
+    r"`"
+    t.lexer.pop_state()
+    t.lexer.pop_state()
+    return t
+
+t_backtickedvar_LBRACKET = t_quotedvar_LBRACKET
+t_backtickedvar_OBJECT_OPERATOR = t_quotedvar_OBJECT_OPERATOR
+t_backtickedvar_VARIABLE = t_quotedvar_VARIABLE
+t_backtickedvar_CURLY_OPEN = t_quotedvar_CURLY_OPEN
+t_backtickedvar_DOLLAR_OPEN_CURLY_BRACES = t_quotedvar_DOLLAR_OPEN_CURLY_BRACES
+
+def t_backtickedvar_ENCAPSED_AND_WHITESPACE(t):
+    r'( [^`\\${] | \\(.|\n) | \$(?![A-Za-z_{]) | \{(?!\$) )+'
+    t.lexer.lineno += t.value.count("\n")
+    t.lexer.pop_state()
+    return t
 
 def t_ANY_error(t):
     raise SyntaxError('illegal character', (None, t.lineno, None, t.value))

@@ -761,6 +761,10 @@ def p_function_call_variable(p):
     'function_call : variable_without_objects LPAREN function_call_parameter_list RPAREN'
     p[0] = ast.FunctionCall(p[1], p[3], lineno=p.lineno(2))
 
+def p_function_call_backtick_shell_exec(p):
+    'function_call : BACKTICK encaps_list BACKTICK'
+    p[0] = ast.FunctionCall('shell_exec', [ast.Parameter(p[2], False)], lineno=p.lineno(1))
+
 def p_method_or_not(p):
     '''method_or_not : LPAREN function_call_parameter_list RPAREN
                      | empty'''
