@@ -737,3 +737,11 @@ def test_backtick_shell_exec():
         FunctionCall('shell_exec', [Parameter(BinaryOp('.', 'echo ', Variable('$line')), False)])
     ]
     eq_ast(input, expected)
+
+def test_open_close_tags_ignore():
+    # The filtered lexer should correctly interpret ?><?
+    input = '<? if (1): if (2) 3; ?><? else: 0; endif;'
+    expected = [
+        If(1, Block([If(2, 3, [], None), None]), [], Else(Block([0])))
+    ]
+    eq_ast(input, expected)
