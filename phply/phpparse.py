@@ -1182,6 +1182,7 @@ def p_common_scalar_magic_ns(p):
 
 def p_static_scalar(p):
     '''static_scalar : common_scalar
+                     | class_constant
                      | QUOTE QUOTE
                      | QUOTE ENCAPSED_AND_WHITESPACE QUOTE'''
     if len(p) == 2:
