@@ -453,6 +453,11 @@ class FilteredLexer(object):
 
             # Skip over open tags, but keep track of when we see them.
             if t.type == 'OPEN_TAG':
+                if self.last_token and self.last_token.type == 'SEMI':
+                    # Rewrite ?><?php as a semicolon.
+                    t.type = 'SEMI'
+                    t.value = ';'
+                    break
                 self.last_token = t
                 t = self.lexer.token()
                 continue
