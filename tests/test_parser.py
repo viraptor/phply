@@ -713,3 +713,10 @@ def test_type_hinting():
             False)]
     eq_ast(input, expected)
 
+def test_ternary():
+    input = '<? 1 ? 2 : 3; 4 ? : 5;'
+    expected = [
+        TernaryOp(1, 2, 3),
+        TernaryOp(4, 4, 5),
+    ]
+    eq_ast(input, expected)
