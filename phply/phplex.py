@@ -371,7 +371,7 @@ def t_property_STRING(t):
 # Heredocs
 
 def t_php_START_HEREDOC(t):
-    r'<<<[ \t]*(?P<label>[A-Za-z_][\w_]*)\n'
+    r'<<<[ \t]*(?P<label>[A-Za-z_][\w_]*)\r?\n'
     t.lexer.lineno += t.value.count("\n")
     t.lexer.push_state('heredoc')
     t.lexer.heredoc_label = t.lexer.lexmatch.group('label')
