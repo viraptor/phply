@@ -745,3 +745,11 @@ def test_open_close_tags_ignore():
         If(1, Block([If(2, 3, [], None), None]), [], Else(Block([0])))
     ]
     eq_ast(input, expected)
+
+def test_ternary():
+    input = '<? 1 ? 2 : 3; 4 ? : 5;'
+    expected = [
+        TernaryOp(1, 2, 3),
+        TernaryOp(4, 4, 5),
+    ]
+    eq_ast(input, expected)
