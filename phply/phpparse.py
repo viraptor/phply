@@ -1338,7 +1338,7 @@ if __name__ == '__main__':
            result = parser.parse(s, lexer=lexer)
        except SyntaxError as e:
            if e.lineno is not None:
-               print e, 'near', repr(e.text)
+               print (e, 'near', repr(e.text))
                s = ''
            continue
        if result:
