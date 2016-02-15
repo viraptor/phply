@@ -20,7 +20,7 @@ def eq_tokens(input, expected, ignore=('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG')):
 
     print ('Token by token:')
     for out, exp in zip(output, expected):
-        print '\tgot:', out, '\texpected:', exp
+        print ('\tgot:', out, '\texpected:', exp)
         nose.tools.eq_(out, exp)
 
     assert len(output) == len(expected), \
