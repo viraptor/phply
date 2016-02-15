@@ -14,11 +14,11 @@ def eq_tokens(input, expected, ignore=('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG')):
         if tok.type in ignore: continue
         output.append((tok.type, tok.value))
 
-    print 'Lexer output:'
+    print ('Lexer output:')
     pprint.pprint(output)
     print
 
-    print 'Token by token:'
+    print ('Token by token:')
     for out, exp in zip(output, expected):
         print '\tgot:', out, '\texpected:', exp
         nose.tools.eq_(out, exp)
