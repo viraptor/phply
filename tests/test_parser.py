@@ -753,3 +753,11 @@ def test_ternary():
         TernaryOp(4, 4, 5),
     ]
     eq_ast(input, expected)
+
+def test_array_dereferencing():
+    input = '<? $a->method()[0]; func()[1];'
+    expected = [
+        ArrayOffset(MethodCall(Variable('$a'), 'method', []), 0),
+        ArrayOffset(FunctionCall('func', []), 1)
+    ]
+    eq_ast(input, expected)
