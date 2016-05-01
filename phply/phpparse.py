@@ -1136,7 +1136,10 @@ def p_common_scalar_lnumber(p):
     if p[1].startswith('0x'):
         p[0] = int(p[1], 16)
     elif p[1].startswith('0'):
-        p[0] = int(p[1], 8)
+        if '9' in p[1]:
+            p[0] = 0
+        else:
+            p[0] = int(p[1], 8)
     else:
         p[0] = int(p[1])
 
@@ -1145,8 +1148,8 @@ def p_common_scalar_dnumber(p):
     p[0] = float(p[1])
 
 def p_common_scalar_string(p):
-    'common_scalar : CONSTANT_ENCAPSED_STRING'
-    p[0] = p[1][1:-1].replace("\\'", "'").replace('\\\\', '\\')
+    'common_scalar : CONSTANT_ENCAPSED_STRING'    
+    p[0] = p[1][1:-1].replace("\\'", "'").replace('\\\\', '\\').replace("\\$", "$")
 
 def p_common_scalar_magic_line(p):
     'common_scalar : LINE'
@@ -1257,9 +1260,9 @@ def p_encaps_list(p):
 def p_encaps_list_string(p):
     'encaps_list : encaps_list ENCAPSED_AND_WHITESPACE'
     if p[1] == '':
-        p[0] = p[2].decode('string_escape')
+        p[0] = p[2].decode('string_escape').replace('\\$', '$')
     else:
-        p[0] = ast.BinaryOp('.', p[1], p[2].decode('string_escape'),
+        p[0] = ast.BinaryOp('.', p[1], p[2].decode('string_escape').replace('\\$', '$'),
                             lineno=p.lineno(2))
 
 def p_encaps_var(p):
