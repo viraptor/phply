@@ -762,3 +762,11 @@ def test_array_dereferencing():
         ArrayOffset(FunctionCall('func', []), 1)
     ]
     eq_ast(input, expected)
+
+def test_array_literal():
+    input = '<? [1,2]; [];'
+    expected = [
+        Array([ArrayElement(None, 1, False), ArrayElement(None, 2, False)]),
+        Array([]),
+    ]
+    eq_ast(input, expected)

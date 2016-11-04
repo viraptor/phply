@@ -906,8 +906,14 @@ def p_expr_scalar(p):
     p[0] = p[1]
 
 def p_expr_array(p):
-    'expr : ARRAY LPAREN array_pair_list RPAREN'
-    p[0] = ast.Array(p[3], lineno=p.lineno(1))
+    '''expr : ARRAY LPAREN array_pair_list RPAREN
+            | LBRACKET array_pair_list RBRACKET'''
+    if len(p) == 5:
+        contents = p[3]
+    else:
+        contents = p[2]
+
+    p[0] = ast.Array(contents, lineno=p.lineno(1))
 
 def p_array_pair_list(p):
     '''array_pair_list : empty
