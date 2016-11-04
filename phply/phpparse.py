@@ -3,11 +3,12 @@
 #
 # A parser for PHP.
 # -----------------------------------------------------------------------------
+from builtins import bytes
 
 import os
 import sys
-import phplex
-import phpast as ast
+from . import phplex
+from . import phpast as ast
 import ply.yacc as yacc
 
 # Get the token map
@@ -603,9 +604,9 @@ def p_parameter(p):
         p[0] = ast.FormalParameter(p[1], None, False, None, lineno=p.lineno(1))
     elif len(p) == 3 and p[1] == '&': # AND VARIABLE
         p[0] = ast.FormalParameter(p[2], None, True, None, lineno=p.lineno(1))
-    elif len(p) == 3 and p[1] != '&': # STRING VARIABLE 
+    elif len(p) == 3 and p[1] != '&': # STRING VARIABLE
         p[0] = ast.FormalParameter(p[2], None, False, p[1], lineno=p.lineno(1))
-    elif len(p) == 4 and p[2] != '&': # VARIABLE EQUALS static_scalar 
+    elif len(p) == 4 and p[2] != '&': # VARIABLE EQUALS static_scalar
         p[0] = ast.FormalParameter(p[1], p[3], False, None, lineno=p.lineno(1))
     elif len(p) == 4 and p[2] == '&': # STRING AND VARIABLE
         p[0] = ast.FormalParameter(p[3], None, True, p[1], lineno=p.lineno(1))
@@ -1202,7 +1203,7 @@ def p_static_scalar(p):
     elif len(p) == 3:
         p[0] = ''
     else:
-        p[0] = p[2].decode('string_escape')
+        p[0] = bytes(p[2], 'utf-8').decode('unicode_escape')
 
 def p_static_scalar_namespace_name(p):
     '''static_scalar : namespace_name
@@ -1275,9 +1276,10 @@ def p_encaps_list_string(p):
     except ValueError:
         p2 = p[2]
     if p[1] == '':
-        p[0] = p2
+        p[0] = bytes(p[2], 'utf-8').decode('unicode_escape')
     else:
-        p[0] = ast.BinaryOp('.', p[1], p2, lineno=p.lineno(2))
+        p[0] = ast.BinaryOp('.', p[1], bytes(p[2], 'utf-8').decode('unicode_escape'),
+                            lineno=p.lineno(2))
 
 def p_encaps_var(p):
     'encaps_var : VARIABLE'
@@ -1345,7 +1347,7 @@ if __name__ == '__main__':
                prompt = lexer.current_state()
                if prompt == 'INITIAL': prompt = 'html'
                prompt += '> '
-           s += raw_input(prompt)
+           s += input(prompt)
        except EOFError:
            break
        if not s: continue
@@ -1353,9 +1355,9 @@ if __name__ == '__main__':
        try:
            lexer.lineno = 1
            result = parser.parse(s, lexer=lexer)
-       except SyntaxError, e:
+       except SyntaxError as e:
            if e.lineno is not None:
-               print e, 'near', repr(e.text)
+               print(e, 'near', repr(e.text))
                s = ''
            continue
        if result:

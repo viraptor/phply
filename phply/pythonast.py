@@ -1,4 +1,4 @@
-import phpast as php
+from . import phpast as php
 import ast as py
 
 unary_ops = {
@@ -57,7 +57,7 @@ def from_phpast(node):
     if node is None:
         return py.Pass(**pos(node))
 
-    if isinstance(node, basestring):
+    if isinstance(node, str):
         return py.Str(node, **pos(node))
 
     if isinstance(node, (int, float)):
@@ -90,7 +90,7 @@ def from_phpast(node):
     if isinstance(node, php.Echo):
         return py.Call(py.Name('echo', py.Load(**pos(node)),
                                **pos(node)),
-                       map(from_phpast, node.nodes),
+                       list(map(from_phpast, node.nodes)),
                        [], None, None,
                        **pos(node))
 
@@ -127,7 +127,7 @@ def from_phpast(node):
         return from_phpast(php.If(1, node, [], None, lineno=node.lineno))
 
     if isinstance(node, php.Unset):
-        return py.Delete(map(from_phpast, node.nodes), **pos(node))
+        return py.Delete(list(map(from_phpast, node.nodes)), **pos(node))
 
     if isinstance(node, php.IsSet) and len(node.nodes) == 1:
         if isinstance(node.nodes[0], php.ArrayOffset):
@@ -183,7 +183,7 @@ def from_phpast(node):
                          **pos(node))
 
     if isinstance(node, php.ListAssignment):
-        return py.Assign([py.Tuple(map(store, map(from_phpast, node.nodes)),
+        return py.Assign([py.Tuple(list(map(store, list(map(from_phpast, node.nodes)))),
                                    py.Store(**pos(node)),
                                    **pos(node))],
                           from_phpast(node.expr),
@@ -270,7 +270,7 @@ def from_phpast(node):
             if pieces:
                 return py.BinOp(py.Str(pattern, **pos(node)),
                                 py.Mod(**pos(node)),
-                                py.Tuple(map(from_phpast, pieces),
+                                py.Tuple(list(map(from_phpast, pieces)),
                                          py.Load(**pos(node)),
                                          **pos(node)),
                                 **pos(node))
@@ -313,10 +313,10 @@ def from_phpast(node):
                 orelse.append(to_stmt(else_))
         for elseif in reversed(node.elseifs):
             orelse = [py.If(from_phpast(elseif.expr),
-                            map(to_stmt, map(from_phpast, deblock(elseif.node))),
+                            list(map(to_stmt, list(map(from_phpast, deblock(elseif.node))))),
                             orelse, **pos(node))]
         return py.If(from_phpast(node.expr),
-                     map(to_stmt, map(from_phpast, deblock(node.node))),
+                     list(map(to_stmt, list(map(from_phpast, deblock(node.node))))),
                      orelse, **pos(node))
 
     if isinstance(node, php.For):
@@ -341,12 +341,12 @@ def from_phpast(node):
                                        py.Store(**pos(node)))],
                               py.Store(**pos(node)), **pos(node))
         return py.For(target, from_phpast(node.expr),
-                      map(to_stmt, map(from_phpast, deblock(node.node))),
+                      list(map(to_stmt, list(map(from_phpast, deblock(node.node))))),
                       [], **pos(node))
 
     if isinstance(node, php.While):
         return py.While(from_phpast(node.expr),
-                        map(to_stmt, map(from_phpast, deblock(node.node))),
+                        list(map(to_stmt, list(map(from_phpast, deblock(node.node))))),
                         [], **pos(node))
 
     if isinstance(node, php.DoWhile):
@@ -360,12 +360,12 @@ def from_phpast(node):
                                      lineno=node.lineno))
 
     if isinstance(node, php.Try):
-        return py.TryExcept(map(to_stmt, map(from_phpast, node.nodes)),
+        return py.TryExcept(list(map(to_stmt, list(map(from_phpast, node.nodes)))),
                             [py.ExceptHandler(py.Name(catch.class_,
                                                       py.Load(**pos(node)),
                                                       **pos(node)),
                                               store(from_phpast(catch.var)),
-                                              map(to_stmt, map(from_phpast, catch.nodes)),
+                                              list(map(to_stmt, list(map(from_phpast, catch.nodes)))),
                                               **pos(node))
                              for catch in node.catches],
                             [],
@@ -383,7 +383,7 @@ def from_phpast(node):
                                 **pos(node)))
             if param.default is not None:
                 defaults.append(from_phpast(param.default))
-        body = map(to_stmt, map(from_phpast, node.nodes))
+        body = list(map(to_stmt, list(map(from_phpast, node.nodes))))
         if not body: body = [py.Pass(**pos(node))]
         return py.FunctionDef(node.name,
                               py.arguments(args, None, None, defaults),
@@ -406,7 +406,7 @@ def from_phpast(node):
                                 **pos(node)))
             if param.default is not None:
                 defaults.append(from_phpast(param.default))
-        body = map(to_stmt, map(from_phpast, node.nodes))
+        body = list(map(to_stmt, list(map(from_phpast, node.nodes))))
         if not body: body = [py.Pass(**pos(node))]
         return py.FunctionDef(node.name,
                               py.arguments(args, None, None, defaults),
@@ -417,7 +417,7 @@ def from_phpast(node):
         bases = []
         extends = node.extends or 'object'
         bases.append(py.Name(extends, py.Load(**pos(node)), **pos(node)))
-        body = map(to_stmt, map(from_phpast, node.nodes))
+        body = list(map(to_stmt, list(map(from_phpast, node.nodes))))
         for stmt in body:
             if (isinstance(stmt, py.FunctionDef)
                 and stmt.name in (name, '__construct')):
@@ -440,7 +440,7 @@ def from_phpast(node):
                          **pos(node))
 
     if isinstance(node, (php.FunctionCall, php.New)):
-        if isinstance(node.name, basestring):
+        if isinstance(node.name, str):
             name = py.Name(node.name, py.Load(**pos(node)), **pos(node))
         else:
             name = py.Subscript(py.Call(py.Name('vars', py.Load(**pos(node)),
@@ -511,13 +511,13 @@ def build_args(params):
     return args, kwargs
 
 def build_format(left, right):
-    if isinstance(left, basestring):
+    if isinstance(left, str):
         pattern, pieces = left.replace('%', '%%'), []
     elif isinstance(left, php.BinaryOp) and left.op == '.':
         pattern, pieces = build_format(left.left, left.right)
     else:
         pattern, pieces = '%s', [left]
-    if isinstance(right, basestring):
+    if isinstance(right, str):
         pattern += right.replace('%', '%%')
     else:
         pattern += '%s'
