@@ -1262,8 +1262,13 @@ def p_static_scalar_unary_op(p):
     p[0] = ast.UnaryOp(p[1], p[2], lineno=p.lineno(1))
 
 def p_static_scalar_array(p):
-    'static_scalar : ARRAY LPAREN static_array_pair_list RPAREN'
-    p[0] = ast.Array(p[3], lineno=p.lineno(1))
+    '''static_scalar : ARRAY LPAREN static_array_pair_list RPAREN
+                     | LBRACKET static_array_pair_list RBRACKET'''
+    if len(p) == 5:
+        contents = p[3]
+    else:
+        contents = p[2]
+    p[0] = ast.Array(contents, lineno=p.lineno(1))
 
 def p_static_array_pair_list(p):
     '''static_array_pair_list : empty

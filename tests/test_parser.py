@@ -770,3 +770,11 @@ def test_array_literal():
         Array([]),
     ]
     eq_ast(input, expected)
+
+def test_array_in_default_arg():
+    input = '<? function f($a=[]){} function g($a=array()){}'
+    expected = [
+        Function('f', [FormalParameter('$a', Array([]), False, None)], [], False),
+        Function('g', [FormalParameter('$a', Array([]), False, None)], [], False),
+    ]
+    eq_ast(input, expected)
