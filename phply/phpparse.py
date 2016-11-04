@@ -1334,35 +1334,22 @@ def p_error(t):
 # Build the grammar
 parser = yacc.yacc()
 
-if __name__ == '__main__':
-    import readline
+def run_on_stdin():
     import pprint
-    s = ''
+    s = sys.stdin.read()
     lexer = phplex.lexer
-    while True:
-       try:
-           if s:
-               prompt = '     '
-           else:
-               prompt = lexer.current_state()
-               if prompt == 'INITIAL': prompt = 'html'
-               prompt += '> '
-           s += input(prompt)
-       except EOFError:
-           break
-       if not s: continue
-       s += '\n'
-       try:
-           lexer.lineno = 1
-           result = parser.parse(s, lexer=lexer)
-       except SyntaxError as e:
-           if e.lineno is not None:
-               print(e, 'near', repr(e.text))
-               s = ''
-           continue
-       if result:
-           for item in result:
-               if hasattr(item, 'generic'):
-                   item = item.generic()
-               pprint.pprint(item)
-       s = ''
+    lexer.lineno = 1
+
+    try:
+        result = parser.parse(s, lexer=lexer)
+    except SyntaxError as e:
+        if e.lineno is not None:
+            print(e, 'near', repr(e.text))
+        else:
+            print(e)
+        sys.exit(1)
+
+    for item in result:
+        if hasattr(item, 'generic'):
+            item = item.generic()
+        pprint.pprint(item)

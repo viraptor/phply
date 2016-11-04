@@ -549,5 +549,5 @@ lexer = FilteredLexer(full_lexer)
 full_tokens = tokens
 tokens = [token for token in tokens if token not in unparsed]
 
-if __name__ == "__main__":
+def run_on_argv1():
     lex.runmain(full_lexer)

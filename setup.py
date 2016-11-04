@@ -17,7 +17,7 @@ setup(name="phply",
       zip_safe=False,
       platforms='any',
       license='BSD',
-      url='https://github.com/dgasson/phply',
+      url='https://github.com/viraptor/phply',
 
       classifiers=[
         'Development Status :: 2 - Pre-Alpha',
@@ -30,18 +30,16 @@ setup(name="phply",
         'Operating System :: Unix',
         ],
 
-      # entry_points={
-      #   'console_scripts': [
-      #       ],
-      #   },
+      entry_points={
+        'console_scripts': [
+            'phpparse=phply.phpparse:run_on_stdin',
+            'phplex=phply.phplex:run_on_argv1',
+            ],
+        },
 
       install_requires=[
         'ply',
-        'six',
         'wheel',
-        'future',
-        'simplejson',
-        'anyreadline'
         ],
 
       test_suite='nose.collector',

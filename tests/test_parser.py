@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from phply import phplex
 from phply.phpparse import parser
 from phply.phpast import *
