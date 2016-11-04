@@ -44,6 +44,40 @@ precedence = (
     ('right', 'STATIC', 'ABSTRACT', 'FINAL', 'PRIVATE', 'PROTECTED', 'PUBLIC'),
 )
 
+def process_php_string_escapes(s):
+    # TODO: actual processing - turn php escape sequences into actual chars
+    res = ''
+    i = iter(s)
+    for c in i:
+        if c == '\\':
+            c = next(i)
+            if c == 'n':
+                res += '\n'
+            elif c == 'r':
+                res += '\r'
+            elif c == 't':
+                res += '\t'
+            elif c == '"':
+                res += '"'
+            elif c == "'":
+                res += "'"
+            elif c == 'x':
+                x = next(i)
+                x += next(i)
+                try:
+                    x = int(x, 16)
+                    res += chr(x)
+                except ValueError:
+                    # TODO: find out what php does with broken literals
+                    res += '\\x'+x
+            elif c == '\\':
+                res += '\\'
+            else:
+                res += c
+        else:
+            res += c
+    return res
+
 def p_start(p):
     'start : top_statement_list'
     p[0] = p[1]
@@ -1203,7 +1237,7 @@ def p_static_scalar(p):
     elif len(p) == 3:
         p[0] = ''
     else:
-        p[0] = bytes(p[2], 'utf-8').decode('unicode_escape')
+        p[0] = process_php_string_escapes(p[2])
 
 def p_static_scalar_namespace_name(p):
     '''static_scalar : namespace_name
@@ -1271,14 +1305,11 @@ def p_encaps_list(p):
 
 def p_encaps_list_string(p):
     'encaps_list : encaps_list ENCAPSED_AND_WHITESPACE'
-    try:
-        p2 = p[2].decode('string_escape')
-    except ValueError:
-        p2 = p[2]
+    p2 = process_php_string_escapes(p[2])
     if p[1] == '':
-        p[0] = bytes(p[2], 'utf-8').decode('unicode_escape')
+        p[0] = process_php_string_escapes(p[2])
     else:
-        p[0] = ast.BinaryOp('.', p[1], bytes(p[2], 'utf-8').decode('unicode_escape'),
+        p[0] = ast.BinaryOp('.', p[1], process_php_string_escapes(p[2]),
                             lineno=p.lineno(2))
 
 def p_encaps_var(p):
