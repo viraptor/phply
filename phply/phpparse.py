@@ -484,7 +484,7 @@ def p_class_declaration_statement(p):
         stmts = []
         for s in p[6]:
             if isinstance(s, ast.TraitUse):
-                traits.append(s.name)
+                traits.append(s)
             else:
                 stmts.append(s)
         p[0] = ast.Class(p[2], p[1], p[3], p[4], traits, stmts, lineno=p.lineno(2))
@@ -495,7 +495,7 @@ def p_class_declaration_statement(p):
         stmts = []
         for s in p[4]:
             if isinstance(s, ast.TraitUse):
-                traits.append(s.name)
+                traits.append(s)
             else:
                 stmts.append(s)
         p[0] = ast.Trait(p[2], traits, stmts, lineno=p.lineno(1))
@@ -532,6 +532,18 @@ def p_implements_list(p):
     else:
         p[0] = []
 
+def p_trait_renames_list(p):
+    '''trait_renames_list : trait_renames_list trait_rename
+                          | empty'''
+    if len(p) == 3:
+        p[0] = p[1] + [p[2]]
+    else:
+        p[0] = []
+
+def p_trait_rename(p):
+    'trait_rename : STRING AS STRING SEMI'
+    p[0] = ast.TraitRename(p[1], p[3])
+
 def p_trait_statement_list(p):
     '''trait_statement_list : trait_statement_list trait_statement
                             | empty'''
@@ -544,12 +556,15 @@ def p_trait_statement_list(p):
 def p_trait_statement(p):
     '''trait_statement : method_modifiers FUNCTION is_reference STRING LPAREN parameter_list RPAREN method_body
                        | variable_modifiers class_variable_declaration SEMI
+                       | USE fully_qualified_class_name LBRACE trait_renames_list RBRACE
                        | USE fully_qualified_class_name SEMI'''
     if len(p) == 9:
         p[0] = ast.Method(p[4], p[1], p[6], p[8], p[3], lineno=p.lineno(2))
+    elif len(p) == 6:
+        p[0] = ast.TraitUse(p[2], p[4], lineno=p.lineno(1))
     else:
         if p[1] == 'use':
-            p[0] = ast.TraitUse(p[2], lineno=p.lineno(1))
+            p[0] = ast.TraitUse(p[2], [], lineno=p.lineno(1))
         else:
             p[0] = ast.ClassVariables(p[1], p[2], lineno=p.lineno(3))
 
@@ -566,12 +581,15 @@ def p_class_statement(p):
     '''class_statement : method_modifiers FUNCTION is_reference STRING LPAREN parameter_list RPAREN method_body
                        | variable_modifiers class_variable_declaration SEMI
                        | class_constant_declaration SEMI
+                       | USE fully_qualified_class_name LBRACE trait_renames_list RBRACE
                        | USE fully_qualified_class_name SEMI'''
     if len(p) == 9:
         p[0] = ast.Method(p[4], p[1], p[6], p[8], p[3], lineno=p.lineno(2))
+    elif len(p) == 6:
+        p[0] = ast.TraitUse(p[2], p[4], lineno=p.lineno(1))
     elif len(p) == 4:
         if p[1] == 'use':
-            p[0] = ast.TraitUse(p[2], lineno=p.lineno(1))
+            p[0] = ast.TraitUse(p[2], [], lineno=p.lineno(1))
         else:
             p[0] = ast.ClassVariables(p[1], p[2], lineno=p.lineno(3))
     else:

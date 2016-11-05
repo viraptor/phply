@@ -845,7 +845,7 @@ def test_binary_string():
 def test_class_trait_use():
     input = '''<? class A { use B; }'''
     expected = [
-        Class('A', None, None, [], ['B'], []),
+        Class('A', None, None, [], [TraitUse('B', [])], []),
     ]
     eq_ast(input, expected)
 
@@ -854,8 +854,17 @@ def test_trait():
                   trait D { protected $v; }'''
     expected = [
         Trait('A', [], []),
-        Trait('B', ['A'], []),
+        Trait('B', [TraitUse('A', [])], []),
         Trait('C', [], [Method('f', [], [], [], False)]),
         Trait('D', [], [ClassVariables(['protected'], [ClassVariable('$v', None)])]),
+    ]
+    eq_ast(input, expected)
+
+def test_trait_renames():
+    input = '''<? trait A { use T {X as Y;} }
+                  class B { use T {X as Y;} }'''
+    expected = [
+        Trait('A', [TraitUse('T', [TraitRename('X', 'Y')])], []),
+        Class('B', None, None, [], [TraitUse('T', [TraitRename('X', 'Y')])], []),
     ]
     eq_ast(input, expected)
