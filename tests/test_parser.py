@@ -409,7 +409,7 @@ def test_classes():
         class Stub {}
     ?>"""
     expected = [
-        Class('Clown', 'final', 'Unicycle', ['RedNose', 'FacePaint'], [
+        Class('Clown', 'final', 'Unicycle', ['RedNose', 'FacePaint'], [], [
             ClassConstants([ClassConstant('the', 'only'),
                             ClassConstant('constant', 'is')]),
             ClassConstants([ClassConstant('change', 'chump')]),
@@ -424,7 +424,7 @@ def test_classes():
                    [Return(BinaryOp('.', Variable('$arg1'), Variable('$arg2')))],
                    False),
         ]),
-        Class('Stub', None, None, [], []),
+        Class('Stub', None, None, [], [], []),
     ]
     eq_ast(input, expected)
 
@@ -726,7 +726,7 @@ def test_magic_constants():
                 MagicConstant('__FUNCTION__', 'Shmamespace\\p'), ': '),
                 Variable('$x')), '\n')])
         ], False),
-        Class('Bar', None, None, [],
+        Class('Bar', None, None, [], [],
               [Method('__construct', [], [],
                       [FunctionCall('p', [Parameter(MagicConstant('__LINE__', 10), False)]),
                        FunctionCall('p', [Parameter(MagicConstant('__DIR__', '/my/dir'), False)]),
@@ -759,7 +759,7 @@ def test_static_scalar_class_constants():
     class A { public $b = self::C; function d($var1=self::C) {} }
     ?>"""
     expected = [
-        Class('A', None, None, [],
+        Class('A', None, None, [], [],
             [ClassVariables(['public'], [ClassVariable('$b', StaticProperty('self', 'C'))]),
              Method('d', [], [FormalParameter('$var1', StaticProperty('self', 'C'), False, None)], [], False)
             ])]
@@ -839,5 +839,12 @@ def test_binary_string():
     expected = [
         "abc",
         "abc",
+    ]
+    eq_ast(input, expected)
+
+def test_class_trait_use():
+    input = '''<? class A { use B; }'''
+    expected = [
+        Class('A', None, None, [], ['B'], []),
     ]
     eq_ast(input, expected)

@@ -87,7 +87,7 @@ Directive = node('Directive', ['name', 'node'])
 Function = node('Function', ['name', 'params', 'nodes', 'is_ref'])
 Method = node('Method', ['name', 'modifiers', 'params', 'nodes', 'is_ref'])
 Closure = node('Closure', ['params', 'vars', 'nodes', 'is_ref'])
-Class = node('Class', ['name', 'type', 'extends', 'implements', 'nodes'])
+Class = node('Class', ['name', 'type', 'extends', 'implements', 'traits', 'nodes'])
 ClassConstants = node('ClassConstants', ['nodes'])
 ClassConstant = node('ClassConstant', ['name', 'initial'])
 ClassVariables = node('ClassVariables', ['modifiers', 'nodes'])
@@ -139,6 +139,7 @@ UseDeclarations = node('UseDeclarations', ['nodes'])
 UseDeclaration = node('UseDeclaration', ['name', 'alias'])
 ConstantDeclarations = node('ConstantDeclarations', ['nodes'])
 ConstantDeclaration = node('ConstantDeclaration', ['name', 'initial'])
+TraitUse = node('TraitUse', ['name'])
 
 def resolve_magic_constants(nodes):
     current = {}

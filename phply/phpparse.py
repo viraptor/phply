@@ -479,7 +479,14 @@ def p_class_declaration_statement(p):
     '''class_declaration_statement : class_entry_type STRING extends_from implements_list LBRACE class_statement_list RBRACE
                                    | INTERFACE STRING interface_extends_list LBRACE class_statement_list RBRACE'''
     if len(p) == 8:
-        p[0] = ast.Class(p[2], p[1], p[3], p[4], p[6], lineno=p.lineno(2))
+        traits = []
+        stmts = []
+        for s in p[6]:
+            if isinstance(s, ast.TraitUse):
+                traits.append(s.name)
+            else:
+                stmts.append(s)
+        p[0] = ast.Class(p[2], p[1], p[3], p[4], traits, stmts, lineno=p.lineno(2))
     else:
         p[0] = ast.Interface(p[2], p[3], p[5], lineno=p.lineno(1))
 
@@ -527,11 +534,15 @@ def p_class_statement_list(p):
 def p_class_statement(p):
     '''class_statement : method_modifiers FUNCTION is_reference STRING LPAREN parameter_list RPAREN method_body
                        | variable_modifiers class_variable_declaration SEMI
-                       | class_constant_declaration SEMI'''
+                       | class_constant_declaration SEMI
+                       | USE fully_qualified_class_name SEMI'''
     if len(p) == 9:
         p[0] = ast.Method(p[4], p[1], p[6], p[8], p[3], lineno=p.lineno(2))
     elif len(p) == 4:
-        p[0] = ast.ClassVariables(p[1], p[2], lineno=p.lineno(3))
+        if p[1] == 'use':
+            p[0] = ast.TraitUse(p[2])
+        else:
+            p[0] = ast.ClassVariables(p[1], p[2], lineno=p.lineno(3))
     else:
         p[0] = ast.ClassConstants(p[1], lineno=p.lineno(2))
 
