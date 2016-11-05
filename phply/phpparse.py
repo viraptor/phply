@@ -259,10 +259,8 @@ def p_statement_empty(p):
     pass
 
 def p_statement_try(p):
-    'statement : TRY LBRACE inner_statement_list RBRACE CATCH LPAREN fully_qualified_class_name VARIABLE RPAREN LBRACE inner_statement_list RBRACE additional_catches'
-    p[0] = ast.Try(p[3], [ast.Catch(p[7], ast.Variable(p[8], lineno=p.lineno(8)),
-                                    p[11], lineno=p.lineno(5))] + p[13],
-                   lineno=p.lineno(1))
+    'statement : TRY LBRACE inner_statement_list RBRACE additional_catches maybe_finally'
+    p[0] = ast.Try(p[3], p[5], p[6], lineno=p.lineno(1))
 
 def p_additional_catches(p):
     '''additional_catches : additional_catches CATCH LPAREN fully_qualified_class_name VARIABLE RPAREN LBRACE inner_statement_list RBRACE
@@ -272,6 +270,14 @@ def p_additional_catches(p):
                                  p[8], lineno=p.lineno(2))]
     else:
         p[0] = []
+
+def p_maybe_finally(p):
+    '''maybe_finally : FINALLY LBRACE inner_statement_list RBRACE
+                     | empty'''
+    if len(p) == 5:
+        p[0] = ast.Finally(p[3], lineno=p.lineno(2))
+    else:
+        p[0] = None
 
 def p_statement_throw(p):
     'statement : THROW expr SEMI'

@@ -365,3 +365,18 @@ def test_backticks():
         ('SEMI', ';'),
     ]
     eq_tokens(input, expected)
+
+def test_exceptions():
+    input = '<? try {} catch {} finally {}'
+    expected = [
+        ('TRY','try'),
+        ('LBRACE','{'),
+        ('RBRACE','}'),
+        ('CATCH','catch'),
+        ('LBRACE','{'),
+        ('RBRACE','}'),
+        ('FINALLY','finally'),
+        ('LBRACE','{'),
+        ('RBRACE','}'),
+    ]
+    eq_tokens(input, expected)

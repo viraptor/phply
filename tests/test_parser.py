@@ -485,7 +485,44 @@ def test_exceptions():
             Catch('Exception', Variable('$e'), [
                 Echo(['Problem?']),
             ]),
-        ])
+        ],
+        None)
+    ]
+    eq_ast(input, expected)
+
+def test_catch_finally():
+    input = r"""<?
+        try {
+            1;
+        } catch (Exception $e) {
+            2;
+        } finally {
+            3;
+        }
+    ?>"""
+    expected = [
+        Try([
+            1
+        ], [
+            Catch('Exception', Variable('$e'), [
+                2
+            ]),
+        ],
+        Finally([3]))
+    ]
+    eq_ast(input, expected)
+
+def test_just_finally():
+    input = r"""<?
+        try {
+        } finally {
+            1;
+        }
+    ?>"""
+    expected = [
+        Try([
+        ], [],
+        Finally([1]))
     ]
     eq_ast(input, expected)
 
