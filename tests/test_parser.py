@@ -833,3 +833,11 @@ def test_object_property_on_expr():
         ObjectProperty(MethodCall(Variable('$a'), 'm1', []), 'm2'),
     ]
     eq_ast(input, expected)
+
+def test_binary_string():
+    input = '''<? b"abc"; b'abc';'''
+    expected = [
+        "abc",
+        "abc",
+    ]
+    eq_ast(input, expected)

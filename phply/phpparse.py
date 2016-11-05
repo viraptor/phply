@@ -1174,9 +1174,13 @@ def p_scalar(p):
     '''scalar : class_constant
               | common_scalar
               | QUOTE encaps_list QUOTE
+              | STRING QUOTE encaps_list QUOTE
               | scalar_heredoc'''
     if len(p) == 4:
         p[0] = p[2]
+    elif len(p) == 5:
+        if p[1] == 'b':
+            p[0] = p[3]
     else:
         p[0] = p[1]
 
@@ -1228,8 +1232,13 @@ def p_common_scalar_dnumber(p):
     p[0] = float(p[1])
 
 def p_common_scalar_string(p):
-    'common_scalar : CONSTANT_ENCAPSED_STRING'
-    p[0] = p[1][1:-1].replace("\\'", "'").replace('\\\\', '\\')
+    '''common_scalar : CONSTANT_ENCAPSED_STRING
+                     | STRING CONSTANT_ENCAPSED_STRING'''
+    if len(p) == 3:
+        if p[1] == 'b':
+            p[0] = p[2][1:-1].replace("\\'", "'").replace('\\\\', '\\')
+    else:
+        p[0] = p[1][1:-1].replace("\\'", "'").replace('\\\\', '\\')
 
 def p_common_scalar_magic_line(p):
     'common_scalar : LINE'
