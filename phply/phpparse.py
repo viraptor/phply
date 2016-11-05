@@ -1389,6 +1389,7 @@ def main():
     ap.add_argument('-g', '--generate', dest='generate', action='store_true')
     ap.add_argument('-r', '--recursive', dest='recursive', action='store_true')
     ap.add_argument('-q', '--quiet', dest='quiet', action='store_true')
+    ap.add_argument('-d', '--debug', dest='debug', action='store_true')
     ap.add_argument('path', metavar='PATH', nargs='?', type=str)
     args = ap.parse_args()
 
@@ -1400,7 +1401,7 @@ def main():
         run_parser(sys.stdin, args.quiet)
     elif os.path.isfile(args.path):
         with open(args.path, 'r') as f:
-            run_parser(f, args.quiet)
+            run_parser(f, args.quiet, args.debug)
     elif os.path.isdir(args.path):
         if not args.recursive:
             print('directory path given, use -r for recursive processing')
@@ -1410,15 +1411,15 @@ def main():
                     if not fpath.endswith('.php'):
                         continue
                     with open(os.path.join(root, fpath), 'r') as f:
-                        run_parser(f, args.quiet)
+                        run_parser(f, args.quiet, args.debug)
 
-def run_parser(source, quiet):
+def run_parser(source, quiet, debug):
     s = source.read()
     lexer = phplex.lexer
     lexer.lineno = 1
 
     try:
-        result = parser.parse(s, lexer=lexer.clone())
+        result = parser.parse(s, lexer=lexer.clone(), debug=debug)
     except SyntaxError as e:
         if e.lineno is not None:
             print(source.name, e, 'near', repr(e.text))
