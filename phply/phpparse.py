@@ -477,7 +477,8 @@ def p_function_declaration_statement(p):
 
 def p_class_declaration_statement(p):
     '''class_declaration_statement : class_entry_type STRING extends_from implements_list LBRACE class_statement_list RBRACE
-                                   | INTERFACE STRING interface_extends_list LBRACE class_statement_list RBRACE'''
+                                   | INTERFACE STRING interface_extends_list LBRACE class_statement_list RBRACE
+                                   | TRAIT STRING LBRACE trait_statement_list RBRACE'''
     if len(p) == 8:
         traits = []
         stmts = []
@@ -487,8 +488,17 @@ def p_class_declaration_statement(p):
             else:
                 stmts.append(s)
         p[0] = ast.Class(p[2], p[1], p[3], p[4], traits, stmts, lineno=p.lineno(2))
-    else:
+    elif len(p) == 7:
         p[0] = ast.Interface(p[2], p[3], p[5], lineno=p.lineno(1))
+    else:
+        traits = []
+        stmts = []
+        for s in p[4]:
+            if isinstance(s, ast.TraitUse):
+                traits.append(s.name)
+            else:
+                stmts.append(s)
+        p[0] = ast.Trait(p[2], traits, stmts, lineno=p.lineno(1))
 
 def p_class_entry_type(p):
     '''class_entry_type : CLASS
@@ -521,6 +531,23 @@ def p_implements_list(p):
         p[0] = p[2]
     else:
         p[0] = []
+
+def p_trait_statement_list(p):
+    '''trait_statement_list : trait_statement_list trait_statement
+                            | empty'''
+
+    if len(p) == 3:
+        p[0] = p[1] + [p[2]]
+    else:
+        p[0] = []
+
+def p_trait_statement(p):
+    '''trait_statement : method_modifiers FUNCTION is_reference STRING LPAREN parameter_list RPAREN method_body
+                       | USE fully_qualified_class_name SEMI'''
+    if len(p) == 9:
+        p[0] = ast.Method(p[4], p[1], p[6], p[8], p[3], lineno=p.lineno(2))
+    else:
+        p[0] = ast.TraitUse(p[2])
 
 def p_class_statement_list(p):
     '''class_statement_list : class_statement_list class_statement

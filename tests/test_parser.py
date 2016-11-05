@@ -848,3 +848,12 @@ def test_class_trait_use():
         Class('A', None, None, [], ['B'], []),
     ]
     eq_ast(input, expected)
+
+def test_trait():
+    input = '''<? trait A { } trait B { use A; } trait C { function f(){} }'''
+    expected = [
+        Trait('A', [], []),
+        Trait('B', ['A'], []),
+        Trait('C', [], [Method('f', [], [], [], False)]),
+    ]
+    eq_ast(input, expected)
