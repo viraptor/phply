@@ -32,7 +32,7 @@ setup(name="phply",
 
       entry_points={
         'console_scripts': [
-            'phpparse=phply.phpparse:run_on_stdin',
+            'phpparse=phply.phpparse:main',
             'phplex=phply.phplex:run_on_argv1',
             ],
         },

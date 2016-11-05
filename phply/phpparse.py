@@ -1382,22 +1382,55 @@ def p_error(t):
 # Build the grammar
 parser = yacc.yacc()
 
-def run_on_stdin():
-    import pprint
-    s = sys.stdin.read()
+def main():
+    import argparse
+    import os
+    ap = argparse.ArgumentParser(description="Parser test tool")
+    ap.add_argument('-g', '--generate', dest='generate', action='store_true')
+    ap.add_argument('-r', '--recursive', dest='recursive', action='store_true')
+    ap.add_argument('-q', '--quiet', dest='quiet', action='store_true')
+    ap.add_argument('path', metavar='PATH', nargs='?', type=str)
+    args = ap.parse_args()
+
+    if args.generate:
+        # happens by default, nothing to do
+        return
+
+    if args.path is None:
+        run_parser(sys.stdin, args.quiet)
+    elif os.path.isfile(args.path):
+        with open(args.path, 'r') as f:
+            run_parser(f, args.quiet)
+    elif os.path.isdir(args.path):
+        if not args.recursive:
+            print('directory path given, use -r for recursive processing')
+        else:
+            for root, dirs, files in os.walk(args.path):
+                for fpath in files:
+                    if not fpath.endswith('.php'):
+                        continue
+                    with open(os.path.join(root, fpath), 'r') as f:
+                        run_parser(f, args.quiet)
+
+def run_parser(source, quiet):
+    s = source.read()
     lexer = phplex.lexer
     lexer.lineno = 1
 
     try:
-        result = parser.parse(s, lexer=lexer)
+        result = parser.parse(s, lexer=lexer.clone())
     except SyntaxError as e:
         if e.lineno is not None:
-            print(e, 'near', repr(e.text))
+            print(source.name, e, 'near', repr(e.text))
         else:
-            print(e)
+            print(source.name, e)
         sys.exit(1)
 
-    for item in result:
-        if hasattr(item, 'generic'):
-            item = item.generic()
-        pprint.pprint(item)
+    if not quiet:
+        import pprint
+        for item in result:
+            if hasattr(item, 'generic'):
+                item = item.generic()
+            pprint.pprint(item)
+
+    parser.restart()
