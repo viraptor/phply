@@ -236,7 +236,7 @@ EOT;
                                                                  'variables')),
                                          '.\n'),
                                 'This'),
-                       ' is not the EOT; this is:\n')]),
+                       ' is not the EOT; this is:')]),
     ]
     eq_ast(input, expected)
 
@@ -813,5 +813,15 @@ def test_array_in_default_arg():
     expected = [
         Function('f', [FormalParameter('$a', Array([]), False, None)], [], False),
         Function('g', [FormalParameter('$a', Array([]), False, None)], [], False),
+    ]
+    eq_ast(input, expected)
+
+def test_const_heredoc():
+    input = '''<?
+    const X = <<<HERE
+text
+HERE;'''
+    expected = [
+        ConstantDeclarations([ConstantDeclaration('X', 'text')])
     ]
     eq_ast(input, expected)

@@ -1164,11 +1164,25 @@ def p_scalar(p):
     '''scalar : class_constant
               | common_scalar
               | QUOTE encaps_list QUOTE
-              | START_HEREDOC encaps_list END_HEREDOC'''
+              | scalar_heredoc'''
     if len(p) == 4:
         p[0] = p[2]
     else:
         p[0] = p[1]
+
+def p_scalar_heredoc(p):
+    'scalar_heredoc : START_HEREDOC encaps_list END_HEREDOC'
+    if isinstance(p[2], ast.BinaryOp):
+        # due to how lexer works, the last operation is joining an unnecessary
+        # newline character
+        assert isinstance(p[2].right, str)
+        p[2].right = p[2].right[:-1]
+        if p[2].right:
+            p[0] = p[2]
+        else:
+            p[0] = p[2].left
+    else:
+        p[0] = p[2]
 
 def p_scalar_string_varname(p):
     'scalar : STRING_VARNAME'
@@ -1243,13 +1257,28 @@ def p_static_scalar(p):
     '''static_scalar : common_scalar
                      | class_constant
                      | QUOTE QUOTE
-                     | QUOTE ENCAPSED_AND_WHITESPACE QUOTE'''
+                     | QUOTE ENCAPSED_AND_WHITESPACE QUOTE
+                     | static_heredoc'''
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 3:
         p[0] = ''
     else:
         p[0] = process_php_string_escapes(p[2])
+
+def p_static_heredoc(p):
+    'static_heredoc : START_HEREDOC multiple_encapsed END_HEREDOC'
+    # the last character is a newline because of how the lexer works, but it
+    # doesn't belong in the result so drop it
+    p[0] = p[2][:-1]
+
+def p_multiple_encapsed(p):
+    '''multiple_encapsed : multiple_encapsed ENCAPSED_AND_WHITESPACE
+                         | empty'''
+    if len(p) == 3:
+        p[0] = p[1] + p[2]
+    else:
+        p[0] = ''
 
 def p_static_scalar_namespace_name(p):
     '''static_scalar : namespace_name
