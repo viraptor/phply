@@ -825,3 +825,11 @@ HERE;'''
         ConstantDeclarations([ConstantDeclaration('X', 'text')])
     ]
     eq_ast(input, expected)
+
+def test_object_property_on_expr():
+    input = '''<? ($a->m1())->m2(); ($a->m1())->m2;'''
+    expected = [
+        MethodCall(MethodCall(Variable('$a'), 'm1', []), 'm2', []),
+        ObjectProperty(MethodCall(Variable('$a'), 'm1', []), 'm2'),
+    ]
+    eq_ast(input, expected)

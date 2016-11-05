@@ -673,6 +673,16 @@ def p_expr_new(p):
     'expr : NEW class_name_reference ctor_arguments'
     p[0] = ast.New(p[2], p[3], lineno=p.lineno(1))
 
+def p_expr_objectop(p):
+    'expr : expr OBJECT_OPERATOR object_property method_or_not'
+    name, _dims = p[3]
+    assert _dims == []
+    params = p[4]
+    if params is not None:
+        p[0] = ast.MethodCall(p[1], name, params, lineno=p.lineno(3))
+    else:
+        p[0] = ast.ObjectProperty(p[1], name, lineno=p.lineno(3))
+
 def p_class_name_reference(p):
     '''class_name_reference : class_name
                             | dynamic_class_name_reference'''
