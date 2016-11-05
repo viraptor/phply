@@ -850,10 +850,12 @@ def test_class_trait_use():
     eq_ast(input, expected)
 
 def test_trait():
-    input = '''<? trait A { } trait B { use A; } trait C { function f(){} }'''
+    input = '''<? trait A { } trait B { use A; } trait C { function f(){} }
+                  trait D { protected $v; }'''
     expected = [
         Trait('A', [], []),
         Trait('B', ['A'], []),
         Trait('C', [], [Method('f', [], [], [], False)]),
+        Trait('D', [], [ClassVariables(['protected'], [ClassVariable('$v', None)])]),
     ]
     eq_ast(input, expected)
