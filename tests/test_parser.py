@@ -898,3 +898,13 @@ def test_const_arrays():
         ConstantDeclarations([ConstantDeclaration('C', Array([ArrayElement(None, BinaryOp('+', 1, 2), False)]))]),
     ]
     eq_ast(input, expected)
+
+def test_numbers():
+    input = '''<? 10; 010; 0x10; 0b10;'''
+    expected = [
+        10,
+        0o10,
+        0x10,
+        2,
+    ]
+    eq_ast(input, expected)
