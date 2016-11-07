@@ -1578,6 +1578,9 @@ def run_parser(source, quiet, debug):
         else:
             print(source.name, e)
         sys.exit(1)
+    except:
+        print("Critical error in:", source.name)
+        raise
 
     if not quiet:
         import pprint
