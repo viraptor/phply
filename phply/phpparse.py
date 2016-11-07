@@ -953,6 +953,14 @@ def p_reference_variable_compound_variable(p):
     'reference_variable : compound_variable'
     p[0] = p[1]
 
+def p_expr_array_offset(p):
+    'expr : expr LBRACKET dim_offset RBRACKET'
+    p[0] = ast.ArrayOffset(p[1], p[3], lineno=p.lineno(2))
+
+def p_expr_string_offset(p):
+    'expr : expr LBRACE dim_offset RBRACE'
+    p[0] = ast.StringOffset(p[1], p[3], lineno=p.lineno(2))
+
 def p_compound_variable(p):
     '''compound_variable : VARIABLE
                          | DOLLAR LBRACE expr RBRACE'''

@@ -908,3 +908,11 @@ def test_numbers():
         2,
     ]
     eq_ast(input, expected)
+
+def test_result_multiple_offsets():
+    input = '''<? $o->m()[1][2]; $o->m(){1}{2}; '''
+    expected = [
+        ArrayOffset(ArrayOffset(MethodCall(Variable('$o'), 'm', []), 1), 2),
+        StringOffset(StringOffset(MethodCall(Variable('$o'), 'm', []), 1), 2),
+    ]
+    eq_ast(input, expected)
