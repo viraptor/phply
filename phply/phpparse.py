@@ -151,7 +151,7 @@ def p_constant_declarations(p):
         p[0] = [p[1]]
 
 def p_constant_declaration(p):
-    'constant_declaration : STRING EQUALS static_scalar'
+    'constant_declaration : STRING EQUALS static_expr'
     p[0] = ast.ConstantDeclaration(p[1], p[3], lineno=p.lineno(1))
 
 def p_inner_statement_list(p):
@@ -612,8 +612,8 @@ def p_class_variable_declaration_no_initial(p):
         p[0] = [ast.ClassVariable(p[1], None, lineno=p.lineno(1))]
 
 def p_class_constant_declaration(p):
-    '''class_constant_declaration : class_constant_declaration COMMA STRING EQUALS static_scalar
-                                  | CONST STRING EQUALS static_scalar'''
+    '''class_constant_declaration : class_constant_declaration COMMA STRING EQUALS static_expr
+                                  | CONST STRING EQUALS static_expr'''
     if len(p) == 6:
         p[0] = p[1] + [ast.ClassConstant(p[3], p[5], lineno=p.lineno(2))]
     else:
@@ -1415,6 +1415,42 @@ def p_static_non_empty_array_pair_list_pair(p):
         p[0] = p[1] + [ast.ArrayElement(p[3], p[5], False, lineno=p.lineno(2))]
     else:
         p[0] = [ast.ArrayElement(p[1], p[3], False, lineno=p.lineno(2))]
+
+def p_static_expr(p):
+    '''static_expr : static_scalar
+                   | static_expr BOOLEAN_AND static_expr
+                   | static_expr BOOLEAN_OR static_expr
+                   | static_expr LOGICAL_AND static_expr
+                   | static_expr LOGICAL_OR static_expr
+                   | static_expr LOGICAL_XOR static_expr
+                   | static_expr AND static_expr
+                   | static_expr OR static_expr
+                   | static_expr XOR static_expr
+                   | static_expr CONCAT static_expr
+                   | static_expr PLUS static_expr
+                   | static_expr MINUS static_expr
+                   | static_expr MUL static_expr
+                   | static_expr DIV static_expr
+                   | static_expr SL static_expr
+                   | static_expr SR static_expr
+                   | static_expr MOD static_expr
+                   | static_expr IS_IDENTICAL static_expr
+                   | static_expr IS_NOT_IDENTICAL static_expr
+                   | static_expr IS_EQUAL static_expr
+                   | static_expr IS_NOT_EQUAL static_expr
+                   | static_expr IS_SMALLER static_expr
+                   | static_expr IS_SMALLER_OR_EQUAL static_expr
+                   | static_expr IS_GREATER static_expr
+                   | static_expr IS_GREATER_OR_EQUAL static_expr'''
+    if len(p) == 2:
+        # just the scalar
+        p[0] = p[1]
+    else:
+        p[0] = ast.BinaryOp(p[2].lower(), p[1], p[3], lineno=p.lineno(2))
+
+def p_static_expr_group(p):
+    'static_expr : LPAREN static_expr RPAREN'
+    p[0] = p[2]
 
 def p_namespace_name(p):
     '''namespace_name : namespace_name NS_SEPARATOR STRING

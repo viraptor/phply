@@ -876,3 +876,12 @@ def test_class_name_as_string():
         ConstantDeclarations([ConstantDeclaration('C', 'A')]),
     ]
     eq_ast(input, expected)
+
+def test_static_expressions():
+    input = '''<? const C = 1+2; const C = 1+(2+3); const C = "a"."b";'''
+    expected = [
+        ConstantDeclarations([ConstantDeclaration('C', BinaryOp('+', 1, 2))]),
+        ConstantDeclarations([ConstantDeclaration('C', BinaryOp('+', 1, BinaryOp('+', 2, 3)))]),
+        ConstantDeclarations([ConstantDeclaration('C', BinaryOp('.', 'a', 'b'))]),
+    ]
+    eq_ast(input, expected)
