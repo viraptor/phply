@@ -885,3 +885,10 @@ def test_static_expressions():
         ConstantDeclarations([ConstantDeclaration('C', BinaryOp('.', 'a', 'b'))]),
     ]
     eq_ast(input, expected)
+
+def test_const_arrays():
+    input = '''<? const C = array(1+2);'''
+    expected = [
+        ConstantDeclarations([ConstantDeclaration('C', Array([ArrayElement(None, BinaryOp('+', 1, 2), False)]))]),
+    ]
+    eq_ast(input, expected)
