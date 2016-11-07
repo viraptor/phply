@@ -1235,7 +1235,8 @@ def p_scalar(p):
               | common_scalar
               | QUOTE encaps_list QUOTE
               | STRING QUOTE encaps_list QUOTE
-              | scalar_heredoc'''
+              | scalar_heredoc
+              | class_name_constant'''
     if len(p) == 4:
         p[0] = p[2]
     elif len(p) == 5:
@@ -1337,13 +1338,20 @@ def p_static_scalar(p):
                      | class_constant
                      | QUOTE QUOTE
                      | QUOTE ENCAPSED_AND_WHITESPACE QUOTE
-                     | static_heredoc'''
+                     | static_heredoc
+                     | class_name_constant'''
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 3:
         p[0] = ''
     else:
         p[0] = process_php_string_escapes(p[2])
+
+def p_class_name_constant(p):
+    'class_name_constant : class_name DOUBLE_COLON CLASS'
+    # no special treatment needed - in practice php doesn't even check if the
+    # class exists
+    p[0] = p[1]
 
 def p_static_heredoc(p):
     'static_heredoc : START_HEREDOC multiple_encapsed END_HEREDOC'

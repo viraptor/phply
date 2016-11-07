@@ -868,3 +868,11 @@ def test_trait_renames():
         Class('B', None, None, [], [TraitUse('T', [TraitRename('X', 'Y')])], []),
     ]
     eq_ast(input, expected)
+
+def test_class_name_as_string():
+    input = '''<? A::class; const C = A::class;'''
+    expected = [
+        'A',
+        ConstantDeclarations([ConstantDeclaration('C', 'A')]),
+    ]
+    eq_ast(input, expected)
