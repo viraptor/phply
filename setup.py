@@ -1,18 +1,18 @@
 """
 PHPLY
 --------------------
-PHP implemented in Python
+PHP lexer and parser in Python
 """
 from setuptools import setup, find_packages
 
 setup(name="phply",
-      version="dev",
+      version="0.9.1",
       packages=find_packages(),
       namespace_packages=['phply'],
       include_package_data=True,
       author='Ramen',
       author_email='',
-      description='PHP in Python',
+      description='PHP lexer and parser in Python',
       long_description=__doc__,
       zip_safe=False,
       platforms='any',
