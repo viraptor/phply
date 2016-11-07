@@ -62,8 +62,17 @@ def process_php_string_escapes(s):
             elif c == "'":
                 res += "'"
             elif c == 'x':
-                x = next(i)
-                x += next(i)
+                try:
+                    x = next(i)
+                except StopIteration:
+                    res += "\\x"
+                    break
+                try:
+                    x += next(i)
+                except StopIteration:
+                    # one character \xH sequence is actually valid in php
+                    pass
+
                 try:
                     x = int(x, 16)
                     res += chr(x)
