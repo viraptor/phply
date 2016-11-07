@@ -1514,7 +1514,7 @@ def main():
         return
 
     if args.path is None:
-        run_parser(sys.stdin, args.quiet)
+        run_parser(sys.stdin, args.quiet, args.debug)
     elif os.path.isfile(args.path):
         with open(args.path, 'r') as f:
             run_parser(f, args.quiet, args.debug)
