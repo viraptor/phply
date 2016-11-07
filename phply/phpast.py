@@ -141,7 +141,7 @@ UseDeclaration = node('UseDeclaration', ['name', 'alias'])
 ConstantDeclarations = node('ConstantDeclarations', ['nodes'])
 ConstantDeclaration = node('ConstantDeclaration', ['name', 'initial'])
 TraitUse = node('TraitUse', ['name', 'renames'])
-TraitRename = node('TraitRename', ['from', 'to'])
+TraitModifier = node('TraitModifier', ['from', 'to', 'visibility'])
 
 def resolve_magic_constants(nodes):
     current = {}

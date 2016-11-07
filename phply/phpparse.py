@@ -541,17 +541,25 @@ def p_implements_list(p):
     else:
         p[0] = []
 
-def p_trait_renames_list(p):
-    '''trait_renames_list : trait_renames_list trait_rename
-                          | empty'''
+def p_trait_modifiers_list(p):
+    '''trait_modifiers_list : trait_modifiers_list trait_modifier
+                            | empty'''
     if len(p) == 3:
         p[0] = p[1] + [p[2]]
     else:
         p[0] = []
 
-def p_trait_rename(p):
-    'trait_rename : STRING AS STRING SEMI'
-    p[0] = ast.TraitRename(p[1], p[3])
+def p_trait_modifier(p):
+    'trait_modifier : STRING AS STRING SEMI'
+    p[0] = ast.TraitModifier(p[1], p[3], None)
+
+def p_trait_modifier_with_visibility(p):
+    '''trait_modifier : STRING AS visibility_modifier STRING SEMI
+                      | STRING AS visibility_modifier SEMI'''
+    if len(p) == 6:
+        p[0] = ast.TraitModifier(p[1], p[4], p[3])
+    else:
+        p[0] = ast.TraitModifier(p[1], None, p[3])
 
 def p_trait_statement_list(p):
     '''trait_statement_list : trait_statement_list trait_statement
@@ -565,7 +573,7 @@ def p_trait_statement_list(p):
 def p_trait_statement(p):
     '''trait_statement : method_modifiers FUNCTION is_reference STRING LPAREN parameter_list RPAREN method_body
                        | variable_modifiers class_variable_declaration SEMI
-                       | USE fully_qualified_class_name LBRACE trait_renames_list RBRACE
+                       | USE fully_qualified_class_name LBRACE trait_modifiers_list RBRACE
                        | USE fully_qualified_class_name SEMI'''
     if len(p) == 9:
         p[0] = ast.Method(p[4], p[1], p[6], p[8], p[3], lineno=p.lineno(2))
@@ -590,7 +598,7 @@ def p_class_statement(p):
     '''class_statement : method_modifiers FUNCTION is_reference STRING LPAREN parameter_list RPAREN method_body
                        | variable_modifiers class_variable_declaration SEMI
                        | class_constant_declaration SEMI
-                       | USE fully_qualified_class_name LBRACE trait_renames_list RBRACE
+                       | USE fully_qualified_class_name LBRACE trait_modifiers_list RBRACE
                        | USE fully_qualified_class_name SEMI'''
     if len(p) == 9:
         p[0] = ast.Method(p[4], p[1], p[6], p[8], p[3], lineno=p.lineno(2))
@@ -674,10 +682,14 @@ def p_non_empty_member_modifiers(p):
     else:
         p[0] = [p[1]]
 
+def p_visibility_modifier(p):
+    '''visibility_modifier : PUBLIC
+                           | PROTECTED
+                           | PRIVATE'''
+    p[0] = p[1].lower()
+
 def p_member_modifier(p):
-    '''member_modifier : PUBLIC
-                       | PROTECTED
-                       | PRIVATE
+    '''member_modifier : visibility_modifier
                        | STATIC
                        | ABSTRACT
                        | FINAL'''
