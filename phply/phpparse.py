@@ -1182,6 +1182,10 @@ def p_expr_cast_unset(p):
     'expr : UNSET_CAST expr'
     p[0] = ast.Cast('unset', p[2], lineno=p.lineno(1))
 
+def p_expr_cast_binary(p):
+    'expr : BINARY_CAST expr'
+    p[0] = ast.Cast('binary', p[2], lineno=p.lineno(1))
+
 def p_expr_isset(p):
     'expr : ISSET LPAREN isset_variables RPAREN'
     p[0] = ast.IsSet(p[3], lineno=p.lineno(1))

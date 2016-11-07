@@ -594,6 +594,7 @@ def test_casts():
         (iNteger) $x;
         (sTring) $x;
         (uNset) $x;
+        (bInary) $x;
     ?>"""
     expected = [
         Cast('array', Variable('$x')),
@@ -606,6 +607,7 @@ def test_casts():
         Cast('int', Variable('$x')),
         Cast('string', Variable('$x')),
         Cast('unset', Variable('$x')),
+        Cast('binary', Variable('$x')),
     ]
     eq_ast(input, expected)
 
