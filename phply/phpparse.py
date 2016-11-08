@@ -938,7 +938,7 @@ def p_variable_class_name(p):
     p[0] = p[1]
 
 def p_variable_array_offset(p):
-    'expr : variable LBRACKET dim_offset RBRACKET'
+    'variable : variable LBRACKET dim_offset RBRACKET'
     p[0] = ast.ArrayOffset(p[1], p[3], lineno=p.lineno(2))
 
 def p_reference_variable_array_offset(p):
@@ -952,10 +952,6 @@ def p_reference_variable_string_offset(p):
 def p_reference_variable_compound_variable(p):
     'reference_variable : compound_variable'
     p[0] = p[1]
-
-def p_expr_array_offset(p):
-    'expr : expr LBRACKET dim_offset RBRACKET'
-    p[0] = ast.ArrayOffset(p[1], p[3], lineno=p.lineno(2))
 
 def p_expr_string_offset(p):
     'expr : expr LBRACE dim_offset RBRACE'

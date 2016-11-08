@@ -60,12 +60,14 @@ def test_isset():
         isset($b->c);
         isset($d['e']);
         isset($f, $g);
+        isset($h->m()['i1']['i2']);
     ?>"""
     expected = [
         IsSet([Variable('$a')]),
         IsSet([ObjectProperty(Variable('$b'), 'c')]),
         IsSet([ArrayOffset(Variable('$d'), 'e')]),
         IsSet([Variable('$f'), Variable('$g')]),
+        IsSet([ArrayOffset(ArrayOffset(MethodCall(Variable('$h'), 'm', []), 'i1'), 'i2')]),
     ]
     eq_ast(input, expected)
 
