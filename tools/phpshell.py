@@ -11,7 +11,7 @@ import readline
 import traceback
 
 from phply import pythonast, phplex
-from phply.phpparse import parser
+from phply.phpparse import make_parser
 
 def echo(*objs):
     for obj in objs:
@@ -35,6 +35,8 @@ def php_eval(nodes):
     code = ast.Module(body)
     # ast_dump(code)
     eval(compile(code, '<string>', mode='exec'), globals())
+
+parser = make_parser()
 
 s = ''
 lexer = phplex.lexer

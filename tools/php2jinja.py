@@ -7,7 +7,7 @@ import sys
 sys.path.append('..')
 
 from phply.phplex import lexer
-from phply.phpparse import parser
+from phply.phpparse import make_parser
 from phply.phpast import *
 
 input = sys.stdin
@@ -187,4 +187,5 @@ def unparse_node(node, is_expr=False):
     else:
         return '{# XXX %s #}' % node
 
+parser = make_parser()
 output.write(unparse(parser.parse(input.read(), lexer=lexer)))

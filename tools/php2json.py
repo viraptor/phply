@@ -7,7 +7,7 @@ import sys
 sys.path.append('..')
 
 from phply.phplex import lexer
-from phply.phpparse import parser
+from phply.phpparse import make_parser
 
 import simplejson
 
@@ -24,6 +24,7 @@ def export(items):
            result.append(item)
     return result
 
+parser = make_parser()
 simplejson.dump(export(parser.parse(input.read(),
                                     lexer=lexer,
                                     tracking=with_lineno)),

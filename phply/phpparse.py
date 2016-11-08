@@ -1567,7 +1567,8 @@ def p_error(t):
         raise SyntaxError('unexpected EOF while parsing', (None, None, None, None))
 
 # Build the grammar
-parser = yacc.yacc()
+def make_parser(debug=False):
+    return yacc.yacc(debug=debug)
 
 def main():
     import argparse
@@ -1581,14 +1582,15 @@ def main():
     args = ap.parse_args()
 
     if args.generate:
-        # happens by default, nothing to do
+        make_parser(args.debug)
         return
 
+    parser = make_parser(args.debug)
     if args.path is None:
-        run_parser(sys.stdin, args.quiet, args.debug)
+        run_parser(parser, sys.stdin, args.quiet, args.debug)
     elif os.path.isfile(args.path):
         with open(args.path, 'r') as f:
-            run_parser(f, args.quiet, args.debug)
+            run_parser(parser, f, args.quiet, args.debug)
     elif os.path.isdir(args.path):
         if not args.recursive:
             print('directory path given, use -r for recursive processing')
@@ -1598,9 +1600,9 @@ def main():
                     if not fpath.endswith('.php'):
                         continue
                     with open(os.path.join(root, fpath), 'r') as f:
-                        run_parser(f, args.quiet, args.debug)
+                        run_parser(parser, f, args.quiet, args.debug)
 
-def run_parser(source, quiet, debug):
+def run_parser(parser, source, quiet, debug):
     s = source.read()
     lexer = phplex.lexer
     lexer.lineno = 1

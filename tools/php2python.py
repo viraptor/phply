@@ -7,7 +7,7 @@ import sys
 sys.path.append('..')
 
 from phply.phplex import lexer
-from phply.phpparse import parser
+from phply.phpparse import make_parser
 from phply import pythonast
 
 from ast import Module
@@ -16,6 +16,7 @@ from unparse import Unparser
 input = sys.stdin
 output = sys.stdout
 
+parser = make_parser()
 body = [pythonast.from_phpast(ast)
         for ast in parser.parse(input.read(), lexer=lexer)]
 Unparser(body, output)
