@@ -1283,6 +1283,7 @@ def p_scalar(p):
               | QUOTE encaps_list QUOTE
               | STRING QUOTE encaps_list QUOTE
               | scalar_heredoc
+              | nowdoc
               | class_name_constant'''
     if len(p) == 4:
         p[0] = p[2]
@@ -1305,6 +1306,20 @@ def p_scalar_heredoc(p):
             p[0] = p[2].left
     else:
         p[0] = p[2]
+
+def p_nowdoc(p):
+    'nowdoc : START_NOWDOC nowdoc_text_content END_NOWDOC'
+    # due to how lexer works, the last operation is joining an unnecessary
+    # newline character
+    p[0] = p[2][:-1]
+
+def p_nowdoc_text_content(p):
+    '''nowdoc_text_content : nowdoc_text_content ENCAPSED_AND_WHITESPACE
+                           | empty'''
+    if len(p) == 3:
+        p[0] = p[1] + p[2]
+    else:
+        p[0] = ''
 
 def p_scalar_string_varname(p):
     'scalar : STRING_VARNAME'
@@ -1388,6 +1403,7 @@ def p_static_scalar(p):
                      | QUOTE QUOTE
                      | QUOTE ENCAPSED_AND_WHITESPACE QUOTE
                      | static_heredoc
+                     | nowdoc
                      | class_name_constant'''
     if len(p) == 2:
         p[0] = p[1]

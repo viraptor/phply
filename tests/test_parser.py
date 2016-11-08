@@ -949,3 +949,15 @@ def test_static_property_dynamic_call():
         StaticMethodCall(Variable('$o'), Variable('$prop'), []),
     ]
     eq_ast(input, expected)
+
+def test_nowdoc():
+    input = r"""<?
+        echo <<<'EOT'
+disregard $all {$crazy} ${stuff}->f();
+and `this`
+EOT;
+    ?>"""
+    expected = [
+        Echo(['disregard $all {$crazy} ${stuff}->f();\nand `this`'])
+    ]
+    eq_ast(input, expected)

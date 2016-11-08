@@ -7,7 +7,6 @@
 import ply.lex as lex
 import re
 
-# todo: nowdocs
 # todo: BAD_CHARACTER
 # todo: <script> syntax (does anyone use this?)
 
@@ -20,6 +19,7 @@ states = (
     ('property', 'exclusive'),
     ('heredoc', 'exclusive'),
     ('heredocvar', 'exclusive'),
+    ('nowdoc', 'exclusive'),
     ('backticked', 'exclusive'),
     ('backtickedvar', 'exclusive'),
 )
@@ -89,6 +89,9 @@ tokens = reserved + unparsed + (
 
     # Heredocs
     'START_HEREDOC', 'END_HEREDOC',
+
+    # Nowdocs
+    'START_NOWDOC', 'END_NOWDOC',
 
     # Backtick
     'BACKTICK',
@@ -384,6 +387,27 @@ def t_heredoc_END_HEREDOC(t):
         t.lexer.pop_state()
     else:
         t.type = 'ENCAPSED_AND_WHITESPACE'
+    return t
+
+def t_php_START_NOWDOC(t):
+    r'''<<<[ \t]*'(?P<label>[A-Za-z_][\w_]*)'\r?\n'''
+    t.lexer.lineno += t.value.count("\n")
+    t.lexer.push_state('nowdoc')
+    t.lexer.nowdoc_label = t.lexer.lexmatch.group('label')
+    return t
+
+def t_nowdoc_END_NOWDOC(t):
+    r'(?<=\n)[A-Za-z_][\w_]*'
+    if t.value == t.lexer.nowdoc_label:
+        del t.lexer.nowdoc_label
+        t.lexer.pop_state()
+    else:
+        t.type = 'ENCAPSED_AND_WHITESPACE'
+    return t
+
+def t_nowdoc_ENCAPSED_AND_WHITESPACE(t):
+    r'[^\n]*\n'
+    t.lexer.lineno += t.value.count("\n")
     return t
 
 def t_heredoc_ENCAPSED_AND_WHITESPACE(t):
