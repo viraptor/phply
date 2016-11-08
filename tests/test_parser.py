@@ -343,25 +343,30 @@ def test_foreach():
             yo();
             yo();
         endforeach;
+        foreach ($foo as $bar[0]) {}
     ?>"""
     expected = [
-        Foreach(Variable('$foo'), None, ForeachVariable('$bar', False),
+        Foreach(Variable('$foo'), None, ForeachVariable(Variable('$bar'), False),
                 Block([Echo([Variable('$bar')])])),
         Foreach(Variable('$spam'),
-                ForeachVariable('$ham', False),
-                ForeachVariable('$eggs', False),
+                ForeachVariable(Variable('$ham'), False),
+                ForeachVariable(Variable('$eggs'), False),
                 Block([Echo([BinaryOp('.',
                                       BinaryOp('.', Variable('$ham'), ': '),
                                       Variable('$eggs'))])])),
         Foreach(FunctionCall('complex', [Parameter(Variable('$expression'),
                                                    False)]),
-                None, ForeachVariable('$ref', True),
+                None, ForeachVariable(Variable('$ref'), True),
                 PostIncDecOp('++', Variable('$ref'))),
         Foreach(Variable('$what'),
-                ForeachVariable('$de', True),
-                ForeachVariable('$dealy', True),
+                ForeachVariable(Variable('$de'), True),
+                ForeachVariable(Variable('$dealy'), True),
                 Block([FunctionCall('yo', []),
                        FunctionCall('yo', [])])),
+        Foreach(Variable('$foo'),
+                None,
+                ForeachVariable(ArrayOffset(Variable('$bar'), 0), False),
+                Block([])),
     ]
     eq_ast(input, expected)
 

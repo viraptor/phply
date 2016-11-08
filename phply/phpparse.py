@@ -372,8 +372,8 @@ def p_for_statement(p):
         p[0] = ast.Block(p[2], lineno=p.lineno(1))
 
 def p_foreach_variable(p):
-    '''foreach_variable : VARIABLE
-                        | AND VARIABLE'''
+    '''foreach_variable : variable
+                        | AND variable'''
     if len(p) == 2:
         p[0] = ast.ForeachVariable(p[1], False, lineno=p.lineno(1))
     else:
