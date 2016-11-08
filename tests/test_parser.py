@@ -936,9 +936,16 @@ def test_yield():
     ]
     eq_ast(input, expected)
 
-def test_dynamic_property_access():
+def test_static_property_dynamic_access():
     input = '''<? $o::{$prop};'''
     expected = [
         StaticProperty(Variable('$o'), Variable('$prop')),
+    ]
+    eq_ast(input, expected)
+
+def test_static_property_dynamic_call():
+    input = '''<? $o::{$prop}();'''
+    expected = [
+        StaticMethodCall(Variable('$o'), Variable('$prop'), []),
     ]
     eq_ast(input, expected)
