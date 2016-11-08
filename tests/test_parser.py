@@ -1,11 +1,13 @@
 from __future__ import print_function
 
 from phply import phplex
-from phply.phpparse import parser
+from phply.phpparse import make_parser
 from phply.phpast import *
 
 import nose.tools
 import pprint
+
+parser = make_parser()
 
 def eq_ast(input, expected, filename=None):
     lexer = phplex.lexer.clone()
