@@ -179,6 +179,14 @@ def p_inner_statement(p):
     assert len(p) == 2, "__HALT_COMPILER() can only be used from the outermost scope"
     p[0] = p[1]
 
+def p_inner_statement_yield(p):
+    '''inner_statement : YIELD SEMI
+                       | YIELD expr SEMI'''
+    if len(p) == 3:
+        p[0] = ast.Yield(None, lineno=p.lineno(1))
+    else:
+        p[0] = ast.Yield(p[2], lineno=p.lineno(1))
+
 def p_statement_block(p):
     'statement : LBRACE inner_statement_list RBRACE'
     p[0] = ast.Block(p[2], lineno=p.lineno(1))

@@ -925,3 +925,12 @@ def test_result_multiple_offsets():
         StringOffset(StringOffset(MethodCall(Variable('$o'), 'm', []), 1), 2),
     ]
     eq_ast(input, expected)
+
+def test_yield():
+    input = '''<? function f() { yield; yield 1; }'''
+    expected = [
+        Function('f', [], [
+            Yield(None),
+            Yield(1),
+        ], False),
+    ]
