@@ -938,8 +938,13 @@ def p_simple_indirect_reference(p):
 
 def p_static_member(p):
     '''static_member : class_name DOUBLE_COLON variable_without_objects
-                     | variable_class_name DOUBLE_COLON variable_without_objects'''
-    p[0] = ast.StaticProperty(p[1], p[3], lineno=p.lineno(2))
+                     | variable_class_name DOUBLE_COLON variable_without_objects
+                     | class_name DOUBLE_COLON LBRACE expr RBRACE
+                     | variable_class_name DOUBLE_COLON LBRACE expr RBRACE'''
+    if len(p) == 4:
+        p[0] = ast.StaticProperty(p[1], p[3], lineno=p.lineno(2))
+    else:
+        p[0] = ast.StaticProperty(p[1], p[4], lineno=p.lineno(2))
 
 def p_variable_class_name(p):
     'variable_class_name : reference_variable'
