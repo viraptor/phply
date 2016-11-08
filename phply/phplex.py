@@ -8,8 +8,6 @@ import ply.lex as lex
 import re
 
 # todo: nowdocs
-# todo: backticks
-# todo: binary string literals and casts
 # todo: BAD_CHARACTER
 # todo: <script> syntax (does anyone use this?)
 
