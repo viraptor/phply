@@ -44,7 +44,6 @@ setup(name="phply",
 
       install_requires=[
         'ply',
-        'wheel',
         ],
 
       test_suite='nose.collector',
