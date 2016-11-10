@@ -3,13 +3,6 @@
 phply is a parser for the PHP programming language written using PLY, a
 Lex/YACC-style parser generator toolkit for Python.
 
-# Note
-
-This is a python 3.3+ compatible version of the library found at https://github.com/ramen/phply.
-It maintains backwards compatibility with python 2.  All the hard work was done
-by ramen and the contributors in the AUTHORS file.  I (David Gasson <dgasson@gmail.com>)
-merely make very minor tweaks here and there.
-
 ## Why?
 
 Good question. Because I'm crazy. Because it seemed possible.
@@ -45,15 +38,12 @@ to tell you what to do?
 Some things can't be parsed yet. They are getting fewer by the day, but there
 is still a fair amount of work to do:
 
-* Nowdocs
-* Backticks
-* Binary string literals and casts
 * Labels and goto
 * Some other stuff, probably
 
 ## Who's working on it?
 
-See the [AUTHORS](https://github.com/ramen/phply/blob/master/AUTHORS) file.
+See the [AUTHORS](https://github.com/viraptor/phply/blob/master/AUTHORS) file.
 
 ## How do I use it?
 
