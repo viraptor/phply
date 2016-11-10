@@ -380,9 +380,14 @@ def p_for_statement(p):
         p[0] = ast.Block(p[2], lineno=p.lineno(1))
 
 def p_foreach_variable(p):
-    '''foreach_variable : variable
+    '''foreach_variable : LIST LPAREN assignment_list RPAREN
+                        | variable
                         | AND variable'''
-    if len(p) == 2:
+    # actually the only the value supports lists, but that's a runtime error in
+    # php, so let it parse here as well
+    if len(p) == 5:
+        p[0] = ast.ForeachVariable(p[3], False, lineno=p.lineno(1))
+    elif len(p) == 2:
         p[0] = ast.ForeachVariable(p[1], False, lineno=p.lineno(1))
     else:
         p[0] = ast.ForeachVariable(p[2], True, lineno=p.lineno(1))

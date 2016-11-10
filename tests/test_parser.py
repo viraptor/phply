@@ -370,6 +370,17 @@ def test_foreach():
     ]
     eq_ast(input, expected)
 
+def test_foreach_with_lists():
+    input = r"""<?
+        foreach ($foo as list($bar, $baz)) {}
+        foreach ($foo as $k => list($bar, $baz)) {}
+    ?>"""
+    expected = [
+        Foreach(Variable('$foo'), None, ForeachVariable([Variable('$bar'), Variable('$baz')], False), Block([])),
+        Foreach(Variable('$foo'), ForeachVariable(Variable('$k'), False), ForeachVariable([Variable('$bar'), Variable('$baz')], False), Block([])),
+    ]
+    eq_ast(input, expected)
+
 def test_global_variables():
     input = r"""<?
         global $foo, $bar;
