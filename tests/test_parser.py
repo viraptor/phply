@@ -339,7 +339,7 @@ def test_foreach():
         }
         foreach (complex($expression) as &$ref)
             $ref++;
-        foreach ($what as &$de => &$dealy):
+        foreach ($what as $de => &$dealy):
             yo();
             yo();
         endforeach;
@@ -349,7 +349,7 @@ def test_foreach():
         Foreach(Variable('$foo'), None, ForeachVariable(Variable('$bar'), False),
                 Block([Echo([Variable('$bar')])])),
         Foreach(Variable('$spam'),
-                ForeachVariable(Variable('$ham'), False),
+                Variable('$ham'),
                 ForeachVariable(Variable('$eggs'), False),
                 Block([Echo([BinaryOp('.',
                                       BinaryOp('.', Variable('$ham'), ': '),
@@ -359,7 +359,7 @@ def test_foreach():
                 None, ForeachVariable(Variable('$ref'), True),
                 PostIncDecOp('++', Variable('$ref'))),
         Foreach(Variable('$what'),
-                ForeachVariable(Variable('$de'), True),
+                Variable('$de'),
                 ForeachVariable(Variable('$dealy'), True),
                 Block([FunctionCall('yo', []),
                        FunctionCall('yo', [])])),
@@ -377,7 +377,7 @@ def test_foreach_with_lists():
     ?>"""
     expected = [
         Foreach(Variable('$foo'), None, ForeachVariable([Variable('$bar'), Variable('$baz')], False), Block([])),
-        Foreach(Variable('$foo'), ForeachVariable(Variable('$k'), False), ForeachVariable([Variable('$bar'), Variable('$baz')], False), Block([])),
+        Foreach(Variable('$foo'), Variable('$k'), ForeachVariable([Variable('$bar'), Variable('$baz')], False), Block([])),
     ]
     eq_ast(input, expected)
 

@@ -216,7 +216,7 @@ def p_statement_foreach(p):
     if p[6] is None:
         p[0] = ast.Foreach(p[3], None, p[5], p[8], lineno=p.lineno(1))
     else:
-        p[0] = ast.Foreach(p[3], p[5], p[6], p[8], lineno=p.lineno(1))
+        p[0] = ast.Foreach(p[3], p[5].name, p[6], p[8], lineno=p.lineno(1))
 
 def p_statement_switch(p):
     'statement : SWITCH LPAREN expr RPAREN switch_case_list'
