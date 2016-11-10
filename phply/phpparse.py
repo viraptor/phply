@@ -3,7 +3,6 @@
 #
 # A parser for PHP.
 # -----------------------------------------------------------------------------
-from builtins import bytes
 
 import os
 import sys
