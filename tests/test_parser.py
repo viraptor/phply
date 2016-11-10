@@ -875,12 +875,14 @@ def test_trait_renames():
     input = '''<? trait A { use T {X as Y;} }
                   class B { use T {X as Y;} }
                   trait C { use T {X as public Y;} }
-                  trait D { use T {X as public;} }'''
+                  trait D { use T {X as public;} }
+                  trait E { use T {X::m as Y;} }'''
     expected = [
         Trait('A', [TraitUse('T', [TraitModifier('X', 'Y', None)])], []),
         Class('B', None, None, [], [TraitUse('T', [TraitModifier('X', 'Y', None)])], []),
         Trait('C', [TraitUse('T', [TraitModifier('X', 'Y', 'public')])], []),
         Trait('D', [TraitUse('T', [TraitModifier('X', None, 'public')])], []),
+        Trait('E', [TraitUse('T', [TraitModifier(StaticProperty('X', 'm'), 'Y', None)])], []),
     ]
     eq_ast(input, expected)
 

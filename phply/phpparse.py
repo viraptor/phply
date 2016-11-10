@@ -557,13 +557,21 @@ def p_trait_modifiers_list(p):
     else:
         p[0] = []
 
+def p_trait_member(p):
+    '''trait_member : fully_qualified_class_name DOUBLE_COLON STRING
+                    | STRING'''
+    if len(p) == 4:
+        p[0] = ast.StaticProperty(p[1], p[3], lineno=p.lineno(2))
+    else:
+        p[0] = p[1]
+
 def p_trait_modifier(p):
-    'trait_modifier : STRING AS STRING SEMI'
+    'trait_modifier : trait_member AS STRING SEMI'
     p[0] = ast.TraitModifier(p[1], p[3], None)
 
 def p_trait_modifier_with_visibility(p):
-    '''trait_modifier : STRING AS visibility_modifier STRING SEMI
-                      | STRING AS visibility_modifier SEMI'''
+    '''trait_modifier : trait_member AS visibility_modifier STRING SEMI
+                      | trait_member AS visibility_modifier SEMI'''
     if len(p) == 6:
         p[0] = ast.TraitModifier(p[1], p[4], p[3])
     else:
