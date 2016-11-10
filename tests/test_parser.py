@@ -562,11 +562,13 @@ def test_instanceof():
             echo '$foo is a bar';
         }
         $foo instanceof $bar;
+        $foo instanceof static;
     ?>"""
     expected = [
         If(BinaryOp('instanceof', Variable('$foo'), Constant('Bar')),
            Block([Echo(['$foo is a bar'])]), [], None),
         BinaryOp('instanceof', Variable('$foo'), Variable('$bar')),
+        BinaryOp('instanceof', Variable('$foo'), 'static'),
     ]
     eq_ast(input, expected)
 
