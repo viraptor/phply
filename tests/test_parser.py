@@ -976,3 +976,15 @@ EOT;
         Echo(['disregard $all {$crazy} ${stuff}->f();\nand `this`'])
     ]
     eq_ast(input, expected)
+
+def test_basic_spans():
+    input = r"""<?
+        isset($a);
+
+        isset($b,
+            $c);
+    ?>"""
+    lexer = phplex.lexer.clone()
+    output = parser.parse(input, lexer=lexer)
+    nose.tools.eq_(output[0].linespan, (2,2))
+    nose.tools.eq_(output[1].linespan, (4,4))

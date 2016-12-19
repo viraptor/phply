@@ -13,6 +13,7 @@ class Node(object):
                                        len(self.fields))
         try:
             self.lineno = kwargs['lineno']
+            self.linespan = kwargs['linespan']
         except KeyError:
             self.lineno = None
         for i, field in enumerate(self.fields):
