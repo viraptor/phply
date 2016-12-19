@@ -114,19 +114,19 @@ def p_top_statement_namespace(p):
                      | NAMESPACE LBRACE top_statement_list RBRACE
                      | NAMESPACE namespace_name LBRACE top_statement_list RBRACE'''
     if len(p) == 4:
-        p[0] = ast.Namespace(p[2], [], lineno=p.lineno(1))
+        p[0] = ast.Namespace(p[2], [], lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 5:
-        p[0] = ast.Namespace(None, p[3], lineno=p.lineno(1))
+        p[0] = ast.Namespace(None, p[3], lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.Namespace(p[2], p[4], lineno=p.lineno(1))
+        p[0] = ast.Namespace(p[2], p[4], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_top_statement_constant(p):
     'top_statement : CONST constant_declarations SEMI'
-    p[0] = ast.ConstantDeclarations(p[2], lineno=p.lineno(1))
+    p[0] = ast.ConstantDeclarations(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_top_statement_use(p):
     'top_statement : USE use_declarations SEMI'
-    p[0] = ast.UseDeclarations(p[2], lineno=p.lineno(1))
+    p[0] = ast.UseDeclarations(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_use_declarations(p):
     '''use_declarations : use_declarations COMMA use_declaration
@@ -142,13 +142,13 @@ def p_use_declaration(p):
                        | namespace_name AS STRING
                        | NS_SEPARATOR namespace_name AS STRING'''
     if len(p) == 2:
-        p[0] = ast.UseDeclaration(p[1], None, lineno=p.lineno(1))
+        p[0] = ast.UseDeclaration(p[1], None, lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 3:
-        p[0] = ast.UseDeclaration(p[1] + p[2], None, lineno=p.lineno(1))
+        p[0] = ast.UseDeclaration(p[1] + p[2], None, lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 4:
-        p[0] = ast.UseDeclaration(p[1], p[3], lineno=p.lineno(2))
+        p[0] = ast.UseDeclaration(p[1], p[3], lineno=p.lineno(2), linespan=p.linespan(2))
     else:
-        p[0] = ast.UseDeclaration(p[1] + p[2], p[4], lineno=p.lineno(1))
+        p[0] = ast.UseDeclaration(p[1] + p[2], p[4], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_constant_declarations(p):
     '''constant_declarations : constant_declarations COMMA constant_declaration
@@ -160,7 +160,7 @@ def p_constant_declarations(p):
 
 def p_constant_declaration(p):
     'constant_declaration : STRING EQUALS static_expr'
-    p[0] = ast.ConstantDeclaration(p[1], p[3], lineno=p.lineno(1))
+    p[0] = ast.ConstantDeclaration(p[1], p[3], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_inner_statement_list(p):
     '''inner_statement_list : inner_statement_list inner_statement
@@ -188,79 +188,79 @@ def p_inner_statement_yield(p):
 
 def p_statement_block(p):
     'statement : LBRACE inner_statement_list RBRACE'
-    p[0] = ast.Block(p[2], lineno=p.lineno(1))
+    p[0] = ast.Block(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_if(p):
     '''statement : IF LPAREN expr RPAREN statement elseif_list else_single
                  | IF LPAREN expr RPAREN COLON inner_statement_list new_elseif_list new_else_single ENDIF SEMI'''
     if len(p) == 8:
-        p[0] = ast.If(p[3], p[5], p[6], p[7], lineno=p.lineno(1))
+        p[0] = ast.If(p[3], p[5], p[6], p[7], lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.If(p[3], ast.Block(p[6], lineno=p.lineno(5)),
-                      p[7], p[8], lineno=p.lineno(1))
+        p[0] = ast.If(p[3], ast.Block(p[6], lineno=p.lineno(5), linespan=p.linespan(5)),
+                      p[7], p[8], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_while(p):
     'statement : WHILE LPAREN expr RPAREN while_statement'
-    p[0] = ast.While(p[3], p[5], lineno=p.lineno(1))
+    p[0] = ast.While(p[3], p[5], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_do_while(p):
     'statement : DO statement WHILE LPAREN expr RPAREN SEMI'
-    p[0] = ast.DoWhile(p[2], p[5], lineno=p.lineno(1))
+    p[0] = ast.DoWhile(p[2], p[5], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_for(p):
     'statement : FOR LPAREN for_expr SEMI for_expr SEMI for_expr RPAREN for_statement'
-    p[0] = ast.For(p[3], p[5], p[7], p[9], lineno=p.lineno(1))
+    p[0] = ast.For(p[3], p[5], p[7], p[9], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_foreach(p):
     'statement : FOREACH LPAREN expr AS foreach_variable foreach_optional_arg RPAREN foreach_statement'
     if p[6] is None:
-        p[0] = ast.Foreach(p[3], None, p[5], p[8], lineno=p.lineno(1))
+        p[0] = ast.Foreach(p[3], None, p[5], p[8], lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.Foreach(p[3], p[5].name, p[6], p[8], lineno=p.lineno(1))
+        p[0] = ast.Foreach(p[3], p[5].name, p[6], p[8], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_switch(p):
     'statement : SWITCH LPAREN expr RPAREN switch_case_list'
-    p[0] = ast.Switch(p[3], p[5], lineno=p.lineno(1))
+    p[0] = ast.Switch(p[3], p[5], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_break(p):
     '''statement : BREAK SEMI
                  | BREAK expr SEMI'''
     if len(p) == 3:
-        p[0] = ast.Break(None, lineno=p.lineno(1))
+        p[0] = ast.Break(None, lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.Break(p[2], lineno=p.lineno(1))
+        p[0] = ast.Break(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_continue(p):
     '''statement : CONTINUE SEMI
                  | CONTINUE expr SEMI'''
     if len(p) == 3:
-        p[0] = ast.Continue(None, lineno=p.lineno(1))
+        p[0] = ast.Continue(None, lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.Continue(p[2], lineno=p.lineno(1))
+        p[0] = ast.Continue(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_return(p):
     '''statement : RETURN SEMI
                  | RETURN expr SEMI'''
     if len(p) == 3:
-        p[0] = ast.Return(None, lineno=p.lineno(1))
+        p[0] = ast.Return(None, lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.Return(p[2], lineno=p.lineno(1))
+        p[0] = ast.Return(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_global(p):
     'statement : GLOBAL global_var_list SEMI'
-    p[0] = ast.Global(p[2], lineno=p.lineno(1))
+    p[0] = ast.Global(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_static(p):
     'statement : STATIC static_var_list SEMI'
-    p[0] = ast.Static(p[2], lineno=p.lineno(1))
+    p[0] = ast.Static(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_echo(p):
     'statement : ECHO echo_expr_list SEMI'
-    p[0] = ast.Echo(p[2], lineno=p.lineno(1))
+    p[0] = ast.Echo(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_inline_html(p):
     'statement : INLINE_HTML'
-    p[0] = ast.InlineHTML(p[1], lineno=p.lineno(1))
+    p[0] = ast.InlineHTML(p[1], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_expr(p):
     'statement : expr SEMI'
@@ -268,7 +268,7 @@ def p_statement_expr(p):
 
 def p_statement_unset(p):
     'statement : UNSET LPAREN unset_variables RPAREN SEMI'
-    p[0] = ast.Unset(p[3], lineno=p.lineno(1))
+    p[0] = ast.Unset(p[3], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_empty(p):
     'statement : SEMI'
@@ -276,14 +276,14 @@ def p_statement_empty(p):
 
 def p_statement_try(p):
     'statement : TRY LBRACE inner_statement_list RBRACE additional_catches maybe_finally'
-    p[0] = ast.Try(p[3], p[5], p[6], lineno=p.lineno(1))
+    p[0] = ast.Try(p[3], p[5], p[6], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_additional_catches(p):
     '''additional_catches : additional_catches CATCH LPAREN fully_qualified_class_name VARIABLE RPAREN LBRACE inner_statement_list RBRACE
                           | empty'''
     if len(p) == 10:
-        p[0] = p[1] + [ast.Catch(p[4], ast.Variable(p[5], lineno=p.lineno(5)),
-                                 p[8], lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.Catch(p[4], ast.Variable(p[5], lineno=p.lineno(5), linespan=p.linespan(5)),
+                                 p[8], lineno=p.lineno(2), linespan=p.linespan(2))]
     else:
         p[0] = []
 
@@ -297,19 +297,19 @@ def p_maybe_finally(p):
 
 def p_statement_throw(p):
     'statement : THROW expr SEMI'
-    p[0] = ast.Throw(p[2], lineno=p.lineno(1))
+    p[0] = ast.Throw(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_statement_declare(p):
     'statement : DECLARE LPAREN declare_list RPAREN declare_statement'
-    p[0] = ast.Declare(p[3], p[5], lineno=p.lineno(1))
+    p[0] = ast.Declare(p[3], p[5], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_declare_list(p):
     '''declare_list : STRING EQUALS static_scalar
                     | declare_list COMMA STRING EQUALS static_scalar'''
     if len(p) == 4:
-        p[0] = [ast.Directive(p[1], p[3], lineno=p.lineno(1))]
+        p[0] = [ast.Directive(p[1], p[3], lineno=p.lineno(1), linespan=p.linespan(1))]
     else:
-        p[0] = p[1] + [ast.Directive(p[3], p[5], lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.Directive(p[3], p[5], lineno=p.lineno(2), linespan=p.linespan(2))]
 
 def p_declare_statement(p):
     '''declare_statement : statement
@@ -317,7 +317,7 @@ def p_declare_statement(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = ast.Block(p[2], lineno=p.lineno(1))
+        p[0] = ast.Block(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_elseif_list(p):
     '''elseif_list : empty
@@ -325,13 +325,13 @@ def p_elseif_list(p):
     if len(p) == 2:
         p[0] = []
     else:
-        p[0] = p[1] + [ast.ElseIf(p[4], p[6], lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.ElseIf(p[4], p[6], lineno=p.lineno(2), linespan=p.linespan(2))]
 
 def p_else_single(p):
     '''else_single : empty
                    | ELSE statement'''
     if len(p) == 3:
-        p[0] = ast.Else(p[2], lineno=p.lineno(1))
+        p[0] = ast.Else(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_new_elseif_list(p):
     '''new_elseif_list : empty
@@ -340,14 +340,14 @@ def p_new_elseif_list(p):
         p[0] = []
     else:
         p[0] = p[1] + [ast.ElseIf(p[4], ast.Block(p[7], lineo=p.lineno(6)),
-                                  lineno=p.lineno(2))]
+                                  lineno=p.lineno(2), linespan=p.linespan(2))]
 
 def p_new_else_single(p):
     '''new_else_single : empty
                        | ELSE COLON inner_statement_list'''
     if len(p) == 4:
-        p[0] = ast.Else(ast.Block(p[3], lineno=p.lineno(2)),
-                        lineno=p.lineno(1))
+        p[0] = ast.Else(ast.Block(p[3], lineno=p.lineno(2), linespan=p.linespan(2)),
+                        lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_while_statement(p):
     '''while_statement : statement
@@ -355,7 +355,7 @@ def p_while_statement(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = ast.Block(p[2], lineno=p.lineno(1))
+        p[0] = ast.Block(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_for_expr(p):
     '''for_expr : empty
@@ -376,7 +376,7 @@ def p_for_statement(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = ast.Block(p[2], lineno=p.lineno(1))
+        p[0] = ast.Block(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_foreach_variable(p):
     '''foreach_variable : LIST LPAREN assignment_list RPAREN
@@ -385,11 +385,11 @@ def p_foreach_variable(p):
     # actually the only the value supports lists, but that's a runtime error in
     # php, so let it parse here as well
     if len(p) == 5:
-        p[0] = ast.ForeachVariable(p[3], False, lineno=p.lineno(1))
+        p[0] = ast.ForeachVariable(p[3], False, lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 2:
-        p[0] = ast.ForeachVariable(p[1], False, lineno=p.lineno(1))
+        p[0] = ast.ForeachVariable(p[1], False, lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.ForeachVariable(p[2], True, lineno=p.lineno(1))
+        p[0] = ast.ForeachVariable(p[2], True, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_foreach_optional_arg(p):
     '''foreach_optional_arg : empty
@@ -403,7 +403,7 @@ def p_foreach_statement(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = ast.Block(p[2], lineno=p.lineno(1))
+        p[0] = ast.Block(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_switch_case_list(p):
     '''switch_case_list : LBRACE case_list RBRACE
@@ -426,9 +426,9 @@ def p_case_list(p):
                  | case_list CASE expr case_separator inner_statement_list
                  | case_list DEFAULT case_separator inner_statement_list'''
     if len(p) == 6:
-        p[0] = p[1] + [ast.Case(p[3], p[5], lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.Case(p[3], p[5], lineno=p.lineno(2), linespan=p.linespan(2))]
     elif len(p) == 5:
-        p[0] = p[1] + [ast.Default(p[4], lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.Default(p[4], lineno=p.lineno(2), linespan=p.linespan(2))]
     else:
         p[0] = []
 
@@ -450,11 +450,11 @@ def p_global_var(p):
                   | DOLLAR variable
                   | DOLLAR LBRACE expr RBRACE'''
     if len(p) == 2:
-        p[0] = ast.Variable(p[1], lineno=p.lineno(1))
+        p[0] = ast.Variable(p[1], lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 3:
-        p[0] = ast.Variable(p[2], lineno=p.lineno(1))
+        p[0] = ast.Variable(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.Variable(p[3], lineno=p.lineno(1))
+        p[0] = ast.Variable(p[3], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_static_var_list(p):
     '''static_var_list : static_var_list COMMA static_var
@@ -468,9 +468,9 @@ def p_static_var(p):
     '''static_var : VARIABLE EQUALS static_scalar
                   | VARIABLE'''
     if len(p) == 4:
-        p[0] = ast.StaticVariable(p[1], p[3], lineno=p.lineno(1))
+        p[0] = ast.StaticVariable(p[1], p[3], lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.StaticVariable(p[1], None, lineno=p.lineno(1))
+        p[0] = ast.StaticVariable(p[1], None, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_echo_expr_list(p):
     '''echo_expr_list : echo_expr_list COMMA expr
@@ -494,7 +494,7 @@ def p_unset_variable(p):
 
 def p_function_declaration_statement(p):
     'function_declaration_statement : FUNCTION is_reference STRING LPAREN parameter_list RPAREN LBRACE inner_statement_list RBRACE'
-    p[0] = ast.Function(p[3], p[5], p[8], p[2], lineno=p.lineno(1))
+    p[0] = ast.Function(p[3], p[5], p[8], p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_class_declaration_statement(p):
     '''class_declaration_statement : class_entry_type STRING extends_from implements_list LBRACE class_statement_list RBRACE
@@ -508,9 +508,9 @@ def p_class_declaration_statement(p):
                 traits.append(s)
             else:
                 stmts.append(s)
-        p[0] = ast.Class(p[2], p[1], p[3], p[4], traits, stmts, lineno=p.lineno(2))
+        p[0] = ast.Class(p[2], p[1], p[3], p[4], traits, stmts, lineno=p.lineno(2), linespan=p.linespan(2))
     elif len(p) == 7:
-        p[0] = ast.Interface(p[2], p[3], p[5], lineno=p.lineno(1))
+        p[0] = ast.Interface(p[2], p[3], p[5], lineno=p.lineno(1), linespan=p.linespan(1))
     else:
         traits = []
         stmts = []
@@ -519,7 +519,7 @@ def p_class_declaration_statement(p):
                 traits.append(s)
             else:
                 stmts.append(s)
-        p[0] = ast.Trait(p[2], traits, stmts, lineno=p.lineno(1))
+        p[0] = ast.Trait(p[2], traits, stmts, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_class_entry_type(p):
     '''class_entry_type : CLASS
@@ -621,40 +621,40 @@ def p_class_statement(p):
                        | USE fully_qualified_class_name LBRACE trait_modifiers_list RBRACE
                        | USE fully_qualified_class_name SEMI'''
     if len(p) == 9:
-        p[0] = ast.Method(p[4], p[1], p[6], p[8], p[3], lineno=p.lineno(2))
+        p[0] = ast.Method(p[4], p[1], p[6], p[8], p[3], lineno=p.lineno(2), linespan=p.linespan(2))
     elif len(p) == 6:
-        p[0] = ast.TraitUse(p[2], p[4], lineno=p.lineno(1))
+        p[0] = ast.TraitUse(p[2], p[4], lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 4:
         if p[1] == 'use':
-            p[0] = ast.TraitUse(p[2], [], lineno=p.lineno(1))
+            p[0] = ast.TraitUse(p[2], [], lineno=p.lineno(1), linespan=p.linespan(1))
         else:
-            p[0] = ast.ClassVariables(p[1], p[2], lineno=p.lineno(3))
+            p[0] = ast.ClassVariables(p[1], p[2], lineno=p.lineno(3), linespan=p.linespan(3))
     else:
-        p[0] = ast.ClassConstants(p[1], lineno=p.lineno(2))
+        p[0] = ast.ClassConstants(p[1], lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_class_variable_declaration_initial(p):
     '''class_variable_declaration : class_variable_declaration COMMA VARIABLE EQUALS static_scalar
                                   | VARIABLE EQUALS static_scalar'''
     if len(p) == 6:
-        p[0] = p[1] + [ast.ClassVariable(p[3], p[5], lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.ClassVariable(p[3], p[5], lineno=p.lineno(2), linespan=p.linespan(2))]
     else:
-        p[0] = [ast.ClassVariable(p[1], p[3], lineno=p.lineno(1))]
+        p[0] = [ast.ClassVariable(p[1], p[3], lineno=p.lineno(1), linespan=p.linespan(1))]
 
 def p_class_variable_declaration_no_initial(p):
     '''class_variable_declaration : class_variable_declaration COMMA VARIABLE
                                   | VARIABLE'''
     if len(p) == 4:
-        p[0] = p[1] + [ast.ClassVariable(p[3], None, lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.ClassVariable(p[3], None, lineno=p.lineno(2), linespan=p.linespan(2))]
     else:
-        p[0] = [ast.ClassVariable(p[1], None, lineno=p.lineno(1))]
+        p[0] = [ast.ClassVariable(p[1], None, lineno=p.lineno(1), linespan=p.linespan(1))]
 
 def p_class_constant_declaration(p):
     '''class_constant_declaration : class_constant_declaration COMMA STRING EQUALS static_expr
                                   | CONST STRING EQUALS static_expr'''
     if len(p) == 6:
-        p[0] = p[1] + [ast.ClassConstant(p[3], p[5], lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.ClassConstant(p[3], p[5], lineno=p.lineno(2), linespan=p.linespan(2))]
     else:
-        p[0] = [ast.ClassConstant(p[2], p[4], lineno=p.lineno(1))]
+        p[0] = [ast.ClassConstant(p[2], p[4], lineno=p.lineno(1), linespan=p.linespan(1))]
 
 def p_interface_list(p):
     '''interface_list : interface_list COMMA fully_qualified_class_name
@@ -742,21 +742,21 @@ def p_parameter(p):
                  | AND VARIABLE EQUALS static_scalar
                  | class_name AND VARIABLE EQUALS static_scalar'''
     if len(p) == 2: # VARIABLE
-        p[0] = ast.FormalParameter(p[1], None, False, None, lineno=p.lineno(1))
+        p[0] = ast.FormalParameter(p[1], None, False, None, lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 3 and p[1] == '&': # AND VARIABLE
-        p[0] = ast.FormalParameter(p[2], None, True, None, lineno=p.lineno(1))
+        p[0] = ast.FormalParameter(p[2], None, True, None, lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 3 and p[1] != '&': # STRING VARIABLE
-        p[0] = ast.FormalParameter(p[2], None, False, p[1], lineno=p.lineno(1))
+        p[0] = ast.FormalParameter(p[2], None, False, p[1], lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 4 and p[2] != '&': # VARIABLE EQUALS static_scalar
-        p[0] = ast.FormalParameter(p[1], p[3], False, None, lineno=p.lineno(1))
+        p[0] = ast.FormalParameter(p[1], p[3], False, None, lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 4 and p[2] == '&': # STRING AND VARIABLE
-        p[0] = ast.FormalParameter(p[3], None, True, p[1], lineno=p.lineno(1))
+        p[0] = ast.FormalParameter(p[3], None, True, p[1], lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 5 and p[1] == '&': # AND VARIABLE EQUALS static_scalar
-        p[0] = ast.FormalParameter(p[2], p[4], True, None, lineno=p.lineno(1))
+        p[0] = ast.FormalParameter(p[2], p[4], True, None, lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 5 and p[1] != '&': # class_name VARIABLE EQUALS static_scalar
-        p[0] = ast.FormalParameter(p[2], p[4], False, p[1], lineno=p.lineno(1))
+        p[0] = ast.FormalParameter(p[2], p[4], False, p[1], lineno=p.lineno(1), linespan=p.linespan(1))
     else: # STRING AND VARIABLE EQUALS static_scalar
-        p[0] = ast.FormalParameter(p[3], p[5], True, p[1], lineno=p.lineno(1))
+        p[0] = ast.FormalParameter(p[3], p[5], True, p[1], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_variable(p):
     'expr : variable'
@@ -766,13 +766,13 @@ def p_expr_assign(p):
     '''expr : variable EQUALS expr
             | variable EQUALS AND expr'''
     if len(p) == 5:
-        p[0] = ast.Assignment(p[1], p[4], True, lineno=p.lineno(2))
+        p[0] = ast.Assignment(p[1], p[4], True, lineno=p.lineno(2), linespan=p.linespan(2))
     else:
-        p[0] = ast.Assignment(p[1], p[3], False, lineno=p.lineno(2))
+        p[0] = ast.Assignment(p[1], p[3], False, lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_expr_new(p):
     'expr : NEW class_name_reference ctor_arguments'
-    p[0] = ast.New(p[2], p[3], lineno=p.lineno(1))
+    p[0] = ast.New(p[2], p[3], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_objectop(p):
     'expr : expr OBJECT_OPERATOR object_property method_or_not'
@@ -809,11 +809,11 @@ def p_dynamic_class_name_reference(p):
                                     | base_variable'''
     if len(p) == 5:
         name, dims = p[3]
-        p[0] = ast.ObjectProperty(p[1], name, lineno=p.lineno(2))
+        p[0] = ast.ObjectProperty(p[1], name, lineno=p.lineno(2), linespan=p.linespan(2))
         for class_, dim, lineno in dims:
             p[0] = class_(p[0], dim, lineno=lineno)
         for name, dims in p[4]:
-            p[0] = ast.ObjectProperty(p[0], name, lineno=p.lineno(2))
+            p[0] = ast.ObjectProperty(p[0], name, lineno=p.lineno(2), linespan=p.linespan(2))
             for class_, dim, lineno in dims:
                 p[0] = class_(p[0], dim, lineno=lineno)
     else:
@@ -841,11 +841,11 @@ def p_ctor_arguments(p):
 
 def p_expr_clone(p):
     'expr : CLONE expr'
-    p[0] = ast.Clone(p[2], lineno=p.lineno(1))
+    p[0] = ast.Clone(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_list_assign(p):
     'expr : LIST LPAREN assignment_list RPAREN EQUALS expr'
-    p[0] = ast.ListAssignment(p[3], p[6], lineno=p.lineno(1))
+    p[0] = ast.ListAssignment(p[3], p[6], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_assignment_list(p):
     '''assignment_list : assignment_list COMMA assignment_list_element
@@ -871,16 +871,16 @@ def p_variable(p):
         name, dims = p[3]
         params = p[4]
         if params is not None:
-            p[0] = ast.MethodCall(p[1], name, params, lineno=p.lineno(2))
+            p[0] = ast.MethodCall(p[1], name, params, lineno=p.lineno(2), linespan=p.linespan(2))
         else:
-            p[0] = ast.ObjectProperty(p[1], name, lineno=p.lineno(2))
+            p[0] = ast.ObjectProperty(p[1], name, lineno=p.lineno(2), linespan=p.linespan(2))
         for class_, dim, lineno in dims:
             p[0] = class_(p[0], dim, lineno=lineno)
         for (name, dims), params in p[5]:
             if params is not None:
-                p[0] = ast.MethodCall(p[0], name, params, lineno=p.lineno(2))
+                p[0] = ast.MethodCall(p[0], name, params, lineno=p.lineno(2), linespan=p.linespan(2))
             else:
-                p[0] = ast.ObjectProperty(p[0], name, lineno=p.lineno(2))
+                p[0] = ast.ObjectProperty(p[0], name, lineno=p.lineno(2), linespan=p.linespan(2))
             for class_, dim, lineno in dims:
                 p[0] = class_(p[0], dim, lineno=lineno)
     else:
@@ -896,18 +896,18 @@ def p_function_call(p):
                      | NS_SEPARATOR namespace_name LPAREN function_call_parameter_list RPAREN
                      | NAMESPACE NS_SEPARATOR namespace_name LPAREN function_call_parameter_list RPAREN'''
     if len(p) == 5:
-        p[0] = ast.FunctionCall(p[1], p[3], lineno=p.lineno(2))
+        p[0] = ast.FunctionCall(p[1], p[3], lineno=p.lineno(2), linespan=p.linespan(2))
     elif len(p) == 6:
-        p[0] = ast.FunctionCall(p[1] + p[2], p[4], lineno=p.lineno(1))
+        p[0] = ast.FunctionCall(p[1] + p[2], p[4], lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.FunctionCall(p[1] + p[2] + p[3], p[5], lineno=p.lineno(1))
+        p[0] = ast.FunctionCall(p[1] + p[2] + p[3], p[5], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_function_call_static(p):
     '''function_call : class_name DOUBLE_COLON STRING LPAREN function_call_parameter_list RPAREN
                      | class_name DOUBLE_COLON variable_without_objects LPAREN function_call_parameter_list RPAREN
                      | variable_class_name DOUBLE_COLON STRING LPAREN function_call_parameter_list RPAREN
                      | variable_class_name DOUBLE_COLON variable_without_objects LPAREN function_call_parameter_list RPAREN'''
-    p[0] = ast.StaticMethodCall(p[1], p[3], p[5], lineno=p.lineno(2))
+    p[0] = ast.StaticMethodCall(p[1], p[3], p[5], lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_function_call_static_dynamic_name(p):
     '''function_call : class_name DOUBLE_COLON LBRACE expr RBRACE LPAREN function_call_parameter_list RPAREN
@@ -916,7 +916,7 @@ def p_function_call_static_dynamic_name(p):
 
 def p_function_call_variable(p):
     'function_call : variable_without_objects LPAREN function_call_parameter_list RPAREN'
-    p[0] = ast.FunctionCall(p[1], p[3], lineno=p.lineno(2))
+    p[0] = ast.FunctionCall(p[1], p[3], lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_function_call_backtick_shell_exec(p):
     'function_call : BACKTICK encaps_list BACKTICK'
@@ -949,7 +949,7 @@ def p_simple_indirect_reference(p):
     '''simple_indirect_reference : DOLLAR simple_indirect_reference
                                  | reference_variable'''
     if len(p) == 3:
-        p[0] = ast.Variable(p[2], lineno=p.lineno(1))
+        p[0] = ast.Variable(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
     else:
         p[0] = p[1]
 
@@ -959,9 +959,9 @@ def p_static_member(p):
                      | class_name DOUBLE_COLON LBRACE expr RBRACE
                      | variable_class_name DOUBLE_COLON LBRACE expr RBRACE'''
     if len(p) == 4:
-        p[0] = ast.StaticProperty(p[1], p[3], lineno=p.lineno(2))
+        p[0] = ast.StaticProperty(p[1], p[3], lineno=p.lineno(2), linespan=p.linespan(2))
     else:
-        p[0] = ast.StaticProperty(p[1], p[4], lineno=p.lineno(2))
+        p[0] = ast.StaticProperty(p[1], p[4], lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_variable_class_name(p):
     'variable_class_name : reference_variable'
@@ -973,11 +973,11 @@ def p_variable_array_offset(p):
 
 def p_reference_variable_array_offset(p):
     'reference_variable : reference_variable LBRACKET dim_offset RBRACKET'
-    p[0] = ast.ArrayOffset(p[1], p[3], lineno=p.lineno(2))
+    p[0] = ast.ArrayOffset(p[1], p[3], lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_reference_variable_string_offset(p):
     'reference_variable : reference_variable LBRACE expr RBRACE'
-    p[0] = ast.StringOffset(p[1], p[3], lineno=p.lineno(2))
+    p[0] = ast.StringOffset(p[1], p[3], lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_reference_variable_compound_variable(p):
     'reference_variable : compound_variable'
@@ -991,9 +991,9 @@ def p_compound_variable(p):
     '''compound_variable : VARIABLE
                          | DOLLAR LBRACE expr RBRACE'''
     if len(p) == 2:
-        p[0] = ast.Variable(p[1], lineno=p.lineno(1))
+        p[0] = ast.Variable(p[1], lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.Variable(p[3], lineno=p.lineno(1))
+        p[0] = ast.Variable(p[3], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_dim_offset(p):
     '''dim_offset : expr
@@ -1044,7 +1044,7 @@ def p_expr_array(p):
     else:
         contents = p[2]
 
-    p[0] = ast.Array(contents, lineno=p.lineno(1))
+    p[0] = ast.Array(contents, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_array_pair_list(p):
     '''array_pair_list : empty
@@ -1060,13 +1060,13 @@ def p_non_empty_array_pair_list_item(p):
                                  | AND variable
                                  | expr'''
     if len(p) == 5:
-        p[0] = p[1] + [ast.ArrayElement(None, p[4], True, lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.ArrayElement(None, p[4], True, lineno=p.lineno(2), linespan=p.linespan(2))]
     elif len(p) == 4:
-        p[0] = p[1] + [ast.ArrayElement(None, p[3], False, lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.ArrayElement(None, p[3], False, lineno=p.lineno(2), linespan=p.linespan(2))]
     elif len(p) == 3:
-        p[0] = [ast.ArrayElement(None, p[2], True, lineno=p.lineno(1))]
+        p[0] = [ast.ArrayElement(None, p[2], True, lineno=p.lineno(1), linespan=p.linespan(1))]
     else:
-        p[0] = [ast.ArrayElement(None, p[1], False, lineno=p.lineno(1))]
+        p[0] = [ast.ArrayElement(None, p[1], False, lineno=p.lineno(1), linespan=p.linespan(1))]
 
 def p_non_empty_array_pair_list_pair(p):
     '''non_empty_array_pair_list : non_empty_array_pair_list COMMA expr DOUBLE_ARROW AND variable
@@ -1074,13 +1074,13 @@ def p_non_empty_array_pair_list_pair(p):
                                  | expr DOUBLE_ARROW AND variable
                                  | expr DOUBLE_ARROW expr'''
     if len(p) == 7:
-        p[0] = p[1] + [ast.ArrayElement(p[3], p[6], True, lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.ArrayElement(p[3], p[6], True, lineno=p.lineno(2), linespan=p.linespan(2))]
     elif len(p) == 6:
-        p[0] = p[1] + [ast.ArrayElement(p[3], p[5], False, lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.ArrayElement(p[3], p[5], False, lineno=p.lineno(2), linespan=p.linespan(2))]
     elif len(p) == 5:
-        p[0] = [ast.ArrayElement(p[1], p[4], True, lineno=p.lineno(2))]
+        p[0] = [ast.ArrayElement(p[1], p[4], True, lineno=p.lineno(2), linespan=p.linespan(2))]
     else:
-        p[0] = [ast.ArrayElement(p[1], p[3], False, lineno=p.lineno(2))]
+        p[0] = [ast.ArrayElement(p[1], p[3], False, lineno=p.lineno(2), linespan=p.linespan(2))]
 
 def p_possible_comma(p):
     '''possible_comma : empty
@@ -1103,13 +1103,13 @@ def p_function_call_parameter(p):
     '''function_call_parameter : expr
                                | AND variable'''
     if len(p) == 2:
-        p[0] = ast.Parameter(p[1], False, lineno=p.lineno(1))
+        p[0] = ast.Parameter(p[1], False, lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.Parameter(p[2], True, lineno=p.lineno(1))
+        p[0] = ast.Parameter(p[2], True, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_function(p):
     'expr : FUNCTION is_reference LPAREN parameter_list RPAREN lexical_vars LBRACE inner_statement_list RBRACE'
-    p[0] = ast.Closure(p[4], p[6], p[8], p[2], lineno=p.lineno(1))
+    p[0] = ast.Closure(p[4], p[6], p[8], p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_lexical_vars(p):
     '''lexical_vars : USE LPAREN lexical_var_list RPAREN
@@ -1125,13 +1125,13 @@ def p_lexical_var_list(p):
                         | AND VARIABLE
                         | VARIABLE'''
     if len(p) == 5:
-        p[0] = p[1] + [ast.LexicalVariable(p[4], True, lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.LexicalVariable(p[4], True, lineno=p.lineno(2), linespan=p.linespan(2))]
     elif len(p) == 4:
-        p[0] = p[1] + [ast.LexicalVariable(p[3], False, lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.LexicalVariable(p[3], False, lineno=p.lineno(2), linespan=p.linespan(2))]
     elif len(p) == 3:
-        p[0] = [ast.LexicalVariable(p[2], True, lineno=p.lineno(1))]
+        p[0] = [ast.LexicalVariable(p[2], True, lineno=p.lineno(1), linespan=p.linespan(1))]
     else:
-        p[0] = [ast.LexicalVariable(p[1], False, lineno=p.lineno(1))]
+        p[0] = [ast.LexicalVariable(p[1], False, lineno=p.lineno(1), linespan=p.linespan(1))]
 
 def p_expr_assign_op(p):
     '''expr : variable PLUS_EQUAL expr
@@ -1145,7 +1145,7 @@ def p_expr_assign_op(p):
             | variable XOR_EQUAL expr
             | variable SL_EQUAL expr
             | variable SR_EQUAL expr'''
-    p[0] = ast.AssignOp(p[2], p[1], p[3], lineno=p.lineno(2))
+    p[0] = ast.AssignOp(p[2], p[1], p[3], lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_expr_binary_op(p):
     '''expr : expr BOOLEAN_AND expr
@@ -1174,18 +1174,18 @@ def p_expr_binary_op(p):
             | expr IS_GREATER_OR_EQUAL expr
             | expr INSTANCEOF expr
             | expr INSTANCEOF STATIC'''
-    p[0] = ast.BinaryOp(p[2].lower(), p[1], p[3], lineno=p.lineno(2))
+    p[0] = ast.BinaryOp(p[2].lower(), p[1], p[3], lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_expr_unary_op(p):
     '''expr : PLUS expr
             | MINUS expr
             | NOT expr
             | BOOLEAN_NOT expr'''
-    p[0] = ast.UnaryOp(p[1], p[2], lineno=p.lineno(1))
+    p[0] = ast.UnaryOp(p[1], p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_ternary_op(p):
     'expr : expr QUESTION expr COLON expr'
-    p[0] = ast.TernaryOp(p[1], p[3], p[5], lineno=p.lineno(2))
+    p[0] = ast.TernaryOp(p[1], p[3], p[5], lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_expr_short_ternary_op(p):
     'expr : expr QUESTION COLON expr'
@@ -1194,40 +1194,40 @@ def p_expr_short_ternary_op(p):
 def p_expr_pre_incdec(p):
     '''expr : INC variable
             | DEC variable'''
-    p[0] = ast.PreIncDecOp(p[1], p[2], lineno=p.lineno(1))
+    p[0] = ast.PreIncDecOp(p[1], p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_post_incdec(p):
     '''expr : variable INC
             | variable DEC'''
-    p[0] = ast.PostIncDecOp(p[2], p[1], lineno=p.lineno(2))
+    p[0] = ast.PostIncDecOp(p[2], p[1], lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_expr_cast_int(p):
     'expr : INT_CAST expr'
-    p[0] = ast.Cast('int', p[2], lineno=p.lineno(1))
+    p[0] = ast.Cast('int', p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_cast_double(p):
     'expr : DOUBLE_CAST expr'
-    p[0] = ast.Cast('double', p[2], lineno=p.lineno(1))
+    p[0] = ast.Cast('double', p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_cast_string(p):
     'expr : STRING_CAST expr'
-    p[0] = ast.Cast('string', p[2], lineno=p.lineno(1))
+    p[0] = ast.Cast('string', p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_cast_array(p):
     'expr : ARRAY_CAST expr'
-    p[0] = ast.Cast('array', p[2], lineno=p.lineno(1))
+    p[0] = ast.Cast('array', p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_cast_object(p):
     'expr : OBJECT_CAST expr'
-    p[0] = ast.Cast('object', p[2], lineno=p.lineno(1))
+    p[0] = ast.Cast('object', p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_cast_bool(p):
     'expr : BOOL_CAST expr'
-    p[0] = ast.Cast('bool', p[2], lineno=p.lineno(1))
+    p[0] = ast.Cast('bool', p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_cast_unset(p):
     'expr : UNSET_CAST expr'
-    p[0] = ast.Cast('unset', p[2], lineno=p.lineno(1))
+    p[0] = ast.Cast('unset', p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_cast_binary(p):
     'expr : BINARY_CAST expr'
@@ -1235,7 +1235,7 @@ def p_expr_cast_binary(p):
 
 def p_expr_isset(p):
     'expr : ISSET LPAREN isset_variables RPAREN'
-    p[0] = ast.IsSet(p[3], lineno=p.lineno(1))
+    p[0] = ast.IsSet(p[3], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_isset_variables(p):
     '''isset_variables : isset_variables COMMA variable
@@ -1247,44 +1247,44 @@ def p_isset_variables(p):
 
 def p_expr_empty(p):
     'expr : EMPTY LPAREN expr RPAREN'
-    p[0] = ast.Empty(p[3], lineno=p.lineno(1))
+    p[0] = ast.Empty(p[3], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_eval(p):
     'expr : EVAL LPAREN expr RPAREN'
-    p[0] = ast.Eval(p[3], lineno=p.lineno(1))
+    p[0] = ast.Eval(p[3], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_include(p):
     'expr : INCLUDE expr'
-    p[0] = ast.Include(p[2], False, lineno=p.lineno(1))
+    p[0] = ast.Include(p[2], False, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_include_once(p):
     'expr : INCLUDE_ONCE expr'
-    p[0] = ast.Include(p[2], True, lineno=p.lineno(1))
+    p[0] = ast.Include(p[2], True, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_require(p):
     'expr : REQUIRE expr'
-    p[0] = ast.Require(p[2], False, lineno=p.lineno(1))
+    p[0] = ast.Require(p[2], False, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_require_once(p):
     'expr : REQUIRE_ONCE expr'
-    p[0] = ast.Require(p[2], True, lineno=p.lineno(1))
+    p[0] = ast.Require(p[2], True, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_exit(p):
     '''expr : EXIT
             | EXIT LPAREN RPAREN
             | EXIT LPAREN expr RPAREN'''
     if len(p) == 5:
-        p[0] = ast.Exit(p[3], lineno=p.lineno(1))
+        p[0] = ast.Exit(p[3], lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.Exit(None, lineno=p.lineno(1))
+        p[0] = ast.Exit(None, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_print(p):
     'expr : PRINT expr'
-    p[0] = ast.Print(p[2], lineno=p.lineno(1))
+    p[0] = ast.Print(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_silence(p):
     'expr : AT expr'
-    p[0] = ast.Silence(p[2], lineno=p.lineno(1))
+    p[0] = ast.Silence(p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_expr_group(p):
     'expr : LPAREN expr RPAREN'
@@ -1336,23 +1336,23 @@ def p_nowdoc_text_content(p):
 
 def p_scalar_string_varname(p):
     'scalar : STRING_VARNAME'
-    p[0] = ast.Variable('$' + p[1], lineno=p.lineno(1))
+    p[0] = ast.Variable('$' + p[1], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_scalar_namespace_name(p):
     '''scalar : namespace_name
               | NS_SEPARATOR namespace_name
               | NAMESPACE NS_SEPARATOR namespace_name'''
     if len(p) == 2:
-        p[0] = ast.Constant(p[1], lineno=p.lineno(1))
+        p[0] = ast.Constant(p[1], lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 3:
-        p[0] = ast.Constant(p[1] + p[2], lineno=p.lineno(1))
+        p[0] = ast.Constant(p[1] + p[2], lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.Constant(p[1] + p[2] + p[3], lineno=p.lineno(1))
+        p[0] = ast.Constant(p[1] + p[2] + p[3], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_class_constant(p):
     '''class_constant : class_name DOUBLE_COLON STRING
                       | variable_class_name DOUBLE_COLON STRING'''
-    p[0] = ast.StaticProperty(p[1], p[3], lineno=p.lineno(2))
+    p[0] = ast.StaticProperty(p[1], p[3], lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_common_scalar_lnumber(p):
     'common_scalar : LNUMBER'
@@ -1380,35 +1380,35 @@ def p_common_scalar_string(p):
 
 def p_common_scalar_magic_line(p):
     'common_scalar : LINE'
-    p[0] = ast.MagicConstant(p[1].upper(), p.lineno(1), lineno=p.lineno(1))
+    p[0] = ast.MagicConstant(p[1].upper(), p.lineno(1), lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_common_scalar_magic_file(p):
     'common_scalar : FILE'
     value = getattr(p.lexer, 'filename', None)
-    p[0] = ast.MagicConstant(p[1].upper(), value, lineno=p.lineno(1))
+    p[0] = ast.MagicConstant(p[1].upper(), value, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_common_scalar_magic_dir(p):
     'common_scalar : DIR'
     value = getattr(p.lexer, 'filename', None)
     if value is not None:
         value = os.path.dirname(value)
-    p[0] = ast.MagicConstant(p[1].upper(), value, lineno=p.lineno(1))
+    p[0] = ast.MagicConstant(p[1].upper(), value, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_common_scalar_magic_class(p):
     'common_scalar : CLASS_C'
-    p[0] = ast.MagicConstant(p[1].upper(), None, lineno=p.lineno(1))
+    p[0] = ast.MagicConstant(p[1].upper(), None, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_common_scalar_magic_method(p):
     'common_scalar : METHOD_C'
-    p[0] = ast.MagicConstant(p[1].upper(), None, lineno=p.lineno(1))
+    p[0] = ast.MagicConstant(p[1].upper(), None, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_common_scalar_magic_func(p):
     'common_scalar : FUNC_C'
-    p[0] = ast.MagicConstant(p[1].upper(), None, lineno=p.lineno(1))
+    p[0] = ast.MagicConstant(p[1].upper(), None, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_common_scalar_magic_ns(p):
     'common_scalar : NS_C'
-    p[0] = ast.MagicConstant(p[1].upper(), None, lineno=p.lineno(1))
+    p[0] = ast.MagicConstant(p[1].upper(), None, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_static_scalar(p):
     '''static_scalar : common_scalar
@@ -1450,16 +1450,16 @@ def p_static_scalar_namespace_name(p):
                      | NS_SEPARATOR namespace_name
                      | NAMESPACE NS_SEPARATOR namespace_name'''
     if len(p) == 2:
-        p[0] = ast.Constant(p[1], lineno=p.lineno(1))
+        p[0] = ast.Constant(p[1], lineno=p.lineno(1), linespan=p.linespan(1))
     elif len(p) == 3:
-        p[0] = ast.Constant(p[1] + p[2], lineno=p.lineno(1))
+        p[0] = ast.Constant(p[1] + p[2], lineno=p.lineno(1), linespan=p.linespan(1))
     else:
-        p[0] = ast.Constant(p[1] + p[2] + p[3], lineno=p.lineno(1))
+        p[0] = ast.Constant(p[1] + p[2] + p[3], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_static_scalar_unary_op(p):
     '''static_scalar : PLUS static_scalar
                      | MINUS static_scalar'''
-    p[0] = ast.UnaryOp(p[1], p[2], lineno=p.lineno(1))
+    p[0] = ast.UnaryOp(p[1], p[2], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_static_scalar_array(p):
     '''static_scalar : ARRAY LPAREN static_array_pair_list RPAREN
@@ -1468,7 +1468,7 @@ def p_static_scalar_array(p):
         contents = p[3]
     else:
         contents = p[2]
-    p[0] = ast.Array(contents, lineno=p.lineno(1))
+    p[0] = ast.Array(contents, lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_static_array_pair_list(p):
     '''static_array_pair_list : empty
@@ -1482,17 +1482,17 @@ def p_static_non_empty_array_pair_list_item(p):
     '''static_non_empty_array_pair_list : static_non_empty_array_pair_list COMMA static_expr
                                         | static_expr'''
     if len(p) == 4:
-        p[0] = p[1] + [ast.ArrayElement(None, p[3], False, lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.ArrayElement(None, p[3], False, lineno=p.lineno(2), linespan=p.linespan(2))]
     else:
-        p[0] = [ast.ArrayElement(None, p[1], False, lineno=p.lineno(1))]
+        p[0] = [ast.ArrayElement(None, p[1], False, lineno=p.lineno(1), linespan=p.linespan(1))]
 
 def p_static_non_empty_array_pair_list_pair(p):
     '''static_non_empty_array_pair_list : static_non_empty_array_pair_list COMMA static_scalar DOUBLE_ARROW static_expr
                                         | static_scalar DOUBLE_ARROW static_expr'''
     if len(p) == 6:
-        p[0] = p[1] + [ast.ArrayElement(p[3], p[5], False, lineno=p.lineno(2))]
+        p[0] = p[1] + [ast.ArrayElement(p[3], p[5], False, lineno=p.lineno(2), linespan=p.linespan(2))]
     else:
-        p[0] = [ast.ArrayElement(p[1], p[3], False, lineno=p.lineno(2))]
+        p[0] = [ast.ArrayElement(p[1], p[3], False, lineno=p.lineno(2), linespan=p.linespan(2))]
 
 def p_static_expr(p):
     '''static_expr : static_scalar
@@ -1546,7 +1546,7 @@ def p_encaps_list(p):
         if p[1] == '':
             p[0] = p[2]
         else:
-            p[0] = ast.BinaryOp('.', p[1], p[2], lineno=p.lineno(2))
+            p[0] = ast.BinaryOp('.', p[1], p[2], lineno=p.lineno(2), linespan=p.linespan(2))
     else:
         p[0] = ''
 
@@ -1557,21 +1557,21 @@ def p_encaps_list_string(p):
         p[0] = process_php_string_escapes(p[2])
     else:
         p[0] = ast.BinaryOp('.', p[1], process_php_string_escapes(p[2]),
-                            lineno=p.lineno(2))
+                            lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_encaps_var(p):
     'encaps_var : VARIABLE'
-    p[0] = ast.Variable(p[1], lineno=p.lineno(1))
+    p[0] = ast.Variable(p[1], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_encaps_var_array_offset(p):
     'encaps_var : VARIABLE LBRACKET encaps_var_offset RBRACKET'
-    p[0] = ast.ArrayOffset(ast.Variable(p[1], lineno=p.lineno(1)), p[3],
-                           lineno=p.lineno(2))
+    p[0] = ast.ArrayOffset(ast.Variable(p[1], lineno=p.lineno(1), linespan=p.linespan(1)), p[3],
+                           lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_encaps_var_object_property(p):
     'encaps_var : VARIABLE OBJECT_OPERATOR STRING'
-    p[0] = ast.ObjectProperty(ast.Variable(p[1], lineno=p.lineno(1)), p[3],
-                              lineno=p.lineno(2))
+    p[0] = ast.ObjectProperty(ast.Variable(p[1], lineno=p.lineno(1), linespan=p.linespan(1)), p[3],
+                              lineno=p.lineno(2), linespan=p.linespan(2))
 
 def p_encaps_var_dollar_curly_expr(p):
     'encaps_var : DOLLAR_OPEN_CURLY_BRACES expr RBRACE'
@@ -1579,8 +1579,8 @@ def p_encaps_var_dollar_curly_expr(p):
 
 def p_encaps_var_dollar_curly_array_offset(p):
     'encaps_var : DOLLAR_OPEN_CURLY_BRACES STRING_VARNAME LBRACKET expr RBRACKET RBRACE'
-    p[0] = ast.ArrayOffset(ast.Variable('$' + p[2], lineno=p.lineno(2)), p[4],
-                           lineno=p.lineno(3))
+    p[0] = ast.ArrayOffset(ast.Variable('$' + p[2], lineno=p.lineno(2), linespan=p.linespan(2)), p[4],
+                           lineno=p.lineno(3), linespan=p.linespan(3))
 
 def p_encaps_var_curly_variable(p):
     'encaps_var : CURLY_OPEN variable RBRACE'
@@ -1596,7 +1596,7 @@ def p_encaps_var_offset_num_string(p):
 
 def p_encaps_var_offset_variable(p):
     'encaps_var_offset : VARIABLE'
-    p[0] = ast.Variable(p[1], lineno=p.lineno(1))
+    p[0] = ast.Variable(p[1], lineno=p.lineno(1), linespan=p.linespan(1))
 
 def p_empty(p):
     'empty : '
