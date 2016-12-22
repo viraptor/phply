@@ -49,8 +49,8 @@ def test_open_tag_with_echo():
 def test_exit():
     input = '<?php exit; exit(); exit(123); die; die(); die(456); ?>'
     expected = [
-        Exit(None), Exit(None), Exit(123),
-        Exit(None), Exit(None), Exit(456),
+        Exit(None, 'exit'), Exit(None, 'exit'), Exit(123, 'exit'),
+        Exit(None, 'die'), Exit(None, 'die'), Exit(456, 'die'),
     ]
     eq_ast(input, expected)
 
