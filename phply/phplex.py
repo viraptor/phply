@@ -27,7 +27,7 @@ states = (
 # Reserved words
 reserved = (
     'ARRAY', 'AS', 'BREAK', 'CASE', 'CLASS', 'CONST', 'CONTINUE', 'DECLARE',
-    'DEFAULT', 'DO', 'ECHO', 'ELSE', 'ELSEIF', 'EMPTY', 'ENDDECLARE',
+    'DEFAULT', 'DIE', 'DO', 'ECHO', 'ELSE', 'ELSEIF', 'EMPTY', 'ENDDECLARE',
     'ENDFOR', 'ENDFOREACH', 'ENDIF', 'ENDSWITCH', 'ENDWHILE', 'EVAL', 'EXIT',
     'EXTENDS', 'FOR', 'FOREACH', 'FUNCTION', 'GLOBAL', 'IF', 'INCLUDE',
     'INCLUDE_ONCE', 'INSTANCEOF', 'ISSET', 'LIST', 'NEW', 'PRINT', 'REQUIRE',
@@ -244,7 +244,6 @@ reserved_map = {
     'OR':              'LOGICAL_OR',
     'XOR':             'LOGICAL_XOR',
 
-    'DIE':             'EXIT',
     '__HALT_COMPILER': 'HALT_COMPILER',
 }
 

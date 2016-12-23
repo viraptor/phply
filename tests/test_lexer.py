@@ -380,3 +380,15 @@ def test_exceptions():
         ('RBRACE','}'),
     ]
     eq_tokens(input, expected)
+
+def test_exit_die():
+    input = '<? exit(); die;'
+    expected = [
+        ('EXIT', 'exit'),
+        ('LPAREN', '('),
+        ('RPAREN', ')'),
+        ('SEMI', ';'),
+        ('DIE', 'die'),
+        ('SEMI', ';'),
+    ]
+    eq_tokens(input, expected)

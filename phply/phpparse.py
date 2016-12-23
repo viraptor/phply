@@ -1269,14 +1269,22 @@ def p_expr_require_once(p):
     'expr : REQUIRE_ONCE expr'
     p[0] = ast.Require(p[2], True, lineno=p.lineno(1))
 
+def p_exit_or_die(p):
+    '''exit_or_die : EXIT
+                   | DIE'''
+    p[0] = p[1]
+    p.set_lineno(0, p.lineno(1))
+
 def p_expr_exit(p):
-    '''expr : EXIT
-            | EXIT LPAREN RPAREN
-            | EXIT LPAREN expr RPAREN'''
+    '''expr : exit_or_die
+            | exit_or_die LPAREN RPAREN
+            | exit_or_die LPAREN expr RPAREN'''
+    # although they're treated the same in PHP itself, annotate the exit type
+    # (die/exit) so that apps can create better user experience
     if len(p) == 5:
-        p[0] = ast.Exit(p[3], lineno=p.lineno(1))
+        p[0] = ast.Exit(p[3], p[1], lineno=p.lineno(1))
     else:
-        p[0] = ast.Exit(None, lineno=p.lineno(1))
+        p[0] = ast.Exit(None, p[1], lineno=p.lineno(1))
 
 def p_expr_print(p):
     'expr : PRINT expr'
