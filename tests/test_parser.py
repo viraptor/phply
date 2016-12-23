@@ -9,7 +9,7 @@ import pprint
 
 parser = make_parser()
 
-def eq_ast(input, expected, filename=None):
+def eq_ast(input, expected, filename=None, with_top_lineno=False):
     lexer = phplex.lexer.clone()
     lexer.filename = filename
     output = parser.parse(input, lexer=lexer)
@@ -23,6 +23,11 @@ def eq_ast(input, expected, filename=None):
     for out, exp in zip(output, expected):
         print('\tgot:', out, '\texpected:', exp)
         nose.tools.eq_(out, exp)
+
+        # compare line numbers, but only for top elements
+        if with_top_lineno:
+            print('\tgot line:', out.lineno, '\texpected:', exp.lineno)
+            nose.tools.eq_(out.lineno, exp.lineno)
 
     assert len(output) == len(expected), \
            'output length was %d, expected %s' % (len(output), len(expected))
@@ -976,3 +981,11 @@ EOT;
         Echo(['disregard $all {$crazy} ${stuff}->f();\nand `this`'])
     ]
     eq_ast(input, expected)
+
+def test_exit_loc():
+    input = '''<?
+               exit(1); '''
+    expected = [
+        Exit(1, 'exit', lineno=2)
+    ]
+    eq_ast(input, expected, with_top_lineno=True)
