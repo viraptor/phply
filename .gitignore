@@ -10,3 +10,5 @@ pip-selfcheck.json
 man/
 *.sw?
 .tox
+build/
+dist/
