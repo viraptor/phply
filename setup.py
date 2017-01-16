@@ -1,15 +1,10 @@
 # coding: utf-8
 from __future__ import unicode_literals
 
-"""
-PHPLY
---------------------
-PHP implemented in Python
-"""
 from setuptools import setup, find_packages
 
 setup(name="phply",
-      version="dev",
+      version="1.0.0",
       packages=find_packages(),
       namespace_packages=['phply'],
       include_package_data=True,
@@ -17,15 +12,14 @@ setup(name="phply",
       author_email='',
       maintainer='Stanisław Pitucha',
       maintainer_email='viraptor@gmail.com',
-      description='PHP in Python',
-      long_description=__doc__,
+      description='Lexer and parser for PHP source implemented using PLY',
       zip_safe=False,
       platforms='any',
       license='BSD',
       url='https://github.com/viraptor/phply',
 
       classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
         'Intended Audience :: Education',
         'License :: OSI Approved :: BSD License',
