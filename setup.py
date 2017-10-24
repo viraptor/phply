@@ -3,6 +3,14 @@ from __future__ import unicode_literals
 
 from setuptools import setup, find_packages
 
+try:
+    from phply.phpparse import make_parser
+    # Ensure the parser tab is generated
+    make_parser()
+except ImportError:
+    # ply is not installed
+    pass
+
 setup(name="phply",
       version="1.0.0",
       packages=find_packages(),
