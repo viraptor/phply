@@ -10,6 +10,11 @@ from . import phplex
 from . import phpast as ast
 import ply.yacc as yacc
 
+if sys.version_info[0] == 3:
+    string_type = str
+else:
+    string_type = basestring
+
 # Get the token map
 tokens = phplex.tokens
 
@@ -1319,7 +1324,7 @@ def p_scalar_heredoc(p):
     if isinstance(p[2], ast.BinaryOp):
         # due to how lexer works, the last operation is joining an unnecessary
         # newline character
-        assert isinstance(p[2].right, str)
+        assert isinstance(p[2].right, string_type)
         p[2].right = p[2].right[:-1]
         if p[2].right:
             p[0] = p[2]
