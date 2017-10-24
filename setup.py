@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from setuptools import setup, find_packages
 
 setup(name="phply",
-      version="1.1.0",
+      version="1.2.0",
       packages=find_packages(),
       namespace_packages=['phply'],
       include_package_data=True,
