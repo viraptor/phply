@@ -6,6 +6,7 @@ from phply.phpast import *
 
 import nose.tools
 import pprint
+import sys
 
 parser = make_parser()
 
@@ -248,6 +249,8 @@ EOT;
                        ' is not the EOT; this is:')]),
     ]
     eq_ast(input, expected)
+    if sys.version_info[0] < 3:
+        eq_ast(input.decode('utf-8'), expected)
 
 def test_function_calls():
     input = r"""<?
