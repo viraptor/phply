@@ -1569,8 +1569,17 @@ def p_encaps_list_string(p):
     if p[1] == '':
         p[0] = process_php_string_escapes(p[2])
     else:
-        p[0] = ast.BinaryOp('.', p[1], process_php_string_escapes(p[2]),
-                            lineno=p.lineno(2))
+        if isinstance(p[1], string_type):
+            # if it's only a string so far, just append the contents
+            p[0] = p[1] + process_php_string_escapes(p[2])
+        elif isinstance(p[1], ast.BinaryOp) and isinstance(p[1].right, string_type):
+            # if the last right leaf is a string, extend previous binop
+            p[0] = ast.BinaryOp('.', p[1].left, p[1].right + process_php_string_escapes(p[2]),
+                                lineno=p[1].lineno)
+        else:
+            # worst case - insert a binaryop
+            p[0] = ast.BinaryOp('.', p[1], process_php_string_escapes(p[2]),
+                                lineno=p.lineno(2))
 
 def p_encaps_var(p):
     'encaps_var : VARIABLE'
