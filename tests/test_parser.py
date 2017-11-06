@@ -246,6 +246,21 @@ EOT;
     if sys.version_info[0] < 3:
         eq_ast(input.decode('utf-8'), expected)
 
+def test_heredoc_no_var():
+    input = r"""<?
+        echo <<<EOT
+This is a long
+heredoc without
+any variable.
+EOT;
+    ?>"""
+    expected = [
+        Echo(['This is a long\nheredoc without\nany variable.'])
+    ]
+    eq_ast(input, expected)
+    if sys.version_info[0] < 3:
+        eq_ast(input.decode('utf-8'), expected)
+
 def test_function_calls():
     input = r"""<?
         f();

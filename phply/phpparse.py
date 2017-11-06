@@ -1331,7 +1331,9 @@ def p_scalar_heredoc(p):
         else:
             p[0] = p[2].left
     else:
-        p[0] = p[2]
+        # due to how lexer works, the last operation is joining an unnecessary
+        # newline character
+        p[0] = p[2][:-1]
 
 def p_nowdoc(p):
     'nowdoc : START_NOWDOC nowdoc_text_content END_NOWDOC'
