@@ -1,7 +1,24 @@
 # coding: utf-8
 from __future__ import unicode_literals
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Command
+from distutils.command.build import build as distutils_build
+
+distutils_build.sub_commands.insert(0, ('gen_parsetab', lambda _: True))
+
+
+class GenerateParsetab(Command):
+    user_options = []
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        from phply.phpparse import make_parser
+        make_parser(debug=False)
+
 
 setup(name="phply",
       version="1.2.1",
@@ -44,4 +61,8 @@ setup(name="phply",
       tests_require=[
         'nose',
         ],
+
+      cmdclass={
+          'gen_parsetab': GenerateParsetab,
+          }
       )

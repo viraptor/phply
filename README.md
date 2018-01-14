@@ -45,6 +45,19 @@ is still a fair amount of work to do:
 
 See the [AUTHORS](https://github.com/viraptor/phply/blob/master/AUTHORS) file.
 
+## Troubleshooting
+
+### Couldn't create 'phply.parsetab'
+
+Phply relies on `ply` to generate and cache some tables required for the parser.
+These have been generated with the latest available version of ply for the phply
+release. If you installed phply under a different user and a new `ply` was
+released, the parsetab file cannot be automatically updated. Your options are
+to:
+
+* raise an issue for phply
+* rebuild the package yourself
+
 ## How do I use it?
 
 * Lexer test: python phply/phplex.py
