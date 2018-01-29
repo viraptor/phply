@@ -20,6 +20,14 @@ class GenerateParsetab(Command):
         make_parser(debug=False)
 
 
+try:
+    from phply.phpparse import make_parser
+    # Ensure the parser tab is generated
+    make_parser()
+except ImportError:
+    # ply is not installed
+    pass
+
 setup(name="phply",
       version="1.2.2",
       packages=find_packages(),
