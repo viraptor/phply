@@ -515,8 +515,15 @@ class FilteredLexer(object):
     def input(self, input):
         self.lexer.input(input)
 
+    def next_lexer_token(self):
+        """Return next lexer token.
+
+        Can be useful to customize parser behavior without need to touch
+        parser code in the token method."""
+        return self.lexer.token()
+
     def token(self):
-        t = self.lexer.token()
+        t = self.next_lexer_token()
 
         # Filter out tokens that the parser is not expecting.
         while t and t.type in unparsed:
@@ -529,7 +536,7 @@ class FilteredLexer(object):
                     t.value = ';'
                     break
                 self.last_token = t
-                t = self.lexer.token()
+                t = self.next_lexer_token()
                 continue
 
             # Rewrite <?= to yield an "echo" statement.
@@ -549,7 +556,7 @@ class FilteredLexer(object):
                     t.type = 'SEMI'
                     break
 
-            t = self.lexer.token()
+            t = self.next_lexer_token()
 
         self.last_token = t
         return t
