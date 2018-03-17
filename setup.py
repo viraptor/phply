@@ -56,6 +56,9 @@ setup(name="phply",
       install_requires=[
         'ply',
         ],
+      setup_requires=[
+        'ply',
+        ],
 
       test_suite='nose.collector',
       tests_require=[
