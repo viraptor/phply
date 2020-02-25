@@ -88,7 +88,7 @@ def from_phpast(node):
                        **pos(node))
 
     if isinstance(node, php.Echo):
-        return py.Call(py.Name('echo', py.Load(**pos(node)),
+        return py.Call(py.Name('print', py.Load(**pos(node)),
                                **pos(node)),
                        list(map(from_phpast, node.nodes)),
                        [], None, None,
@@ -320,6 +320,42 @@ def from_phpast(node):
         return py.If(from_phpast(node.expr),
                      list(map(to_stmt, list(map(from_phpast, deblock(node.node))))),
                      orelse, **pos(node))
+
+    
+
+    if isinstance(node, php.Switch):
+        ifexpr = py.Compare(from_phpast(node.expr), [py.Eq(**pos(node))],
+                              [from_phpast(node.nodes[0].expr)],
+                              **pos(node))
+        def recurseIfs(conds, bodies, current):
+            assert (len(conds) == len(bodies)), \
+                'Length of conds %r and bodies %r mismatch' % (len(conds), len(bodies))
+
+            if current >= len(conds):
+                return []
+            elif current == len(conds)-1:
+                return bodies[current]
+            return py.If(conds[current], 
+                         bodies[current], 
+                         recurseIfs(conds, bodies, current+1),
+                         **pos(node))
+
+        elseifs_conditions = [py.Compare(from_phpast(node.expr), [py.Eq(**pos(node))],
+                              [from_phpast(subnode.expr)],
+                              **pos(node))
+                              for subnode in node.nodes[1:]]
+        elseifs_bodies = [list(map(to_stmt, list(map(from_phpast, subnode.nodes)))) 
+                            for subnode in node.nodes[1:]]
+
+        elseifs = recurseIfs(elseifs_conditions, elseifs_bodies, 0)
+
+        return py.If(ifexpr,
+                     list(map(to_stmt, list(map(from_phpast, node.nodes[0].nodes)))),
+                     elseifs, 
+                     **pos(node))
+
+
+
 
     if isinstance(node, php.For):
         assert node.test is None or len(node.test) == 1, \

@@ -111,7 +111,7 @@ class Unparser:
         self.fill("pass")
 
     def _Break(self, t):
-        self.fill("break")
+        pass
 
     def _Continue(self, t):
         self.fill("continue")
