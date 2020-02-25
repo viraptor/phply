@@ -3,6 +3,8 @@
 phply is a parser for the PHP programming language written using PLY, a
 Lex/YACC-style parser generator toolkit for Python.
 
+Supports only python 2.7 currently.
+
 ## Why?
 
 Good question. Because I'm crazy. Because it seemed possible.
