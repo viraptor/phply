@@ -12,3 +12,4 @@ man/
 .tox
 build/
 dist/
+.venv/
