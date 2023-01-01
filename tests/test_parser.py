@@ -4,7 +4,6 @@ from phply import phplex
 from phply.phpparse import make_parser
 from phply.phpast import *
 
-import nose.tools
 import pprint
 import sys
 
@@ -23,12 +22,12 @@ def eq_ast(input, expected, filename=None, with_top_lineno=False):
     print('Node by node:')
     for out, exp in zip(output, expected):
         print('\tgot:', out, '\texpected:', exp)
-        nose.tools.eq_(out, exp)
+        assert out == exp
 
         # compare line numbers, but only for top elements
         if with_top_lineno:
             print('\tgot line:', out.lineno, '\texpected:', exp.lineno)
-            nose.tools.eq_(out.lineno, exp.lineno)
+            assert out.lineno == exp.lineno
 
     assert len(output) == len(expected), \
            'output length was %d, expected %s' % (len(output), len(expected))

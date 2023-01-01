@@ -2,7 +2,6 @@ from __future__ import print_function
 
 from phply import phplex
 
-import nose.tools
 import pprint
 
 def eq_tokens(input, expected, ignore=('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG')):
@@ -23,7 +22,7 @@ def eq_tokens(input, expected, ignore=('WHITESPACE', 'OPEN_TAG', 'CLOSE_TAG')):
     print('Token by token:')
     for out, exp in zip(output, expected):
         print('\tgot:', out, '\texpected:', exp)
-        nose.tools.eq_(out, exp)
+        assert out == exp
 
     assert len(output) == len(expected), \
            'output length was %d, expected %s' % (len(output), len(expected))

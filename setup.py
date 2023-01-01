@@ -59,11 +59,7 @@ setup(name="phply",
       setup_requires=[
         'ply',
         ],
-
-      test_suite='nose.collector',
-      tests_require=[
-        'nose',
-        ],
+      extras_require={'test': ['pytest', 'tox']},
 
       cmdclass={
           'gen_parsetab': GenerateParsetab,
