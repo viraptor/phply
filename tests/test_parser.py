@@ -7,12 +7,19 @@ from phply.phpast import *
 import pprint
 import sys
 
-parser = make_parser()
+parser5 = make_parser(version=5)
+parser7 = make_parser(version=7)
 
-def eq_ast(input, expected, filename=None, with_top_lineno=False):
+def eq_ast(input, expected, version=7, filename=None, with_top_lineno=False):
     lexer = phplex.lexer.clone()
     lexer.filename = filename
-    output = parser.parse(input, lexer=lexer)
+    if version == 5:
+        output = parser5.parse(input, lexer=lexer)
+    elif version == 7:
+        output = parser7.parse(input, lexer=lexer)
+    else:
+        raise Exception("Unknown version")
+
     resolve_magic_constants(output)
 
     print('Parser output:')
@@ -1000,3 +1007,24 @@ def test_exit_loc():
         Exit(1, 'exit', lineno=2)
     ]
     eq_ast(input, expected, with_top_lineno=True)
+
+
+def test_yield_5():
+    input = '''<? function f() { yield $foo or die; }'''
+    expected = [
+        Function('f', [], [
+            Yield(
+                BinaryOp('or', Variable('$foo'), Exit(None, 'die'))
+                ),
+        ], False),
+    ]
+    eq_ast(input, expected, version=5)
+
+def test_yield_7():
+    input = '''<? function f() { yield $foo or die; }'''
+    expected = [
+        Function('f', [], [
+            BinaryOp('or', Yield(Variable('$foo')), Exit(None, 'die'))
+        ], False),
+    ]
+    eq_ast(input, expected, version=7)
