@@ -1,7 +1,7 @@
 # coding: utf-8
 from __future__ import unicode_literals
 
-from setuptools import setup, find_packages, Command
+from setuptools import setup, Command
 from distutils.command.build import build as distutils_build
 
 distutils_build.sub_commands.insert(0, ('gen_parsetab', lambda _: True))
@@ -22,8 +22,7 @@ class GenerateParsetab(Command):
 
 setup(name="phply",
       version="1.2.6",
-      packages=find_packages(),
-      namespace_packages=['phply'],
+      packages=['phply'],
       include_package_data=True,
       author='Ramen',
       author_email='',
